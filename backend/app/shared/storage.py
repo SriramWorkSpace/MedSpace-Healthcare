@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import shutil
 from functools import lru_cache
 from pathlib import Path
 from typing import Protocol
@@ -14,6 +15,7 @@ class ObjectStorage(Protocol):
     async def put(self, key: str, data: bytes, content_type: str) -> None: ...
     async def get(self, key: str) -> bytes: ...
     async def delete(self, key: str) -> None: ...
+    async def delete_prefix(self, prefix: str) -> None: ...
 
 
 class LocalStorage:
@@ -39,6 +41,10 @@ class LocalStorage:
 
     async def delete(self, key: str) -> None:
         await asyncio.to_thread(self._path(key).unlink, True)
+
+    async def delete_prefix(self, prefix: str) -> None:
+        path = self._path(prefix.rstrip("/"))
+        await asyncio.to_thread(shutil.rmtree, path, True)
 
 
 class S3Storage:
@@ -70,6 +76,16 @@ class S3Storage:
 
     async def delete(self, key: str) -> None:
         await asyncio.to_thread(self.client.delete_object, Bucket=self.bucket, Key=key)
+
+    async def delete_prefix(self, prefix: str) -> None:
+        def _purge() -> None:
+            paginator = self.client.get_paginator("list_objects_v2")
+            for page in paginator.paginate(Bucket=self.bucket, Prefix=prefix):
+                keys = [{"Key": o["Key"]} for o in page.get("Contents", [])]
+                if keys:
+                    self.client.delete_objects(Bucket=self.bucket, Delete={"Objects": keys})
+
+        await asyncio.to_thread(_purge)
 
 
 @lru_cache

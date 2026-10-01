@@ -7,6 +7,7 @@ from app.core.deps import CurrentUser, DbSession
 from app.core.ratelimit import rate_limit
 from app.core.security import ACCESS_COOKIE, REFRESH_COOKIE, decode_access_token
 from app.modules.audit import service as audit
+from app.modules.documents import service as documents
 from app.modules.identity import service
 from app.modules.identity.cookies import clear_auth_cookies, set_auth_cookies
 from app.modules.identity.schemas import LoginIn, ProfileUpdate, SignupIn, UserOut
@@ -103,8 +104,10 @@ async def update_profile(data: ProfileUpdate, user: CurrentUser, session: DbSess
 
 @profile_router.delete("", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_account(user: CurrentUser, response: Response, session: DbSession):
+    user_id = user.id
     await service.delete_user(session, user)
     await session.commit()
+    await documents.purge_user_files(user_id)
     clear_auth_cookies(response)
     response.status_code = status.HTTP_204_NO_CONTENT
     return response

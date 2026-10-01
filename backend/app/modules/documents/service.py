@@ -161,6 +161,14 @@ async def page_preview_png(doc: Document, page_no: int) -> bytes:
     return png
 
 
+async def purge_user_files(user_id: uuid.UUID) -> None:
+    """Remove every stored object for a user (account deletion, demo expiry)."""
+    try:
+        await get_storage().delete_prefix(f"users/{user_id}/")
+    except Exception:
+        logger.exception("could not purge files for user %s", user_id)
+
+
 def set_status(doc: Document, status: DocumentStatus, error: str | None = None) -> None:
     doc.status = status
     doc.error = error

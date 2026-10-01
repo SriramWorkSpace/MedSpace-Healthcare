@@ -106,6 +106,7 @@
   /* ---------------------------------------------------------------- Forms */
   .field {
     display: grid;
+    align-content: start;
     gap: 6px;
   }
   .field__label {

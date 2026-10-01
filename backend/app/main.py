@@ -23,6 +23,7 @@ from app.modules.extraction.router import router as extraction_router
 from app.modules.identity.router import profile_router
 from app.modules.identity.router import router as auth_router
 from app.modules.records.router import router as records_router
+from app.modules.timeline.router import router as timeline_router
 
 
 @asynccontextmanager
@@ -65,6 +66,7 @@ def create_app() -> FastAPI:
     api.include_router(documents_router)
     api.include_router(extraction_router)
     api.include_router(records_router)
+    api.include_router(timeline_router)
 
     @api.get("/health", tags=["ops"])
     async def health() -> dict[str, str]:

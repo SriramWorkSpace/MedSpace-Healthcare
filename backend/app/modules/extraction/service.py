@@ -6,7 +6,7 @@ import asyncio
 import base64
 import logging
 import uuid
-from datetime import date, timedelta
+from datetime import timedelta
 from typing import Any
 
 from fastapi import Request
@@ -25,7 +25,9 @@ from app.modules.extraction import heuristic, prompts
 from app.modules.extraction.models import Extraction, ExtractionStatus
 from app.modules.extraction.normalize import normalize_frequency, parse_duration_days
 from app.modules.extraction.schemas import (
+    ConfirmCareAction,
     ConfirmIn,
+    ConfirmMedication,
     ExtractedCareAction,
     ExtractionPayload,
     ScheduleModel,
@@ -193,9 +195,14 @@ def post_process(
     return p
 
 
-async def extract_document(doc: Document, pages: list[str], dose_times: dict[str, str]):
-    """Returns (payload, method, model). Raises ExtractionFailed with a user-facing reason."""
-    llm = get_llm()
+async def extract_document(
+    doc: Document, pages: list[str], dose_times: dict[str, str], *, offline: bool = False
+):
+    """Returns (payload, method, model). Raises ExtractionFailed with a user-facing reason.
+
+    `offline=True` forces the heuristic path (demo seeding never spends LLM calls).
+    """
+    llm = None if offline else get_llm()
     settings = get_settings()
     has_text = doc.has_text_layer or any(len(t) >= files.TEXT_LAYER_MIN_CHARS for t in pages)
 
@@ -303,7 +310,7 @@ async def confirm(
     )
     extraction.status = ExtractionStatus.CONFIRMED
     extraction.confirmed_at = utcnow()
-    extraction.prescription_id = prescription.id
+    extraction.prescription_id = prescription.id if prescription else None
     await session.execute(
         update(Extraction)
         .where(
@@ -364,5 +371,37 @@ async def discard(
     return extraction
 
 
-def default_start(issued_on: date | None) -> date:
-    return issued_on or date.today()
+def payload_to_confirm(payload: ExtractionPayload) -> ConfirmIn:
+    """Accept a draft exactly as extracted (used by demo seeding and tests)."""
+    return ConfirmIn(
+        document_kind=payload.document_type,
+        prescriber=payload.prescriber,
+        issued_on=payload.issued_on,
+        follow_up=payload.follow_up,
+        summary=payload.summary,
+        medications=[
+            ConfirmMedication(
+                name=m.name,
+                strength=m.strength,
+                form=m.form,
+                dose=m.dose,
+                route=m.route,
+                frequency_raw=m.frequency_raw,
+                schedule=m.schedule or ScheduleModel(period="unknown"),
+                duration_days=m.duration_days,
+                instructions=m.instructions,
+                source_page=m.source_page,
+            )
+            for m in payload.medications
+        ],
+        care_actions=[
+            ConfirmCareAction(
+                kind=a.kind,
+                title=a.title,
+                due_on=a.due_on,
+                notes=a.notes,
+                source_page=a.source_page,
+            )
+            for a in payload.care_actions
+        ],
+    )

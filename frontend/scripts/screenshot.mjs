@@ -24,6 +24,31 @@ async function shot(name, url, { theme = "light", width = 1440, height = 900, fu
   await page.screenshot({ path: `${out}/${name}.png`, fullPage: full });
   await ctx.close();
 }
+async function flow(name, theme = "light") {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: theme });
+  const page = await ctx.newPage();
+  page.on("pageerror", (e) => console.log(`[${name}] pageerror:`, e.message));
+  await page.goto(base + "/login");
+  await page.getByRole("button", { name: "Try the demo" }).click();
+  await page.waitForURL("**/app");
+  await page.goto(base + "/app/documents");
+  await page.waitForTimeout(800);
+  await page.screenshot({ path: `${out}/documents-empty.png` });
+  const input = page.locator('input[type="file"]');
+  await input.setInputFiles(["../samples/rx-riverside-acute.pdf", "../samples/rx-northgate-diabetes.pdf", "../samples/rx-riverside-acute-photo.png"]);
+  await page.waitForTimeout(700);
+  await page.screenshot({ path: `${out}/documents-uploading.png` });
+  await page.waitForTimeout(3500);
+  await page.screenshot({ path: `${out}/documents-list.png` });
+  await page.locator("a").filter({ hasText: "Rx riverside acute" }).filter({ hasNotText: "photo" }).first().click();
+  await page.waitForTimeout(2500);
+  await page.screenshot({ path: `${out}/review.png` });
+  await page.screenshot({ path: `${out}/review-full.png`, fullPage: true });
+  await page.getByRole("button", { name: "Confirm records" }).click();
+  await page.waitForTimeout(1800);
+  await page.screenshot({ path: `${out}/review-confirmed.png` });
+  await ctx.close();
+}
 const which = process.argv.slice(3);
 const all = {
   "landing-light": () => shot("landing-light", "/", { wait: 6500 }),
@@ -33,6 +58,7 @@ const all = {
   "landing-full-dark": () => shot("landing-full-dark", "/", { full: true, theme: "dark", wait: 2500 }),
   "login": () => shot("login", "/login"),
   "dashboard": () => shot("dashboard", "/app", { demo: true }),
+  "review": () => flow("review"),
   "notfound": () => shot("notfound", "/nope", { theme: "dark", wait: 2500 }),
 };
 for (const k of which.length ? which : Object.keys(all)) await all[k]();

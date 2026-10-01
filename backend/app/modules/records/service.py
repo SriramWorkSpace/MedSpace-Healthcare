@@ -58,13 +58,19 @@ async def replace_for_document(
     document: Document,
     extraction_id: uuid.UUID,
     data: ConfirmIn,
-) -> Prescription:
-    """Create records from a confirmed review, replacing earlier confirmations of the document."""
+) -> Prescription | None:
+    """Create records from a confirmed review, replacing earlier confirmations of the document.
+
+    Documents that are not prescriptions and carry no medications or to-dos (a lab report, a
+    letter) are confirmed without creating a prescription record.
+    """
     await session.execute(
         delete(Prescription).where(
             Prescription.document_id == document.id, Prescription.user_id == user_id
         )
     )
+    if data.document_kind != "prescription" and not data.medications and not data.care_actions:
+        return None
     p = data.prescriber
     fu = data.follow_up
     prescription = Prescription(

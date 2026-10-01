@@ -85,6 +85,83 @@ SCENARIOS: list[Scenario] = [
 ]
 
 
+# A fresh upload left in "needs review" so the demo shows the review workspace.
+PENDING = Scenario(
+    slug="lakeside-urgent",
+    clinic="Lakeside Urgent Care",
+    address="1200 Shoreline Drive, Austin, TX 78701  |  (512) 555-0163",
+    doctor="Dr. Priya Raman, DO",
+    specialty="Family Medicine",
+    days_ago=0,
+    patient="Avery Lindqvist, 34 F",
+    lines=[
+        "1. Prednisolone 20 mg tablet - OD x 5 days - after breakfast",
+        "2. Salbutamol 100 mcg inhaler - 2 puffs q6h as needed",
+        "3. Montelukast 10 mg tablet - HS x 30 days",
+    ],
+    notes=["Follow-up: Review in 1 week", "Investigations: chest X-ray if not improving"],
+)
+
+
+@dataclass(frozen=True)
+class LabReport:
+    slug: str
+    lab: str
+    address: str
+    title: str
+    days_ago: int
+    rows: list[tuple[str, str, str]]
+
+
+LAB_REPORT = LabReport(
+    slug="cedar-lipid",
+    lab="Cedar Valley Diagnostics",
+    address="41 Laurel Road, Boulder, CO 80302  |  (303) 555-0174",
+    title="Lipid Profile Results",
+    days_ago=47,
+    rows=[
+        ("Total cholesterol", "212 mg/dL", "< 200"),
+        ("LDL cholesterol", "138 mg/dL", "< 130"),
+        ("HDL cholesterol", "48 mg/dL", "> 40"),
+        ("Triglycerides", "131 mg/dL", "< 150"),
+    ],
+)
+
+
+def build_lab_pdf(r: LabReport, today: date | None = None) -> bytes:
+    d = (today or date.today()) - timedelta(days=r.days_ago)
+    doc = pymupdf.open()
+    page = doc.new_page(width=595, height=842)
+    x = 56
+    page.draw_rect(pymupdf.Rect(0, 0, 595, 8), color=None, fill=ACCENT)
+    page.insert_text((x, 64), r.lab, fontname="hebo", fontsize=17, color=INK)
+    page.insert_text((x, 82), r.address, fontname="helv", fontsize=9, color=MUTED)
+    page.insert_text((x, 122), r.title, fontname="hebo", fontsize=13, color=INK)
+    page.insert_text((x, 146), "Patient: Avery Lindqvist, 34 F", fontname="helv", fontsize=10)
+    page.insert_text(
+        (360, 146), f"Collected: {d:%B} {d.day}, {d.year}", fontname="helv", fontsize=10
+    )
+    page.draw_line((x, 160), (539, 160), color=(0.85, 0.88, 0.86), width=0.8)
+    y = 190
+    for label, header in ((x, "Test"), (300, "Result"), (430, "Reference")):
+        page.insert_text((label, y), header, fontname="hebo", fontsize=10, color=MUTED)
+    for test, value, ref in r.rows:
+        y += 24
+        page.insert_text((x, y), f"{test}:", fontname="helv", fontsize=10.5, color=INK)
+        page.insert_text((300, y), value, fontname="cour", fontsize=10.5, color=INK)
+        page.insert_text((430, y), ref, fontname="cour", fontsize=10.5, color=MUTED)
+    page.insert_text(
+        (x, 800),
+        "SYNTHETIC SAMPLE FOR THE MEDSPACE DEMO. NOT A REAL LAB REPORT.",
+        fontname="helv",
+        fontsize=7.5,
+        color=MUTED,
+    )
+    data = doc.tobytes(deflate=True)
+    doc.close()
+    return data
+
+
 def issued(s: Scenario, today: date | None = None) -> date:
     return (today or date.today()) - timedelta(days=s.days_ago)
 
@@ -143,5 +220,7 @@ if __name__ == "__main__":
     out.mkdir(parents=True, exist_ok=True)
     for sc in SCENARIOS:
         (out / f"rx-{sc.slug}.pdf").write_bytes(build_pdf(sc))
+    (out / f"rx-{PENDING.slug}.pdf").write_bytes(build_pdf(PENDING))
     (out / f"rx-{SCENARIOS[0].slug}-photo.png").write_bytes(build_scan_png(SCENARIOS[0]))
-    print(f"Wrote {len(SCENARIOS) + 1} samples to {out.resolve()}")
+    (out / f"lab-{LAB_REPORT.slug}.pdf").write_bytes(build_lab_pdf(LAB_REPORT))
+    print(f"Wrote {len(SCENARIOS) + 3} samples to {out.resolve()}")
