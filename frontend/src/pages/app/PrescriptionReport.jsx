@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router";
-import { ArrowLeft, ArrowSquareOut, Printer, ShareNetwork, FileX } from "@phosphor-icons/react";
+import { ArrowLeft, ArrowSquareOut, CalendarPlus, Printer, ShareNetwork, FileX } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -8,6 +9,7 @@ import { Logo } from "@/components/ui/Logo";
 import { usePrescription } from "@/features/records/api";
 import { formatClock, formatDate } from "@/lib/format";
 import { CARE_KINDS } from "@/features/review/mapping";
+import { SyncDialog } from "@/features/integrations/SyncDialog";
 
 const KIND_LABEL = Object.fromEntries(CARE_KINDS.map((k) => [k.value, k.label]));
 
@@ -130,6 +132,7 @@ export function ReportBody({ rx, compact = false }) {
 export default function PrescriptionReport() {
   const { id } = useParams();
   const { data: rx, isPending, isError } = usePrescription(id);
+  const [syncOpen, setSyncOpen] = useState(false);
 
   if (isPending) {
     return (
@@ -170,12 +173,16 @@ export default function PrescriptionReport() {
           <Button as={Link} to={`/app/sharing?prescription=${rx.id}`} variant="ghost" size="sm">
             <ShareNetwork size={15} /> Share
           </Button>
-          <Button variant="secondary" size="sm" onClick={() => window.print()}>
+          <Button variant="ghost" size="sm" onClick={() => window.print()}>
             <Printer size={15} /> Print
+          </Button>
+          <Button size="sm" onClick={() => setSyncOpen(true)}>
+            <CalendarPlus size={15} weight="bold" /> Add to Google
           </Button>
         </div>
       </div>
       <ReportBody rx={rx} />
+      <SyncDialog open={syncOpen} onClose={() => setSyncOpen(false)} prescriptionId={rx.id} />
     </div>
   );
 }
