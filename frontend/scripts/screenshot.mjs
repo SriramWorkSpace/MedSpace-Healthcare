@@ -49,6 +49,27 @@ async function flow(name, theme = "light") {
   await page.screenshot({ path: `${out}/review-confirmed.png` });
   await ctx.close();
 }
+async function appTour(theme = "light") {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: theme });
+  const page = await ctx.newPage();
+  page.on("pageerror", (e) => console.log(`[tour] pageerror:`, e.message));
+  await page.goto(base + "/login");
+  await page.getByRole("button", { name: "Try the demo" }).click();
+  await page.waitForURL("**/app");
+  await page.waitForTimeout(1800);
+  await page.screenshot({ path: `${out}/${theme}-dashboard.png` });
+  for (const [name, path] of [["medications", "/app/medications"], ["timeline", "/app/timeline"]]) {
+    await page.goto(base + path);
+    await page.waitForTimeout(1500);
+    await page.screenshot({ path: `${out}/${theme}-${name}.png` });
+  }
+  await page.goto(base + "/app/timeline");
+  await page.waitForTimeout(800);
+  await page.locator('a[href^="/app/prescriptions/"]').first().click();
+  await page.waitForTimeout(1500);
+  await page.screenshot({ path: `${out}/${theme}-report.png`, fullPage: true });
+  await ctx.close();
+}
 const which = process.argv.slice(3);
 const all = {
   "landing-light": () => shot("landing-light", "/", { wait: 6500 }),
@@ -59,6 +80,8 @@ const all = {
   "login": () => shot("login", "/login"),
   "dashboard": () => shot("dashboard", "/app", { demo: true }),
   "review": () => flow("review"),
+  "app": () => appTour(),
+  "app-dark": () => appTour("dark"),
   "notfound": () => shot("notfound", "/nope", { theme: "dark", wait: 2500 }),
 };
 for (const k of which.length ? which : Object.keys(all)) await all[k]();

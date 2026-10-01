@@ -56,3 +56,30 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Print: reports print cleanly on white paper without app chrome. */
+.print-only-show {
+  display: none;
+}
+@media print {
+  :root {
+    color-scheme: light;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  .topnav,
+  .no-print,
+  [data-sonner-toaster],
+  #main > .border-b {
+    display: none !important;
+  }
+  .print-only-show {
+    display: inline-flex;
+  }
+  .report {
+    box-shadow: none !important;
+    border-color: #d9dedb !important;
+  }
+}

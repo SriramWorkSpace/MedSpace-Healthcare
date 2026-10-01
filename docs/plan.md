@@ -18,7 +18,7 @@ Goal: repo, docs, tooling and local infrastructure that every later phase builds
 - [x] Backend tooling: `pyproject.toml`, ruff, pytest config
 - [x] Frontend tooling: Vite, ESLint, Prettier, Vitest
 - [x] GitHub Actions CI: backend lint+test, frontend lint+test+build
-- [ ] graphify knowledge graph of the repo (`graphify-out/`)
+- [x] graphify knowledge graph of the repo (`graphify-out/`)
 
 ## Phase 1: Core platform + design system
 
@@ -49,33 +49,33 @@ Frontend
 
 Goal: drag-and-drop a prescription and watch it process to "needs review".
 
-- [ ] `shared/storage`: S3 (MinIO) + local adapters
-- [ ] `shared/queue`: ARQ + inline modes; `worker.py`
-- [ ] `documents`: upload validation (MIME, magic bytes, size, pages), dedupe by sha256, list/detail/delete, authenticated file streaming
-- [ ] Page text extraction (PyMuPDF) and scanned detection
-- [ ] Frontend: dropzone with progress, library grid/list, status chips with live polling, processing skeletons with puns
-- [ ] Tests: upload validation, ownership isolation, status transitions
+- [x] `shared/storage`: S3 (MinIO) + local adapters
+- [x] `shared/queue`: ARQ + inline modes; `worker.py`
+- [x] `documents`: upload validation (MIME, magic bytes, size, pages), dedupe by sha256, list/detail/delete, authenticated file streaming
+- [x] Page text extraction (PyMuPDF) and scanned detection
+- [x] Frontend: dropzone with progress, library grid/list, status chips with live polling, processing skeletons with puns
+- [x] Tests: upload validation, ownership isolation, status transitions
 
 ## Phase 3: Prescription intelligence (extract → review → confirm)
 
 Goal: the core loop. A user reviews AI-extracted fields against the source and confirms them.
 
-- [ ] `shared/llm`: `LLMProvider`, `GroqProvider` (text strict-schema, vision JSON), `FakeLLM`
-- [ ] Extraction schema + prompts, repair retry, confidence + source page per field
-- [ ] Frequency normalizer (`1-0-1`, BD/BID, TDS/TID, QID, OD/QD, HS, qNh, weekly, PRN) with table-driven tests
-- [ ] `extractions` versioning, reprocess
-- [ ] `records`: confirm → prescriptions, medications, care actions; edit medication; discard draft
-- [ ] Prescription report endpoint + printable report page
-- [ ] Frontend review workspace: source preview (PDF/image) ↔ editable fields, low-confidence highlighting, schedule editor, confirm flow with celebration micro-interaction
-- [ ] Synthetic sample prescriptions (PDF text + scanned image) in `backend/app/modules/demo/samples/`
+- [x] `shared/llm`: `LLMProvider`, `GroqProvider` (text strict-schema, vision JSON), `FakeLLM`
+- [x] Extraction schema + prompts, repair retry, confidence + source page per field
+- [x] Frequency normalizer (`1-0-1`, BD/BID, TDS/TID, QID, OD/QD, HS, qNh, weekly, PRN) with table-driven tests
+- [x] `extractions` versioning, reprocess
+- [x] `records`: confirm → prescriptions, medications, care actions; edit medication; discard draft
+- [x] Printable prescription report (rendered from `GET /prescriptions/{id}`; print stylesheet)
+- [x] Frontend review workspace: source preview (PDF/image) ↔ editable fields, low-confidence highlighting, schedule editor, confirm flow with celebration micro-interaction
+- [x] Synthetic sample prescriptions (PDF text + scanned image) in `backend/app/modules/demo/samples/`
 
 ## Phase 4: Dashboard, medications, timeline
 
-- [ ] `GET /api/dashboard`: today's doses, next follow-up, needs-review queue, counts
-- [ ] Medications page: active/completed, schedule visualization, course progress
-- [ ] `timeline`: cursor-paginated union read model with type filters
-- [ ] Frontend timeline with sticky month headers, filter chips, scroll-reveal
-- [ ] Demo seed: realistic synthetic history (3 to 4 prescriptions over months, a lab report, follow-ups)
+- [x] `GET /api/dashboard`: today's doses, next follow-up, needs-review queue, counts
+- [x] Medications page: active/completed, schedule visualization, course progress
+- [x] `timeline`: cursor-paginated union read model with type filters
+- [x] Frontend timeline with sticky month headers, filter chips, scroll-reveal
+- [x] Demo seed: realistic synthetic history (3 to 4 prescriptions over months, a lab report, follow-ups)
 
 ## Phase 5: Ask MedSpace (RAG)
 
@@ -115,6 +115,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 ---
 
 ## Change log
+
+- **2026-10-02**: Phases 2-4 shipped. Page previews render server-side as PNG (works on mobile, no PDF viewer needed). Non-prescription documents confirm without a prescription record (ADR-015). Course-completion to-dos stay tasks but are not duplicated on the timeline. Initial graphify graph: 1,022 nodes, 86 communities.
 
 - **2026-10-01**: Phase 1 shipped. Added `GET /api/auth/session` (quiet anonymous boot) and a same-origin API proxy (ADR-014).
 

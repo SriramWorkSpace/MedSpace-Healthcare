@@ -117,3 +117,11 @@ Format: `Status: Accepted | Superseded by ADR-xxx | Deprecated`
 - **Context:** Auth uses `SameSite=Lax` httpOnly cookies. If the SPA (e.g. Vercel) and API (e.g. Render) live on different sites, browsers treat the cookies as third-party and increasingly block them.
 - **Decision:** The SPA always calls a same-origin `/api` path: the Vite dev proxy locally and a host rewrite/reverse proxy in production (Vercel `rewrites`, Netlify `_redirects`, or nginx). `VITE_API_URL` exists only as an escape hatch.
 - **Consequences:** No CORS preflights in normal operation, cookies stay first-party, and CSRF protection stays simple. Deployment docs must include the rewrite rule.
+
+## ADR-015: Server-rendered page previews; records only for prescriptions
+
+- **Date:** 2026-10-02
+- **Status:** Accepted
+- **Context:** (1) Embedding PDFs in an iframe is inconsistent across browsers and mostly broken on mobile, and framing would require relaxing `X-Frame-Options`. (2) Confirming a lab report created an empty "prescription", which polluted counts and the timeline.
+- **Decision:** (1) `GET /documents/{id}/pages/{n}/preview` renders each page to PNG with PyMuPDF and caches it in object storage next to the original; the review workspace shows images. (2) `records.replace_for_document` returns no prescription when the document is not a prescription and has no medications or to-dos; such documents still appear on the timeline as reports.
+- **Consequences:** Identical preview behaviour everywhere, strict framing headers stay on, and a natural hook for future bounding-box highlights. Lab results are not yet structured (future work).

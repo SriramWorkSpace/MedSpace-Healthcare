@@ -113,7 +113,8 @@ async def build_events(session: AsyncSession, user: User) -> list[TimelineEvent]
     actions = await session.scalars(
         select(CareAction).where(
             CareAction.user_id == uid,
-            CareAction.kind != "follow_up",  # follow-ups are already appointments
+            # Follow-ups are already appointments; course completions are medication_end events.
+            CareAction.kind.not_in(["follow_up", "course_completion"]),
         )
     )
     for a in actions.all():

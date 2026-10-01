@@ -1,0 +1,6 @@
+# Synthetic sample documents are test fixtures, not architecture.
+samples/
+frontend/public/
+frontend/scripts/
+frontend/index.html
+graphify-out/

@@ -208,17 +208,15 @@ def extract(pages: list[str]) -> ExtractionPayload:
                 meds.append(med)
 
     has_meds = bool(meds)
-    summary_bits = []
-    if prescriber.name or prescriber.clinic:
-        summary_bits.append(
-            f"Prescription from {prescriber.name or prescriber.clinic}"
-            + (f" dated {issued_on.isoformat()}" if issued_on else "")
+    summary = None
+    if prescriber.name or prescriber.clinic or has_meds:
+        who = prescriber.name or prescriber.clinic or "the prescriber"
+        when = f" dated {issued_on:%B} {issued_on.day}, {issued_on.year}" if issued_on else ""
+        listing = (
+            f", listing {len(meds)} medication{'s' if len(meds) != 1 else ''}" if has_meds else ""
         )
-    if has_meds:
-        summary_bits.append(f"lists {len(meds)} medication{'s' if len(meds) != 1 else ''}")
-    if actions:
-        summary_bits.append(f"and {len(actions)} follow-up item{'s' if len(actions) != 1 else ''}")
-    summary = (" ".join(summary_bits) + ".") if summary_bits else None
+        follow = " and a follow-up visit" if follow_up else ""
+        summary = f"Prescription from {who}{when}{listing}{follow}."
 
     confidences = [m.confidence for m in meds] or [0.5]
     doc_type = "prescription" if has_meds else ("lab_report" if lab_lines_seen else "other")
