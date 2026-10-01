@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import shutil
 from functools import lru_cache
 from pathlib import Path
 from typing import Protocol
 
 from app.core.config import get_settings
+from app.core.errors import ServiceUnavailable
+
+logger = logging.getLogger("medspace.storage")
 
 
 class ObjectStorage(Protocol):
@@ -56,6 +60,7 @@ class S3Storage:
 
         s = get_settings()
         self.bucket = s.s3_bucket
+        self._bucket_ready = False
         self.client = boto3.client(
             "s3",
             endpoint_url=s.s3_endpoint_url,
@@ -65,10 +70,30 @@ class S3Storage:
             config=Config(signature_version="s3v4", retries={"max_attempts": 3}),
         )
 
+    def _ensure_bucket(self) -> None:
+        if self._bucket_ready:
+            return
+        from botocore.exceptions import ClientError
+
+        try:
+            self.client.head_bucket(Bucket=self.bucket)
+        except ClientError:
+            self.client.create_bucket(Bucket=self.bucket)
+        self._bucket_ready = True
+
     async def put(self, key: str, data: bytes, content_type: str) -> None:
-        await asyncio.to_thread(
-            self.client.put_object, Bucket=self.bucket, Key=key, Body=data, ContentType=content_type
-        )
+        try:
+            await asyncio.to_thread(self._ensure_bucket)
+            await asyncio.to_thread(
+                self.client.put_object,
+                Bucket=self.bucket,
+                Key=key,
+                Body=data,
+                ContentType=content_type,
+            )
+        except Exception as exc:
+            logger.exception("object storage put failed for %s", key)
+            raise ServiceUnavailable("File storage is temporarily unavailable.") from exc
 
     async def get(self, key: str) -> bytes:
         obj = await asyncio.to_thread(self.client.get_object, Bucket=self.bucket, Key=key)

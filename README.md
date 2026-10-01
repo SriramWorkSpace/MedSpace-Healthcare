@@ -70,7 +70,7 @@ Deep dive: [docs/architecture.md](docs/architecture.md) · Decisions and trade-o
 
 **Backend:** Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2.0 (async), Alembic, ARQ
 
-**Data & AI:** PostgreSQL 17, pgvector, Redis, S3-compatible storage (MinIO), Groq (`gpt-oss-120b`, `qwen3.8-27b` vision), fastembed (`bge-small-en-v1.5`), PyMuPDF
+**Data & AI:** PostgreSQL 17, pgvector, Redis, S3-compatible storage (SeaweedFS locally, R2/S3 in production), Groq (`gpt-oss-120b`, `qwen3.8-27b` vision), fastembed (`bge-small-en-v1.5`), PyMuPDF
 
 **Integrations:** Google Calendar API, Google Tasks API, OAuth 2.0
 
@@ -95,7 +95,7 @@ docker compose up --build
 |---|---|
 | Web app | http://localhost:5173 |
 | API docs (OpenAPI) | http://localhost:8000/docs |
-| MinIO console | http://localhost:9001 |
+| S3 API (SeaweedFS) | http://localhost:8333 |
 
 Click **Try the demo** on the login page to explore a pre-seeded synthetic account.
 

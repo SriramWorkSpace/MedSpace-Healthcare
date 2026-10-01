@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -28,12 +29,16 @@ from app.modules.records.router import router as records_router
 from app.modules.sharing.router import public_router as public_share_router
 from app.modules.sharing.router import router as sharing_router
 from app.modules.timeline.router import router as timeline_router
+from app.shared.embeddings import warm_up
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     configure_logging()
+    warm = asyncio.create_task(warm_up()) if get_settings().embedding_provider != "hash" else None
     yield
+    if warm and not warm.done():
+        warm.cancel()
     await engine.dispose()
 
 

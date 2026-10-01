@@ -19,7 +19,7 @@ flowchart LR
 
   PG[(PostgreSQL 17<br/>+ pgvector)]
   R[(Redis<br/>job queue)]
-  S3[(Object storage<br/>MinIO / R2 / S3)]
+  S3[(Object storage<br/>SeaweedFS / R2 / S3)]
   GROQ[Groq API<br/>LLM + vision]
   G[Google Calendar<br/>+ Tasks APIs]
 
@@ -115,7 +115,7 @@ External dependencies are hidden behind small interfaces so the app runs fully o
 |---|---|---|
 | `LLMProvider` | `GroqProvider` (`openai/gpt-oss-120b` text, `qwen/qwen3.8-27b` vision) | `FakeLLM` (deterministic, regex-based) |
 | `Embedder` | `FastEmbedEmbedder` (`BAAI/bge-small-en-v1.5`, 384-d, local ONNX) | `HashEmbedder` (deterministic hashing trick) |
-| `ObjectStorage` | `S3Storage` (MinIO in dev, R2/S3 in prod) | `LocalStorage` (filesystem) |
+| `ObjectStorage` | `S3Storage` (SeaweedFS in dev, R2/S3 in prod) | `LocalStorage` (filesystem) |
 | `GoogleClient` | `HttpGoogleClient` (httpx → Calendar v3 / Tasks v1) | `FakeGoogleClient` (in-memory) |
 
 ## 4. Core flows
@@ -311,6 +311,6 @@ Navigation is a **top bar on every screen size**; below `md` it collapses into a
 
 | Environment | Topology |
 |---|---|
-| Local | `docker compose up` → `postgres (pgvector/pgvector:pg17)`, `redis`, `minio`, `api`, `worker`, `web` |
+| Local | `docker compose up` → `postgres (pgvector/pgvector:pg17)`, `redis`, `s3 (SeaweedFS)`, `api`, `worker`, `web` |
 | CI | GitHub Actions: ruff + pytest (Postgres service container), ESLint + Vitest + build, Docker image build |
 | Demo (suggested) | Web on Vercel/Netlify · API on Render/Fly (`QUEUE_MODE=inline` for a single free instance) · Postgres on Neon (pgvector) · Storage on Cloudflare R2 |

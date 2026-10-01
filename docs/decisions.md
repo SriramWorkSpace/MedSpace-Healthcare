@@ -125,3 +125,11 @@ Format: `Status: Accepted | Superseded by ADR-xxx | Deprecated`
 - **Context:** (1) Embedding PDFs in an iframe is inconsistent across browsers and mostly broken on mobile, and framing would require relaxing `X-Frame-Options`. (2) Confirming a lab report created an empty "prescription", which polluted counts and the timeline.
 - **Decision:** (1) `GET /documents/{id}/pages/{n}/preview` renders each page to PNG with PyMuPDF and caches it in object storage next to the original; the review workspace shows images. (2) `records.replace_for_document` returns no prescription when the document is not a prescription and has no medications or to-dos; such documents still appear on the timeline as reports.
 - **Consequences:** Identical preview behaviour everywhere, strict framing headers stay on, and a natural hook for future bounding-box highlights. Lab results are not yet structured (future work).
+
+## ADR-016: SeaweedFS for local S3; storage failures surface as 503
+
+- **Date:** 2026-10-02
+- **Status:** Accepted (supersedes the MinIO detail of ADR-001's local topology)
+- **Context:** MinIO stopped publishing community images to Docker Hub (and quay.io), so `docker compose up` failed for new clones. Separately, a misconfigured store produced generic 500s on upload and silently empty demo accounts.
+- **Decision:** The compose stack uses SeaweedFS (`chrislusf/seaweedfs`, `server -s3`) on port 8333; the app talks plain S3, so production can use Cloudflare R2 or AWS S3 unchanged. `S3Storage` creates its bucket on first use (no init container) and maps provider errors to `503 File storage is temporarily unavailable`. The embedding model is warmed up at API and worker start so the first demo login doesn't pay the download.
+- **Consequences:** One fewer container; storage outages are explicit to users and in logs.

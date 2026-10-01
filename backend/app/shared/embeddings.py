@@ -76,6 +76,16 @@ class FastEmbedEmbedder:
         return vectors[0].tolist()
 
 
+async def warm_up() -> None:
+    """Load (and on first run, download) the embedding model before the first request needs it."""
+    import logging
+
+    try:
+        await get_embedder().embed_query("warm up")
+    except Exception:
+        logging.getLogger("medspace.embeddings").warning("embedding warm-up failed", exc_info=True)
+
+
 @lru_cache
 def get_embedder() -> Embedder:
     s = get_settings()

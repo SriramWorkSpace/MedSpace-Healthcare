@@ -12,11 +12,14 @@ from app.core.db import SessionLocal
 from app.core.logging import configure_logging
 from app.modules.demo import service as demo
 from app.modules.sharing import service as sharing
+from app.shared.embeddings import warm_up
 from app.shared.queue import JOBS
 
 
 async def startup(ctx: dict) -> None:
     configure_logging()
+    if get_settings().embedding_provider != "hash":
+        await warm_up()
 
 
 async def purge_demo_accounts(ctx: dict) -> int:

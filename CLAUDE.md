@@ -18,7 +18,7 @@ When context is lost or a task touches unfamiliar areas, read in this order:
 
 ## Stack
 
-- **Backend:** Python 3.12+, FastAPI, Pydantic v2, SQLAlchemy 2.0 (async, asyncpg), Alembic, PostgreSQL 17 + pgvector, Redis + ARQ worker, S3-compatible storage (MinIO in dev), Groq (LLM), fastembed (local embeddings), PyMuPDF.
+- **Backend:** Python 3.12+, FastAPI, Pydantic v2, SQLAlchemy 2.0 (async, asyncpg), Alembic, PostgreSQL 17 + pgvector, Redis + ARQ worker, S3-compatible storage (SeaweedFS in dev), Groq (LLM), fastembed (local embeddings), PyMuPDF.
 - **Frontend:** React 19 + Vite, **JavaScript/JSX (not TypeScript, ADR-011)**, React Router, TanStack Query, React Hook Form + Zod, Tailwind v4 + hand-authored CSS tokens (ADR-012), `motion/react`, Phosphor icons, Sonner, Geist font.
 - **Infra:** Docker Compose, GitHub Actions.
 
@@ -26,7 +26,7 @@ When context is lost or a task touches unfamiliar areas, read in this order:
 
 ```bash
 # Full stack (from repo root)
-docker compose up --build            # web :5173, api :8000, minio console :9001
+docker compose up --build            # web :5173, api :8000, S3 :8333
 
 # Backend (from backend/)
 python -m venv .venv && .venv/Scripts/activate   # Windows; use bin/activate on *nix

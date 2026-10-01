@@ -28,9 +28,15 @@ async function flow(name, theme = "light") {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: theme });
   const page = await ctx.newPage();
   page.on("pageerror", (e) => console.log(`[${name}] pageerror:`, e.message));
-  await page.goto(base + "/login");
-  await page.getByRole("button", { name: "Try the demo" }).click();
+  // A fresh account (demo accounts already contain the sample files).
+  await page.goto(base + "/signup");
+  await page.getByLabel("Name").fill("Mira Castellanos");
+  await page.getByLabel("Email").fill(`mira-${Date.now()}@example.com`);
+  await page.getByLabel("Password", { exact: true }).fill("a-long-enough-password");
+  await page.getByRole("button", { name: "Create account" }).click();
   await page.waitForURL("**/app");
+  await page.waitForTimeout(800);
+  await page.screenshot({ path: `${out}/dashboard-new.png` });
   await page.goto(base + "/app/documents");
   await page.waitForTimeout(800);
   await page.screenshot({ path: `${out}/documents-empty.png` });
