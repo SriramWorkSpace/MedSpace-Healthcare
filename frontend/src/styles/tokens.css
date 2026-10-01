@@ -1,0 +1,108 @@
+/*
+ * MedSpace design tokens.
+ * One source of truth: CSS custom properties, bridged into Tailwind via @theme in index.css.
+ *
+ * Palette: cool off-white / evergreen ink neutrals with a single evergreen accent.
+ * Shape rule: interactive controls are pills (--radius-pill); surfaces use --radius-card (16px);
+ * inputs and small chips use --radius-control (10px). Nothing else.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Neutrals */
+  --bg: oklch(0.982 0.005 155);
+  --bg-sunken: oklch(0.962 0.007 155);
+  --surface: oklch(0.996 0.002 155);
+  --surface-2: oklch(0.972 0.006 155);
+  --surface-3: oklch(0.945 0.008 155);
+  --ink: oklch(0.235 0.022 165);
+  --ink-2: oklch(0.44 0.018 165);
+  --ink-3: oklch(0.56 0.014 165);
+  --line: oklch(0.905 0.009 160);
+  --line-strong: oklch(0.84 0.012 160);
+
+  /* Accent: evergreen */
+  --accent: oklch(0.52 0.105 163);
+  --accent-hover: oklch(0.47 0.1 163);
+  --accent-ink: oklch(0.99 0.004 160);
+  --accent-soft: oklch(0.948 0.034 163);
+  --accent-soft-ink: oklch(0.38 0.08 163);
+
+  /* Semantic */
+  --warn: oklch(0.72 0.135 72);
+  --warn-soft: oklch(0.96 0.045 85);
+  --warn-ink: oklch(0.45 0.1 60);
+  --danger: oklch(0.56 0.18 27);
+  --danger-soft: oklch(0.955 0.03 25);
+  --danger-ink: oklch(0.45 0.16 27);
+
+  /* Elevation (shadows tinted to the evergreen ink, never pure black) */
+  --shadow-xs: 0 1px 2px oklch(0.3 0.03 165 / 0.06);
+  --shadow-sm: 0 1px 2px oklch(0.3 0.03 165 / 0.05), 0 4px 12px -4px oklch(0.3 0.03 165 / 0.08);
+  --shadow-md: 0 2px 4px oklch(0.3 0.03 165 / 0.04), 0 12px 32px -12px oklch(0.3 0.03 165 / 0.16);
+  --shadow-lg: 0 4px 8px oklch(0.3 0.03 165 / 0.04), 0 28px 64px -24px oklch(0.3 0.03 165 / 0.24);
+  --ring: 0 0 0 3px oklch(0.52 0.105 163 / 0.28);
+  --inner-highlight: inset 0 1px 0 oklch(1 0 0 / 0.65);
+
+  /* Shape */
+  --radius-control: 10px;
+  --radius-card: 16px;
+  --radius-pill: 999px;
+
+  /* Type */
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-press: 140ms;
+  --dur-fast: 180ms;
+  --dur-base: 240ms;
+
+  /* Layers (the only z-indexes in the app) */
+  --z-nav: 40;
+  --z-drawer: 50;
+  --z-dialog: 60;
+  --z-toast: 70;
+  --z-egg: 80;
+
+  --nav-h: 64px;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: oklch(0.175 0.012 168);
+  --bg-sunken: oklch(0.155 0.011 168);
+  --surface: oklch(0.212 0.014 168);
+  --surface-2: oklch(0.245 0.015 168);
+  --surface-3: oklch(0.285 0.016 168);
+  --ink: oklch(0.955 0.008 160);
+  --ink-2: oklch(0.79 0.014 160);
+  --ink-3: oklch(0.66 0.014 160);
+  --line: oklch(0.31 0.014 168);
+  --line-strong: oklch(0.38 0.016 168);
+
+  --accent: oklch(0.76 0.125 163);
+  --accent-hover: oklch(0.81 0.12 163);
+  --accent-ink: oklch(0.2 0.03 165);
+  --accent-soft: oklch(0.3 0.05 163);
+  --accent-soft-ink: oklch(0.86 0.09 163);
+
+  --warn: oklch(0.8 0.13 80);
+  --warn-soft: oklch(0.32 0.06 75);
+  --warn-ink: oklch(0.88 0.1 85);
+  --danger: oklch(0.7 0.16 25);
+  --danger-soft: oklch(0.3 0.07 25);
+  --danger-ink: oklch(0.85 0.09 25);
+
+  --shadow-xs: 0 1px 2px oklch(0 0 0 / 0.3);
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.3), 0 4px 12px -4px oklch(0 0 0 / 0.35);
+  --shadow-md: 0 2px 4px oklch(0 0 0 / 0.25), 0 12px 32px -12px oklch(0 0 0 / 0.5);
+  --shadow-lg: 0 4px 8px oklch(0 0 0 / 0.25), 0 28px 64px -24px oklch(0 0 0 / 0.6);
+  --ring: 0 0 0 3px oklch(0.76 0.125 163 / 0.32);
+  --inner-highlight: inset 0 1px 0 oklch(1 0 0 / 0.06);
+}

@@ -109,3 +109,11 @@ Format: `Status: Accepted | Superseded by ADR-xxx | Deprecated`
 - **Context:** A portfolio app processing health records must not imply clinical use.
 - **Decision:** Demo seed and sample uploads use synthetic prescriptions (fictional prescribers, clinics and patients). The UI never diagnoses, recommends treatment or alters doses; the assistant refuses such requests. App-wide disclaimer: not a medical device, not HIPAA compliant.
 - **Consequences:** Clear scope for reviewers; guardrail tests in the assistant test suite.
+
+## ADR-014: Same-origin API for first-party auth cookies
+
+- **Date:** 2026-10-01
+- **Status:** Accepted
+- **Context:** Auth uses `SameSite=Lax` httpOnly cookies. If the SPA (e.g. Vercel) and API (e.g. Render) live on different sites, browsers treat the cookies as third-party and increasingly block them.
+- **Decision:** The SPA always calls a same-origin `/api` path: the Vite dev proxy locally and a host rewrite/reverse proxy in production (Vercel `rewrites`, Netlify `_redirects`, or nginx). `VITE_API_URL` exists only as an escape hatch.
+- **Consequences:** No CORS preflights in normal operation, cookies stay first-party, and CSRF protection stays simple. Deployment docs must include the rewrite rule.

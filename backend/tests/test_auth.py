@@ -141,3 +141,11 @@ async def test_security_headers_present(client: httpx.AsyncClient):
     resp = await client.get("/api/health")
     assert resp.headers["x-content-type-options"] == "nosniff"
     assert resp.headers["x-frame-options"] == "DENY"
+
+
+async def test_session_endpoint_is_quiet_for_anonymous(client: httpx.AsyncClient):
+    resp = await client.get("/api/auth/session")
+    assert resp.status_code == 200
+    assert resp.json() == {"user": None}
+    await signup(client)
+    assert (await client.get("/api/auth/session")).json()["user"]["email"] == "ada@example.com"

@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from app.core.deps import CurrentUser, DbSession
 from app.core.ratelimit import rate_limit
-from app.core.security import REFRESH_COOKIE
+from app.core.security import ACCESS_COOKIE, REFRESH_COOKIE, decode_access_token
 from app.modules.audit import service as audit
 from app.modules.identity import service
 from app.modules.identity.cookies import clear_auth_cookies, set_auth_cookies
@@ -74,6 +74,19 @@ async def logout(request: Request, response: Response, session: DbSession):
     clear_auth_cookies(response)
     response.status_code = status.HTTP_204_NO_CONTENT
     return response
+
+
+class SessionState(BaseModel):
+    user: UserOut | None
+
+
+@router.get("/session", response_model=SessionState)
+async def session_state(request: Request, session: DbSession):
+    """Who am I, without a 401 for anonymous visitors (the SPA calls this on boot)."""
+    token = request.cookies.get(ACCESS_COOKIE)
+    user_id = decode_access_token(token) if token else None
+    user = await service.get_user(session, user_id) if user_id else None
+    return SessionState(user=UserOut.model_validate(user) if user else None)
 
 
 @router.get("/me", response_model=UserOut)

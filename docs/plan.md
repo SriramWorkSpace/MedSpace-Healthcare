@@ -12,12 +12,12 @@ Goal: repo, docs, tooling and local infrastructure that every later phase builds
 
 - [x] Plan review, critical changes identified (see ADR-002 to ADR-010)
 - [x] `CLAUDE.md`, `README.md`, `docs/architecture.md`, `docs/decisions.md`, `docs/plan.md`
-- [ ] Monorepo layout: `backend/`, `frontend/`, `docs/`
-- [ ] `docker-compose.yml`: postgres (pgvector), redis, minio (+ bucket init), api, worker, web
-- [ ] `.env.example` with every setting documented
-- [ ] Backend tooling: `pyproject.toml`, ruff, pytest config
-- [ ] Frontend tooling: Vite, ESLint, Prettier, Vitest
-- [ ] GitHub Actions CI: backend lint+test, frontend lint+test+build
+- [x] Monorepo layout: `backend/`, `frontend/`, `docs/`
+- [x] `docker-compose.yml`: postgres (pgvector), redis, minio (+ bucket init), api, worker, web
+- [x] `.env.example` with every setting documented
+- [x] Backend tooling: `pyproject.toml`, ruff, pytest config
+- [x] Frontend tooling: Vite, ESLint, Prettier, Vitest
+- [x] GitHub Actions CI: backend lint+test, frontend lint+test+build
 - [ ] graphify knowledge graph of the repo (`graphify-out/`)
 
 ## Phase 1: Core platform + design system
@@ -25,25 +25,25 @@ Goal: repo, docs, tooling and local infrastructure that every later phase builds
 Goal: a user can sign up, log in (or "Try the demo"), and land in a polished, empty app shell. The marketing site is complete.
 
 Backend
-- [ ] App factory, settings (pydantic-settings), structured logging, problem+json errors
-- [ ] Async SQLAlchemy 2.0 + Alembic, base model mixins (UUID PK, timestamps)
-- [ ] `identity`: signup/login/logout/me, Argon2id, JWT access cookie, rotating refresh with reuse detection, CSRF
-- [ ] `audit`: `record()` helper + `GET /api/audit`
-- [ ] Rate limiting on auth routes
-- [ ] Security headers middleware, CORS for the SPA origin
-- [ ] Health/readiness endpoints
-- [ ] Tests: auth flows, refresh rotation + reuse detection, CSRF enforcement
+- [x] App factory, settings (pydantic-settings), structured logging, problem+json errors
+- [x] Async SQLAlchemy 2.0 + Alembic, base model mixins (UUID PK, timestamps)
+- [x] `identity`: signup/login/logout/me, Argon2id, JWT access cookie, rotating refresh with reuse detection, CSRF
+- [x] `audit`: `record()` helper + `GET /api/audit`
+- [x] Rate limiting on auth routes
+- [x] Security headers middleware, CORS for the SPA origin
+- [x] Health/readiness endpoints
+- [x] Tests: auth flows, refresh rotation + reuse detection, CSRF enforcement
 
 Frontend
-- [ ] Design tokens (light/dark), typography, Tailwind v4 `@theme` bridge
-- [ ] UI primitives: Button, Input, Field, Card, Badge, Skeleton, Dialog, Drawer, Tabs, Tooltip, EmptyState, Toaster
-- [ ] Top navigation (desktop bar + mobile drawer), theme toggle, user menu
-- [ ] Marketing landing: hero with live document-to-schedule morph, workflow, feature bento, AI section, trust/privacy, CTA, footer
-- [ ] Auth pages with validation, error states, demo login
-- [ ] API client (cookies + CSRF + refresh-on-401 queue), TanStack Query setup, route guards
-- [ ] Skeleton screens for every data route
-- [ ] Easter eggs v1: rotating health puns in loaders, 404 pun page, Konami-code apple rain, logo-click apple
-- [ ] Reduced-motion and keyboard/focus audit
+- [x] Design tokens (light/dark), typography, Tailwind v4 `@theme` bridge
+- [~] UI primitives: Button, Field/Input, Chip, Skeleton, Dialog, MobileDrawer, EmptyState, Toaster done; Tabs/Tooltip added when first needed
+- [x] Top navigation (desktop bar + mobile drawer), theme toggle, user menu
+- [x] Marketing landing: hero with live document-to-schedule morph, workflow, feature bento, AI section, trust/privacy, CTA, footer
+- [x] Auth pages with validation, error states, demo login
+- [x] API client (cookies + CSRF + refresh-on-401 queue), TanStack Query setup, route guards
+- [~] Skeleton screens: app shell + generic page skeleton done; shaped skeletons ship with each feature page
+- [x] Easter eggs v1: rotating health puns in loaders, 404 pun page, Konami-code apple rain, logo-click apple
+- [~] Reduced-motion and keyboard/focus: global reduced-motion, MotionConfig, focus rings, dialog focus trap, skip links; full audit in Phase 8
 
 ## Phase 2: Documents + processing pipeline
 
@@ -115,5 +115,7 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 ---
 
 ## Change log
+
+- **2026-10-01**: Phase 1 shipped. Added `GET /api/auth/session` (quiet anonymous boot) and a same-origin API proxy (ADR-014).
 
 - **2026-10-01**: Plan created from the original brief. Changes vs brief: pgvector replaces FAISS (ADR-002); Groq with dual text/vision extraction (ADR-003); local embeddings (ADR-004); Calendar vs Tasks split (ADR-005); deterministic schedule normalization (ADR-006); ARQ queue (ADR-007); own auth + optional Google (ADR-008); draft→confirmed lifecycle (ADR-009); proxied share links (ADR-010).
