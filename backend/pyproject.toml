@@ -1,0 +1,70 @@
+[project]
+name = "medspace-api"
+version = "0.1.0"
+description = "MedSpace API: turn prescriptions into structured, actionable health records."
+requires-python = ">=3.12"
+license = { text = "MIT" }
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.32",
+  "pydantic>=2.9",
+  "pydantic-settings>=2.6",
+  "email-validator>=2.2",
+  "sqlalchemy[asyncio]>=2.0.36",
+  "asyncpg>=0.30",
+  "alembic>=1.14",
+  "pgvector>=0.3.6",
+  "argon2-cffi>=23.1",
+  "pyjwt>=2.10",
+  "cryptography>=43",
+  "httpx>=0.28",
+  "python-multipart>=0.0.18",
+  "arq>=0.26",
+  "redis>=5.2",
+  "boto3>=1.35",
+  "pymupdf>=1.25",
+  "groq>=0.13",
+  "python-dateutil>=2.9",
+]
+
+[project.optional-dependencies]
+embeddings = ["fastembed>=0.4"]
+dev = [
+  "pytest>=8.3",
+  "pytest-asyncio>=0.24",
+  "pytest-cov>=6.0",
+  "ruff>=0.8",
+]
+
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.setuptools.package-data]
+"app.modules.demo" = ["samples/*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["migrations/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "ASYNC", "S", "RUF"]
+ignore = [
+  "S101",   # assert is fine in tests
+  "B008",   # FastAPI Depends() in defaults is idiomatic
+  "RUF012", # mutable class attrs are fine on pydantic/sqlalchemy models
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106", "S107", "S311", "E402"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]
