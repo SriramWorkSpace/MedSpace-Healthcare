@@ -92,7 +92,12 @@ export function ReviewForm({ extraction, onConfirm, onDiscard, confirming, onChe
           <Field label="Follow-up date" optional>
             <Input type="date" {...register("follow_up.date")} />
           </Field>
-          <Field label="Summary" optional className="sm:col-span-2" hint="A neutral description of what the document says.">
+          <Field
+            label="Summary"
+            optional
+            className="sm:col-span-2"
+            hint="A neutral description of what the document says."
+          >
             <Textarea rows={2} {...register("summary")} />
           </Field>
         </div>
@@ -192,7 +197,10 @@ export function ReviewForm({ extraction, onConfirm, onDiscard, confirming, onChe
       </Section>
 
       {/* Sticky action bar */}
-      <div className="fixed inset-x-0 bottom-0 border-t border-line bg-[color-mix(in_oklch,var(--bg),transparent_10%)] backdrop-blur-md" style={{ zIndex: "var(--z-nav)" }}>
+      <div
+        className="fixed inset-x-0 bottom-0 border-t border-line bg-[color-mix(in_oklch,var(--bg),transparent_10%)] backdrop-blur-md"
+        style={{ zIndex: "var(--z-nav)" }}
+      >
         <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <p className="hidden text-sm text-ink-2 sm:block">
             Nothing is saved to your records until you confirm.

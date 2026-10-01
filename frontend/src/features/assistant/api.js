@@ -38,7 +38,11 @@ export function useDeleteThread() {
  * POST a question and consume the server-sent event stream.
  * EventSource can't POST or send the CSRF header, so this parses SSE frames from fetch().
  */
-export async function streamAnswer(threadId, content, { onSources, onToken, onDone, onError, signal }) {
+export async function streamAnswer(
+  threadId,
+  content,
+  { onSources, onToken, onDone, onError, signal },
+) {
   const res = await fetch(`/api/assistant/threads/${threadId}/messages`, {
     method: "POST",
     credentials: "include",

@@ -62,7 +62,9 @@ export default function Documents() {
     return FILTERS.map((f) => ({
       key: f.key,
       label: f.label,
-      count: f.statuses ? f.statuses.reduce((n, s) => n + (counts[s] ?? 0), 0) : counts[f.key] ?? 0,
+      count: f.statuses
+        ? f.statuses.reduce((n, s) => n + (counts[s] ?? 0), 0)
+        : (counts[f.key] ?? 0),
     }));
   }, [data]);
 
@@ -97,7 +99,9 @@ export default function Documents() {
           </span>
           <span>
             <span className="block text-sm font-semibold">Drop files anywhere on this page</span>
-            <span className="block text-[13px] text-ink-3">or click to browse. PDF, JPG, PNG or WEBP up to 15 MB.</span>
+            <span className="block text-[13px] text-ink-3">
+              or click to browse. PDF, JPG, PNG or WEBP up to 15 MB.
+            </span>
           </span>
         </button>
       )}

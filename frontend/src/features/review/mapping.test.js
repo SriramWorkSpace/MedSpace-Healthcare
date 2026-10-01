@@ -4,7 +4,12 @@ import { formToConfirm, payloadToForm, reviewSchema, scheduleLabel } from "./map
 const payload = {
   document_type: "prescription",
   issued_on: "2026-03-04",
-  prescriber: { name: "Dr. Imani Oduya", specialty: "Internal Medicine", clinic: null, contact: null },
+  prescriber: {
+    name: "Dr. Imani Oduya",
+    specialty: "Internal Medicine",
+    clinic: null,
+    contact: null,
+  },
   follow_up: { date: "2026-03-18", notes: "Review in 2 weeks" },
   summary: "Prescription with 2 medications.",
   medications: [
@@ -18,7 +23,12 @@ const payload = {
       source_page: 1,
       confidence: 0.9,
       uncertain_fields: [],
-      schedule: { times: ["20:00", "08:00"], period: "daily", as_needed: false, label: "Twice daily" },
+      schedule: {
+        times: ["20:00", "08:00"],
+        period: "daily",
+        as_needed: false,
+        label: "Twice daily",
+      },
     },
     {
       name: "Ibuprofen",
@@ -28,7 +38,9 @@ const payload = {
       schedule: { times: [], period: "as_needed", as_needed: true, label: "As needed" },
     },
   ],
-  care_actions: [{ kind: "lab_test", title: "Get CBC test", due_on: null, notes: null, source_page: 1 }],
+  care_actions: [
+    { kind: "lab_test", title: "Get CBC test", due_on: null, notes: null, source_page: 1 },
+  ],
 };
 
 describe("review mapping", () => {
@@ -46,7 +58,11 @@ describe("review mapping", () => {
     });
     expect(body.medications[0].schedule.times).toEqual(["08:00", "20:00"]);
     expect(body.medications[0].duration_days).toBe(7);
-    expect(body.medications[1].schedule).toMatchObject({ as_needed: true, times: [], period: "as_needed" });
+    expect(body.medications[1].schedule).toMatchObject({
+      as_needed: true,
+      times: [],
+      period: "as_needed",
+    });
     expect(body.care_actions[0].due_on).toBeNull();
   });
 
@@ -57,7 +73,9 @@ describe("review mapping", () => {
   });
 
   it("labels schedules from the chosen times", () => {
-    expect(scheduleLabel({ times: ["08:00", "14:00", "20:00"], period: "daily" })).toBe("Three times daily");
+    expect(scheduleLabel({ times: ["08:00", "14:00", "20:00"], period: "daily" })).toBe(
+      "Three times daily",
+    );
     expect(scheduleLabel({ times: [], as_needed: true })).toBe("As needed");
     expect(scheduleLabel({ times: ["08:00"], period: "weekly" })).toBe("Once a week");
   });

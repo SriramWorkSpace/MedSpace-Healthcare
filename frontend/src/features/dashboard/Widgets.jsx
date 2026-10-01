@@ -28,10 +28,7 @@ export function Panel({ title, action, children, className }) {
 
 export function StatTile({ label, value, to, icon: Icon }) {
   return (
-    <Link
-      to={to}
-      className="card card--interactive flex items-center justify-between gap-3 p-4"
-    >
+    <Link to={to} className="card card--interactive flex items-center justify-between gap-3 p-4">
       <div>
         <p className="text-xs font-medium text-ink-3">{label}</p>
         <p className="tabular mt-1 text-2xl font-semibold tracking-tight">{value}</p>
@@ -51,7 +48,11 @@ const UPCOMING_ICON = {
 
 export function ComingUp({ items }) {
   if (!items.length) {
-    return <p className="text-sm text-ink-2">Nothing scheduled in the next six weeks. Enjoy the quiet.</p>;
+    return (
+      <p className="text-sm text-ink-2">
+        Nothing scheduled in the next six weeks. Enjoy the quiet.
+      </p>
+    );
   }
   return (
     <ul className="grid gap-1">
@@ -69,9 +70,13 @@ export function ComingUp({ items }) {
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-medium">{e.title}</span>
-                {e.subtitle && <span className="block truncate text-xs text-ink-3">{e.subtitle}</span>}
+                {e.subtitle && (
+                  <span className="block truncate text-xs text-ink-3">{e.subtitle}</span>
+                )}
               </span>
-              <span className="tabular shrink-0 text-xs font-medium text-ink-2">{formatRelativeDay(e.date)}</span>
+              <span className="tabular shrink-0 text-xs font-medium text-ink-2">
+                {formatRelativeDay(e.date)}
+              </span>
             </Link>
           </li>
         );
@@ -89,7 +94,11 @@ export function NeedsReview({ items, processing }) {
           <FileText size={16} weight="duotone" />
           {items.length ? `${items.length} waiting for your review` : "Reading your uploads"}
         </p>
-        {processing > 0 && <Chip tone="warn" live>{processing} processing</Chip>}
+        {processing > 0 && (
+          <Chip tone="warn" live>
+            {processing} processing
+          </Chip>
+        )}
       </div>
       {items.length > 0 && (
         <ul className="divide-y divide-line">
@@ -131,7 +140,9 @@ export function WeekStrip({ week }) {
               />
             </div>
             <span className="tabular text-xs font-semibold">{d.doses}</span>
-            <span className={cn("text-[11px]", i === 0 ? "font-semibold text-accent" : "text-ink-3")}>
+            <span
+              className={cn("text-[11px]", i === 0 ? "font-semibold text-accent" : "text-ink-3")}
+            >
               {i === 0 ? "Today" : format(date, "EEE")}
             </span>
           </li>
@@ -146,7 +157,11 @@ export function AsNeededList({ items }) {
   return (
     <ul className="flex flex-wrap gap-2">
       {items.map((m) => (
-        <li key={m.medication_id} className="chip gap-1.5 py-1 pl-2 pr-3" title={m.instructions ?? undefined}>
+        <li
+          key={m.medication_id}
+          className="chip gap-1.5 py-1 pl-2 pr-3"
+          title={m.instructions ?? undefined}
+        >
           <Pill size={13} weight="duotone" className="text-accent" />
           {m.name} {m.strength && <span className="text-ink-3">{m.strength}</span>}
         </li>

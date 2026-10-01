@@ -14,7 +14,10 @@ export function useDashboard() {
 }
 
 export function usePrescriptions() {
-  return useQuery({ queryKey: recordKeys.prescriptions, queryFn: () => api.get("/api/prescriptions") });
+  return useQuery({
+    queryKey: recordKeys.prescriptions,
+    queryFn: () => api.get("/api/prescriptions"),
+  });
 }
 
 export function usePrescription(id) {
@@ -75,7 +78,8 @@ export function useUpdateCareAction() {
       }
       return { snapshots };
     },
-    onError: (_err, _vars, ctx) => ctx?.snapshots.forEach(([key, data]) => qc.setQueryData(key, data)),
+    onError: (_err, _vars, ctx) =>
+      ctx?.snapshots.forEach(([key, data]) => qc.setQueryData(key, data)),
     onSettled: invalidate,
   });
 }

@@ -44,12 +44,16 @@ export const AUDIT = {
     tone: "danger",
     label: () => "Blocked a reused session token and signed out other sessions",
   },
-  "document.uploaded": { icon: FileArrowUp, label: (m) => `Uploaded ${m.filename ?? "a document"}` },
+  "document.uploaded": {
+    icon: FileArrowUp,
+    label: (m) => `Uploaded ${m.filename ?? "a document"}`,
+  },
   "document.deleted": { icon: Trash, label: (m) => `Deleted ${m.title ?? "a document"}` },
   "document.reprocessed": { icon: ArrowClockwise, label: () => "Reprocessed a document" },
   "extraction.confirmed": {
     icon: CheckCircle,
-    label: (m) => `Confirmed ${plural(m.medications ?? 0, "medication")} and ${plural(m.care_actions ?? 0, "to-do")}`,
+    label: (m) =>
+      `Confirmed ${plural(m.medications ?? 0, "medication")} and ${plural(m.care_actions ?? 0, "to-do")}`,
   },
   "extraction.discarded": { icon: XCircle, label: () => "Discarded an extracted draft" },
   "integration.connected": {
@@ -59,12 +63,22 @@ export const AUDIT = {
   "integration.disconnected": { icon: LinkBreak, label: () => "Disconnected Google" },
   "integration.synced": {
     icon: CalendarCheck,
-    label: (m) => `Synced ${plural(m.events ?? 0, "event")} and ${plural(m.tasks ?? 0, "task")} to Google`,
+    label: (m) =>
+      `Synced ${plural(m.events ?? 0, "event")} and ${plural(m.tasks ?? 0, "task")} to Google`,
   },
-  "integration.unsynced": { icon: CalendarX, label: (m) => `Removed ${plural(m.removed ?? 0, "item")} from Google` },
-  "share.created": { icon: LinkSimple, label: (m) => `Created a share link${m.label ? `: ${m.label}` : ""}` },
+  "integration.unsynced": {
+    icon: CalendarX,
+    label: (m) => `Removed ${plural(m.removed ?? 0, "item")} from Google`,
+  },
+  "share.created": {
+    icon: LinkSimple,
+    label: (m) => `Created a share link${m.label ? `: ${m.label}` : ""}`,
+  },
   "share.revoked": { icon: LinkBreak, label: () => "Revoked a share link" },
-  "share.viewed": { icon: Eye, label: (m) => `A share link was viewed${m.label ? `: ${m.label}` : ""}` },
+  "share.viewed": {
+    icon: Eye,
+    label: (m) => `A share link was viewed${m.label ? `: ${m.label}` : ""}`,
+  },
 };
 
 export function describeAudit(entry) {

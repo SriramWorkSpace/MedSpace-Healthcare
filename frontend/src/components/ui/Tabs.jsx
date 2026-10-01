@@ -33,7 +33,9 @@ export function SegmentedTabs({ items, value, onChange, label, className }) {
               <motion.span
                 layoutId={`seg-${id}`}
                 className="absolute inset-0 -z-10 rounded-full bg-surface shadow-xs ring-1 ring-line"
-                transition={reduce ? { duration: 0 } : { type: "spring", bounce: 0.15, duration: 0.4 }}
+                transition={
+                  reduce ? { duration: 0 } : { type: "spring", bounce: 0.15, duration: 0.4 }
+                }
               />
             )}
             {item.label}

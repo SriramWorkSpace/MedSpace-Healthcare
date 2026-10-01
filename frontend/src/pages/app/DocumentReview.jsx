@@ -125,7 +125,11 @@ export default function DocumentReview() {
   let body;
   if (success) {
     body = (
-      <ConfirmSuccess prescriptionId={success.prescriptionId} medCount={success.meds} taskCount={success.tasks} />
+      <ConfirmSuccess
+        prescriptionId={success.prescriptionId}
+        medCount={success.meds}
+        taskCount={success.tasks}
+      />
     );
   } else if (isProcessing(d.status)) {
     body = <ProcessingState status={d.status} />;
@@ -213,7 +217,9 @@ export default function DocumentReview() {
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="truncate text-2xl font-semibold tracking-tight sm:text-3xl">{d.title}</h1>
+            <h1 className="truncate text-2xl font-semibold tracking-tight sm:text-3xl">
+              {d.title}
+            </h1>
             <Chip tone={meta.tone} live={meta.live}>
               {meta.label}
             </Chip>

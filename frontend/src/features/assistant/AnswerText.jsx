@@ -62,5 +62,10 @@ export function AnswerText({ text, onCite, streaming }) {
 }
 
 function Caret() {
-  return <span className="ml-0.5 inline-block h-4 w-[2px] translate-y-[3px] animate-pulse bg-accent" aria-hidden />;
+  return (
+    <span
+      className="ml-0.5 inline-block h-4 w-[2px] translate-y-[3px] animate-pulse bg-accent"
+      aria-hidden
+    />
+  );
 }

@@ -105,7 +105,10 @@ export default function Dashboard() {
             <Panel
               title="Today's doses"
               action={
-                <Link to="/app/medications" className="text-sm font-medium text-accent hover:underline">
+                <Link
+                  to="/app/medications"
+                  className="text-sm font-medium text-accent hover:underline"
+                >
                   All medications
                 </Link>
               }
@@ -126,10 +129,30 @@ export default function Dashboard() {
 
           <div className="grid gap-4">
             <motion.div {...stagger(2)} className="grid grid-cols-2 gap-3">
-              <StatTile label="Active medications" value={data.stats.active_medications} to="/app/medications" icon={Pill} />
-              <StatTile label="Open to-dos" value={data.stats.open_tasks} to="/app/timeline" icon={CheckSquare} />
-              <StatTile label="Prescriptions" value={data.stats.prescriptions} to="/app/timeline" icon={CalendarBlank} />
-              <StatTile label="Documents" value={data.stats.documents} to="/app/documents" icon={FileText} />
+              <StatTile
+                label="Active medications"
+                value={data.stats.active_medications}
+                to="/app/medications"
+                icon={Pill}
+              />
+              <StatTile
+                label="Open to-dos"
+                value={data.stats.open_tasks}
+                to="/app/timeline"
+                icon={CheckSquare}
+              />
+              <StatTile
+                label="Prescriptions"
+                value={data.stats.prescriptions}
+                to="/app/timeline"
+                icon={CalendarBlank}
+              />
+              <StatTile
+                label="Documents"
+                value={data.stats.documents}
+                to="/app/documents"
+                icon={FileText}
+              />
             </motion.div>
             <motion.div {...stagger(3)}>
               <Panel title="Coming up">

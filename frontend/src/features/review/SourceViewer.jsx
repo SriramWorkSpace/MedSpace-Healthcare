@@ -105,7 +105,9 @@ export function SourceViewer({ doc, page, onPageChange, highlight }) {
               aria-current={n === page ? "page" : undefined}
               className={cn(
                 "tabular grid h-8 min-w-8 place-items-center rounded-lg px-2 text-xs font-medium transition-colors",
-                n === page ? "bg-accent text-accent-ink" : "bg-surface text-ink-2 hover:bg-surface-3",
+                n === page
+                  ? "bg-accent text-accent-ink"
+                  : "bg-surface text-ink-2 hover:bg-surface-3",
               )}
             >
               {n}

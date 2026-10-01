@@ -2,7 +2,8 @@ import { z } from "zod";
 
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 const blank = (v) => (v === "" || v === undefined ? null : v);
-const num = (v) => (v === "" || v === null || v === undefined || Number.isNaN(Number(v)) ? null : Number(v));
+const num = (v) =>
+  v === "" || v === null || v === undefined || Number.isNaN(Number(v)) ? null : Number(v);
 
 export const CARE_KINDS = [
   { value: "follow_up", label: "Follow-up visit" },
@@ -152,7 +153,11 @@ export function formToConfirm(v) {
       frequency_raw: blank(m.frequency_raw),
       schedule: {
         times: m.as_needed ? [] : [...new Set(m.times)].sort(),
-        period: m.as_needed ? "as_needed" : m.period === "unknown" || m.period === "as_needed" ? "daily" : m.period,
+        period: m.as_needed
+          ? "as_needed"
+          : m.period === "unknown" || m.period === "as_needed"
+            ? "daily"
+            : m.period,
         as_needed: m.as_needed,
         interval_hours: num(m.interval_hours),
         label: scheduleLabel(m),
@@ -179,5 +184,8 @@ export function scheduleLabel(m) {
   if (m.period === "weekly") return "Once a week";
   if (m.period === "alternate_days") return "Every other day";
   if (m.period === "interval" && m.interval_hours) return `Every ${m.interval_hours} hours`;
-  return ["No doses set", "Once daily", "Twice daily", "Three times daily", "Four times daily"][n] ?? `${n} times daily`;
+  return (
+    ["No doses set", "Once daily", "Twice daily", "Three times daily", "Four times daily"][n] ??
+    `${n} times daily`
+  );
 }

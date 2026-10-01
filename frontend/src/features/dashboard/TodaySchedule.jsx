@@ -48,11 +48,15 @@ function nowHHMM() {
 export function TodaySchedule({ doses, dateKey }) {
   const [taken, toggle] = useTaken(dateKey);
   const [now] = useState(nowHHMM);
-  const nextIndex = doses.findIndex((d) => d.time >= now && !taken.has(`${d.medication_id}@${d.time}`));
+  const nextIndex = doses.findIndex(
+    (d) => d.time >= now && !taken.has(`${d.medication_id}@${d.time}`),
+  );
 
   const groups = useMemo(() => {
     const out = SLOTS.map((s) => ({ ...s, items: [] }));
-    doses.forEach((d, i) => out.find((g) => g.key === slotFor(d.time)).items.push({ ...d, index: i }));
+    doses.forEach((d, i) =>
+      out.find((g) => g.key === slotFor(d.time)).items.push({ ...d, index: i }),
+    );
     return out.filter((g) => g.items.length);
   }, [doses]);
 
@@ -62,8 +66,8 @@ export function TodaySchedule({ doses, dateKey }) {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <p className="text-sm text-ink-2">
-          <span className="tabular font-semibold text-ink">{doneCount}</span> of {doses.length} doses
-          ticked off
+          <span className="tabular font-semibold text-ink">{doneCount}</span> of {doses.length}{" "}
+          doses ticked off
         </p>
         <div className="h-1.5 w-28 overflow-hidden rounded-full bg-surface-3" aria-hidden>
           <motion.div
@@ -107,17 +111,26 @@ export function TodaySchedule({ doses, dateKey }) {
                             isTaken && "text-ink-3 line-through",
                           )}
                         >
-                          {d.name} {d.strength && <span className="font-normal text-ink-3">{d.strength}</span>}
+                          {d.name}{" "}
+                          {d.strength && (
+                            <span className="font-normal text-ink-3">{d.strength}</span>
+                          )}
                         </span>
                         {d.instructions && (
-                          <span className="block truncate text-xs text-ink-3">{d.instructions}</span>
+                          <span className="block truncate text-xs text-ink-3">
+                            {d.instructions}
+                          </span>
                         )}
                       </span>
-                      {isNext && !isTaken && <span className="chip chip--accent shrink-0">Next</span>}
+                      {isNext && !isTaken && (
+                        <span className="chip chip--accent shrink-0">Next</span>
+                      )}
                       <span
                         className={cn(
                           "grid size-7 shrink-0 place-items-center rounded-full border-2 transition-colors duration-150",
-                          isTaken ? "border-accent bg-accent text-accent-ink" : "border-line-strong text-transparent group-hover:border-ink-3",
+                          isTaken
+                            ? "border-accent bg-accent text-accent-ink"
+                            : "border-line-strong text-transparent group-hover:border-ink-3",
                         )}
                         aria-hidden
                       >

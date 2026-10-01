@@ -44,7 +44,10 @@ function ItemList({ items, kind }) {
   return (
     <ul className="grid max-h-44 gap-1 overflow-y-auto pr-1">
       {items.map((it, i) => (
-        <li key={i} className="flex items-center justify-between gap-3 rounded-lg bg-surface-2 px-3 py-2 text-[13px]">
+        <li
+          key={i}
+          className="flex items-center justify-between gap-3 rounded-lg bg-surface-2 px-3 py-2 text-[13px]"
+        >
           <span className="min-w-0">
             <span className="block truncate font-medium">{it.summary}</span>
             <span className="block truncate text-xs text-ink-3">
@@ -104,7 +107,8 @@ export function SyncDialog({ open, onClose, prescriptionId }) {
                 loading={unsync.isPending}
                 onClick={() =>
                   unsync.mutate(prescriptionId, {
-                    onSuccess: (r) => toast(`Removed ${r.removed} item${r.removed === 1 ? "" : "s"} from Google`),
+                    onSuccess: (r) =>
+                      toast(`Removed ${r.removed} item${r.removed === 1 ? "" : "s"} from Google`),
                   })
                 }
               >
@@ -131,7 +135,9 @@ export function SyncDialog({ open, onClose, prescriptionId }) {
           </p>
           <Button onClick={connectGoogle}>Connect Google</Button>
           {status.data?.mode === "simulation" && (
-            <p className="text-xs text-ink-3">This server runs a Google simulation, so nothing leaves MedSpace.</p>
+            <p className="text-xs text-ink-3">
+              This server runs a Google simulation, so nothing leaves MedSpace.
+            </p>
           )}
         </div>
       ) : preview.isPending ? (
@@ -143,7 +149,8 @@ export function SyncDialog({ open, onClose, prescriptionId }) {
         <div className="grid gap-4">
           {simulated && (
             <p className="flex items-center gap-2 rounded-[var(--radius-control)] bg-surface-2 px-3 py-2 text-xs text-ink-2">
-              <Info size={14} /> Simulation mode: syncing is fully functional but stays inside MedSpace.
+              <Info size={14} /> Simulation mode: syncing is fully functional but stays inside
+              MedSpace.
             </p>
           )}
           <Toggle

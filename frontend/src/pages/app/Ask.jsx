@@ -166,7 +166,9 @@ function ThreadList({ activeId, onSelect, onNew, onDelete }) {
                   onClick={() => onSelect(t.id)}
                   className={cn(
                     "w-full rounded-[var(--radius-control)] px-3 py-2.5 pr-9 text-left transition-colors",
-                    t.id === activeId ? "bg-surface shadow-xs ring-1 ring-line" : "hover:bg-surface-2",
+                    t.id === activeId
+                      ? "bg-surface shadow-xs ring-1 ring-line"
+                      : "hover:bg-surface-2",
                   )}
                 >
                   <span className="block truncate text-sm font-medium">{t.title}</span>
@@ -213,7 +215,8 @@ export default function Ask() {
   }, [messages.length, pending?.answer, pending?.question]);
 
   const openSource = (s) => {
-    if (s.document_id) navigate(`/app/documents/${s.document_id}${s.page_no ? `?page=${s.page_no}` : ""}`);
+    if (s.document_id)
+      navigate(`/app/documents/${s.document_id}${s.page_no ? `?page=${s.page_no}` : ""}`);
   };
 
   async function send(text) {
@@ -286,7 +289,12 @@ export default function Ask() {
               <ShieldCheck size={14} weight="bold" /> Sourced from your records. Not medical advice.
             </p>
           </div>
-          <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setShowThreads((v) => !v)}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="lg:hidden"
+            onClick={() => setShowThreads((v) => !v)}
+          >
             <List size={15} /> Chats
           </Button>
         </div>
@@ -318,7 +326,12 @@ export default function Ask() {
                 m.role === "user" ? (
                   <UserBubble key={m.id} text={m.content} />
                 ) : (
-                  <AssistantBubble key={m.id} text={m.content} citations={m.citations} onOpen={openSource} />
+                  <AssistantBubble
+                    key={m.id}
+                    text={m.content}
+                    citations={m.citations}
+                    onOpen={openSource}
+                  />
                 ),
               )}
               {pending && (
@@ -372,7 +385,13 @@ export default function Ask() {
               className="max-h-40 min-h-[44px] flex-1 resize-none bg-transparent px-3 py-2.5 text-[15px] outline-none placeholder:text-ink-3 [field-sizing:content]"
             />
             {busy ? (
-              <Button type="button" variant="secondary" icon aria-label="Stop answering" onClick={() => abortRef.current?.abort()}>
+              <Button
+                type="button"
+                variant="secondary"
+                icon
+                aria-label="Stop answering"
+                onClick={() => abortRef.current?.abort()}
+              >
                 <Stop size={16} weight="fill" />
               </Button>
             ) : (

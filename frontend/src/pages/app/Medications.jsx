@@ -2,7 +2,16 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { toast } from "sonner";
-import { ArrowSquareOut, Clock, PauseCircle, PencilSimple, Pill, PlayCircle, Plus, X } from "@phosphor-icons/react";
+import {
+  ArrowSquareOut,
+  Clock,
+  PauseCircle,
+  PencilSimple,
+  Pill,
+  PlayCircle,
+  Plus,
+  X,
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { Dialog } from "@/components/ui/Dialog";
@@ -105,7 +114,8 @@ function CourseProgress({ med }) {
     <div className="mt-4">
       <div className="mb-1.5 flex justify-between text-xs text-ink-3">
         <span>
-          Day <span className="tabular font-semibold text-ink">{med.day_of_course}</span> of {med.duration_days}
+          Day <span className="tabular font-semibold text-ink">{med.day_of_course}</span> of{" "}
+          {med.duration_days}
         </span>
         <span>Ends {formatDate(med.end_date, "MMM d")}</span>
       </div>
@@ -140,7 +150,8 @@ function MedicationCard({ med, onEdit, index }) {
           </span>
           <div className="min-w-0">
             <p className="truncate font-semibold">
-              {med.name} {med.strength && <span className="font-normal text-ink-3">{med.strength}</span>}
+              {med.name}{" "}
+              {med.strength && <span className="font-normal text-ink-3">{med.strength}</span>}
             </p>
             <p className="truncate text-xs text-ink-3">
               {[med.form, med.prescriber_name].filter(Boolean).join(" · ") || "Prescription"}
@@ -154,7 +165,10 @@ function MedicationCard({ med, onEdit, index }) {
         <div className="mt-4 flex flex-wrap items-center gap-1.5">
           <Clock size={14} className="text-ink-3" />
           {med.schedule.times.map((t) => (
-            <span key={t} className="tabular rounded-md bg-surface-2 px-2 py-0.5 text-xs font-medium">
+            <span
+              key={t}
+              className="tabular rounded-md bg-surface-2 px-2 py-0.5 text-xs font-medium"
+            >
               {formatClock(t)}
             </span>
           ))}
@@ -183,7 +197,9 @@ function MedicationCard({ med, onEdit, index }) {
             onClick={() =>
               update.mutate(
                 { id: med.id, stopped: !stopped },
-                { onSuccess: () => toast(stopped ? "Marked as active again" : "Marked as stopped") },
+                {
+                  onSuccess: () => toast(stopped ? "Marked as active again" : "Marked as stopped"),
+                },
               )
             }
           >
@@ -241,7 +257,13 @@ export default function Medications() {
         />
       ) : (
         <>
-          <SegmentedTabs label="Medication status" items={tabs} value={tab} onChange={setTab} className="mb-5" />
+          <SegmentedTabs
+            label="Medication status"
+            items={tabs}
+            value={tab}
+            onChange={setTab}
+            className="mb-5"
+          />
           {visible.length === 0 ? (
             <p className="rounded-card border border-line bg-surface px-5 py-10 text-center text-sm text-ink-2">
               Nothing {tab} right now.
@@ -257,7 +279,9 @@ export default function Medications() {
           )}
         </>
       )}
-      {editing && <EditTimesDialog key={editing.id} med={editing} onClose={() => setEditing(null)} />}
+      {editing && (
+        <EditTimesDialog key={editing.id} med={editing} onClose={() => setEditing(null)} />
+      )}
     </>
   );
 }

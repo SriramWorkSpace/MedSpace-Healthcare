@@ -61,14 +61,21 @@ function Section({ id, title, description, children }) {
 function ProfileForm() {
   const { user } = useAuth();
   const zones = useMemo(() => {
+    let list = [];
     try {
-      return Intl.supportedValuesOf("timeZone");
+      list = Intl.supportedValuesOf("timeZone");
     } catch {
-      return [user.timezone];
+      /* older browsers */
     }
+    // Intl omits "UTC"; always keep the saved zone selectable.
+    return [...new Set(["UTC", user.timezone, ...list])];
   }, [user.timezone]);
   const form = useForm({
-    defaultValues: { display_name: user.display_name, timezone: user.timezone, dose_times: user.dose_times },
+    defaultValues: {
+      display_name: user.display_name,
+      timezone: user.timezone,
+      dose_times: user.dose_times,
+    },
   });
   const save = useMutation({
     mutationFn: (body) => api.patch("/api/me", body),
@@ -136,7 +143,13 @@ function GoogleCard() {
         <div>
           <p className="flex flex-wrap items-center gap-2 font-semibold">
             Google Calendar &amp; Tasks
-            {s.connected ? <Chip tone="accent">Connected</Chip> : s.status === "revoked" ? <Chip tone="danger">Reconnect needed</Chip> : <Chip>Not connected</Chip>}
+            {s.connected ? (
+              <Chip tone="accent">Connected</Chip>
+            ) : s.status === "revoked" ? (
+              <Chip tone="danger">Reconnect needed</Chip>
+            ) : (
+              <Chip>Not connected</Chip>
+            )}
             {s.mode === "simulation" && <Chip>Simulation</Chip>}
           </p>
           <p className="mt-1 text-sm text-ink-2">
@@ -155,7 +168,12 @@ function GoogleCard() {
               loading={pull.isPending}
               onClick={() =>
                 pull.mutate(undefined, {
-                  onSuccess: (r) => toast(r.updated ? `Marked ${r.updated} to-do${r.updated === 1 ? "" : "s"} done from Google Tasks` : "Everything's already up to date"),
+                  onSuccess: (r) =>
+                    toast(
+                      r.updated
+                        ? `Marked ${r.updated} to-do${r.updated === 1 ? "" : "s"} done from Google Tasks`
+                        : "Everything's already up to date",
+                    ),
                 })
               }
             >
@@ -197,7 +215,8 @@ function GoogleCard() {
         }
       >
         <p className="text-sm text-ink-2">
-          You can keep the events and tasks already in Google, or have MedSpace remove the ones it created.
+          You can keep the events and tasks already in Google, or have MedSpace remove the ones it
+          created.
         </p>
       </Dialog>
     </div>
@@ -239,7 +258,11 @@ function ActivityLog() {
                     .join(" · ")}
                 </span>
               </span>
-              <time className="shrink-0 text-xs text-ink-3" dateTime={e.created_at} title={formatDate(e.created_at, "PPpp")}>
+              <time
+                className="shrink-0 text-xs text-ink-3"
+                dateTime={e.created_at}
+                title={formatDate(e.created_at, "PPpp")}
+              >
                 {timeAgo(e.created_at)}
               </time>
             </li>
@@ -248,7 +271,12 @@ function ActivityLog() {
       </ul>
       {hasNextPage && (
         <div className="border-t border-line p-3 text-center">
-          <Button variant="ghost" size="sm" loading={isFetchingNextPage} onClick={() => fetchNextPage()}>
+          <Button
+            variant="ghost"
+            size="sm"
+            loading={isFetchingNextPage}
+            onClick={() => fetchNextPage()}
+          >
             Show older activity
           </Button>
         </div>
@@ -270,7 +298,9 @@ function EggTracker() {
     <div className="card card--flat p-5">
       <p className="text-sm text-ink-2">
         <span className="tabular font-semibold text-ink">{found.length}</span> of {total} found.{" "}
-        {found.length === total ? "Full marks. The doctor will see you never." : "Laughter is the best medicine."}
+        {found.length === total
+          ? "Full marks. The doctor will see you never."
+          : "Laughter is the best medicine."}
       </p>
       <ul className="mt-4 grid gap-2 sm:grid-cols-2">
         {Object.keys(EGGS).map((id) => {
@@ -339,7 +369,11 @@ export default function Settings() {
     const result = params.get("google");
     if (!result) return;
     const messages = {
-      connected: ["success", "Google connected", "You can now add prescriptions to Calendar and Tasks."],
+      connected: [
+        "success",
+        "Google connected",
+        "You can now add prescriptions to Calendar and Tasks.",
+      ],
       denied: ["error", "Google wasn't connected", "Permission was declined."],
       expired: ["error", "That took a little too long", "Please try connecting again."],
       error: ["error", "Couldn't connect Google", "Please try again in a moment."],
@@ -352,7 +386,10 @@ export default function Settings() {
 
   return (
     <>
-      <PageHeader title="Settings" description="Your profile, connections and a record of everything that happened." />
+      <PageHeader
+        title="Settings"
+        description="Your profile, connections and a record of everything that happened."
+      />
       <div className="grid gap-10 lg:grid-cols-[200px_minmax(0,1fr)]">
         <nav aria-label="Settings sections" className="hidden lg:block">
           <ul className="sticky top-[calc(var(--nav-h)+24px)] grid gap-0.5">
@@ -372,10 +409,18 @@ export default function Settings() {
           <Section id="profile" title="Profile">
             <ProfileForm />
           </Section>
-          <Section id="integrations" title="Integrations" description="Optional. Only confirmed records are ever synced.">
+          <Section
+            id="integrations"
+            title="Integrations"
+            description="Optional. Only confirmed records are ever synced."
+          >
             <GoogleCard />
           </Section>
-          <Section id="activity" title="Activity" description="Sign-ins, uploads, confirmations, syncs and share-link views.">
+          <Section
+            id="activity"
+            title="Activity"
+            description="Sign-ins, uploads, confirmations, syncs and share-link views."
+          >
             <ActivityLog />
           </Section>
           <Section id="eggs" title="Easter eggs" description="Some things are just for fun.">

@@ -7,7 +7,10 @@ export const googleKeys = {
 };
 
 export function useGoogleStatus() {
-  return useQuery({ queryKey: googleKeys.status, queryFn: () => api.get("/api/integrations/google/status") });
+  return useQuery({
+    queryKey: googleKeys.status,
+    queryFn: () => api.get("/api/integrations/google/status"),
+  });
 }
 
 export function useGooglePreview(prescriptionId, { enabled = true } = {}) {
@@ -50,4 +53,5 @@ export const useDisconnectGoogle = () =>
     api.delete(`/api/integrations/google?remove_items=${removeItems ? "true" : "false"}`),
   );
 
-export const usePullTasks = () => useGoogleMutation(() => api.post("/api/integrations/google/pull"));
+export const usePullTasks = () =>
+  useGoogleMutation(() => api.post("/api/integrations/google/pull"));

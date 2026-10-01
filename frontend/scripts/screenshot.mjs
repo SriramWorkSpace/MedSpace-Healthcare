@@ -90,6 +90,56 @@ async function askTour(theme = "light") {
   await page.screenshot({ path: `${out}/ask-answer.png` });
   await ctx.close();
 }
+async function shareTour(theme = "light") {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: theme });
+  const page = await ctx.newPage();
+  page.on("pageerror", (e) => console.log(`[share] pageerror:`, e.message));
+  await page.goto(base + "/login");
+  await page.getByRole("button", { name: "Try the demo" }).click();
+  await page.waitForURL("**/app");
+  // Google sync from a report
+  await page.goto(base + "/app/timeline");
+  await page.waitForTimeout(800);
+  await page.locator('a[href^="/app/prescriptions/"]').first().click();
+  await page.waitForTimeout(1000);
+  const reportUrl = page.url();
+  await page.getByRole("button", { name: "Add to Google" }).click();
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: `${out}/sync-connect.png` });
+  await page.getByRole("button", { name: "Connect Google" }).click();
+  await page.waitForURL("**/app/settings**");
+  await page.waitForTimeout(1500);
+  await page.screenshot({ path: `${out}/settings.png` });
+  await page.goto(reportUrl);
+  await page.waitForTimeout(1200);
+  await page.getByRole("button", { name: "Add to Google" }).click();
+  await page.waitForTimeout(1200);
+  await page.screenshot({ path: `${out}/sync-preview.png` });
+  await page.getByRole("button", { name: "Sync to Google" }).click();
+  await page.waitForTimeout(1200);
+  await page.keyboard.press("Escape");
+  // Share
+  await page.getByRole("link", { name: "Share" }).click();
+  await page.waitForTimeout(1200);
+  await page.screenshot({ path: `${out}/share-create.png` });
+  await page.getByRole("button", { name: "Create link" }).click();
+  await page.waitForTimeout(1200);
+  await page.screenshot({ path: `${out}/share-created.png` });
+  const url = await page.locator('input[aria-label="Share link"]').inputValue();
+  await page.getByRole("button", { name: "Done" }).click();
+  await page.waitForTimeout(800);
+  await page.screenshot({ path: `${out}/sharing.png` });
+  const anon = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: theme });
+  const p2 = await anon.newPage();
+  await p2.goto(url.replace("http://localhost:5173", base));
+  await p2.waitForTimeout(1800);
+  await p2.screenshot({ path: `${out}/shared-view.png`, fullPage: true });
+  await anon.close();
+  await page.goto(base + "/app/settings#activity");
+  await page.waitForTimeout(1500);
+  await page.screenshot({ path: `${out}/settings-activity.png` });
+  await ctx.close();
+}
 const which = process.argv.slice(3);
 const all = {
   "landing-light": () => shot("landing-light", "/", { wait: 6500 }),
@@ -102,6 +152,7 @@ const all = {
   "review": () => flow("review"),
   "app": () => appTour(),
   "ask": () => askTour(),
+  "share": () => shareTour(),
   "app-dark": () => appTour("dark"),
   "notfound": () => shot("notfound", "/nope", { theme: "dark", wait: 2500 }),
 };

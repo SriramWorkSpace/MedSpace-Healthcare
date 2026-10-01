@@ -88,20 +88,20 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 
 ## Phase 6: Google Calendar + Tasks
 
-- [ ] OAuth connect/callback/disconnect with state + PKCE, encrypted token storage, refresh handling
-- [ ] Calendar: recurring dose events, appointments, follow-ups; idempotent upsert via `sync_links`
-- [ ] Tasks: "MedSpace" task list, care actions as tasks, completion sync back
-- [ ] Unsync/edit propagation; graceful handling of revoked consent
-- [ ] Frontend: integrations settings card, per-prescription "Sync" sheet with preview of events/tasks
-- [ ] `FakeGoogleClient` + tests
+- [x] OAuth connect/callback/disconnect with state + PKCE, encrypted token storage, refresh handling
+- [x] Calendar: recurring dose events, appointments, follow-ups; idempotent upsert via `sync_links`
+- [x] Tasks: "MedSpace" task list, care actions as tasks, completion sync back
+- [x] Unsync/edit propagation; graceful handling of revoked consent
+- [x] Frontend: integrations settings card, per-prescription "Sync" sheet with preview of events/tasks
+- [x] `FakeGoogleClient` + tests
 
 ## Phase 7: Secure sharing + audit UI
 
-- [ ] `sharing`: create (scoped items, expiry, max views), list, revoke; hashed tokens
-- [ ] Public share endpoints + public share page `/s/:token` (read-only report + documents)
-- [ ] Audit log viewer in settings (filterable)
-- [ ] Expiry sweep job
-- [ ] Tests: expired/revoked/over-limit links, scope enforcement, audit rows written
+- [x] `sharing`: create (scoped items, expiry, max views), list, revoke; hashed tokens
+- [x] Public share endpoints + public share page `/s/:token` (read-only report + documents)
+- [x] Audit log viewer in settings (filterable)
+- [x] Expiry sweep job
+- [x] Tests: expired/revoked/over-limit links, scope enforcement, audit rows written
 
 ## Phase 8: Hardening + launch
 
@@ -115,6 +115,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 ---
 
 ## Change log
+
+- **2026-10-02**: Phases 6-7 shipped. Google runs in simulation mode by default (`GOOGLE_PROVIDER=fake`) so every demo visitor can exercise sync end to end. Share tokens are shown exactly once; the list shows only a 6-character hint. Added `tzdata` so `zoneinfo` works on Windows hosts.
 
 - **2026-10-02**: Phase 5 shipped. Offline mode answers extractively from confirmed records and keyword hits (hash vectors never count as evidence on their own). Generic domain words are excluded from keyword scoring.
 

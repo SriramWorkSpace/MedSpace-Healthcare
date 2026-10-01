@@ -18,7 +18,8 @@ export function useDocuments(filters) {
       const qs = new URLSearchParams(Object.entries(filters ?? {}).filter(([, v]) => v));
       return api.get(`/api/documents${qs.size ? `?${qs}` : ""}`);
     },
-    refetchInterval: (q) => (q.state.data?.items?.some((d) => isProcessing(d.status)) ? 1500 : false),
+    refetchInterval: (q) =>
+      q.state.data?.items?.some((d) => isProcessing(d.status)) ? 1500 : false,
   });
 }
 
@@ -72,7 +73,8 @@ export function useUpdateDocument() {
 export function useConfirmExtraction() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ extractionId, body }) => api.post(`/api/extractions/${extractionId}/confirm`, body),
+    mutationFn: ({ extractionId, body }) =>
+      api.post(`/api/extractions/${extractionId}/confirm`, body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: docKeys.all });
       qc.invalidateQueries({ queryKey: ["records"] });
@@ -118,7 +120,8 @@ export function uploadDocument(file, { onProgress, kind } = {}) {
       if (xhr.status >= 200 && xhr.status < 300) resolve(body);
       else reject(new ApiError(xhr.status, body ?? { detail: "Upload failed." }));
     };
-    xhr.onerror = () => reject(new ApiError(0, { detail: "Network error. Check your connection." }));
+    xhr.onerror = () =>
+      reject(new ApiError(0, { detail: "Network error. Check your connection." }));
     xhr.onabort = () => reject(new ApiError(0, { detail: "Upload cancelled.", code: "aborted" }));
     xhr.send(form);
   });

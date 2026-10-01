@@ -68,7 +68,10 @@ function EventRow({ e }) {
       className="relative"
     >
       {to ? (
-        <Link to={to} className="block rounded-[var(--radius-control)] px-3 py-2.5 transition-colors hover:bg-surface">
+        <Link
+          to={to}
+          className="block rounded-[var(--radius-control)] px-3 py-2.5 transition-colors hover:bg-surface"
+        >
           {content}
         </Link>
       ) : (
@@ -179,7 +182,11 @@ export default function Timeline() {
         <EmptyState
           icon={ClockCounterClockwise}
           title="Your timeline is empty"
-          description={active.size ? "Nothing matches these filters." : "Confirmed records appear here automatically."}
+          description={
+            active.size
+              ? "Nothing matches these filters."
+              : "Confirmed records appear here automatically."
+          }
           quip={EMPTY_QUIPS.timeline}
         />
       ) : (
@@ -189,7 +196,12 @@ export default function Timeline() {
             <Group key={key} title={format(parseISO(`${key}-01`), "MMMM yyyy")} events={events} />
           ))}
           {hasNextPage && (
-            <Button variant="secondary" className="w-fit" loading={isFetchingNextPage} onClick={() => fetchNextPage()}>
+            <Button
+              variant="secondary"
+              className="w-fit"
+              loading={isFetchingNextPage}
+              onClick={() => fetchNextPage()}
+            >
               Load earlier events
             </Button>
           )}

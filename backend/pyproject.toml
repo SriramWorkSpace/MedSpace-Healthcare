@@ -25,6 +25,7 @@ dependencies = [
   "pymupdf>=1.25",
   "groq>=0.13",
   "python-dateutil>=2.9",
+  "tzdata>=2024.2",  # IANA zones for zoneinfo on platforms without a system database
 ]
 
 [project.optional-dependencies]

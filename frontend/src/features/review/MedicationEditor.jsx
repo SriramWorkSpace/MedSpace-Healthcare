@@ -63,7 +63,14 @@ function ScheduleEditor({ control, index }) {
               aria-label="Add a dose time"
               className="input h-7 w-[112px] px-2 text-xs"
             />
-            <Button size="sm" variant="ghost" icon aria-label="Add dose time" onClick={add} className="!h-7 !w-7">
+            <Button
+              size="sm"
+              variant="ghost"
+              icon
+              aria-label="Add dose time"
+              onClick={add}
+              className="!h-7 !w-7"
+            >
               <Plus size={13} weight="bold" />
             </Button>
           </span>
@@ -131,13 +138,24 @@ export function MedicationEditor({ index, control, register, errors, onRemove, o
           <Input className={attn("name")} {...register(`medications.${index}.name`)} />
         </Field>
         <Field label="Strength" optional>
-          <Input className={attn("strength")} placeholder="500 mg" {...register(`medications.${index}.strength`)} />
+          <Input
+            className={attn("strength")}
+            placeholder="500 mg"
+            {...register(`medications.${index}.strength`)}
+          />
         </Field>
         <Field label="Form" optional>
           <Input placeholder="tablet, capsule, syrup" {...register(`medications.${index}.form`)} />
         </Field>
-        <Field label="Frequency as written" optional hint="Kept for reference. The schedule below is what we use.">
-          <Input className={cn("font-mono", attn("frequency_raw"))} {...register(`medications.${index}.frequency_raw`)} />
+        <Field
+          label="Frequency as written"
+          optional
+          hint="Kept for reference. The schedule below is what we use."
+        >
+          <Input
+            className={cn("font-mono", attn("frequency_raw"))}
+            {...register(`medications.${index}.frequency_raw`)}
+          />
         </Field>
         <div className="sm:col-span-2">
           <ScheduleEditor control={control} index={index} />
@@ -156,7 +174,10 @@ export function MedicationEditor({ index, control, register, errors, onRemove, o
           />
         </Field>
         <Field label="Instructions" optional className="sm:col-span-2">
-          <Input placeholder="after food, with water" {...register(`medications.${index}.instructions`)} />
+          <Input
+            placeholder="after food, with water"
+            {...register(`medications.${index}.instructions`)}
+          />
         </Field>
       </div>
     </motion.li>
