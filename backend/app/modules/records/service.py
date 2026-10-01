@@ -1,0 +1,273 @@
+"""Records: confirmed prescriptions, medications and care actions."""
+
+from __future__ import annotations
+
+import uuid
+from datetime import date, timedelta
+
+from sqlalchemy import delete, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.db import utcnow
+from app.core.errors import NotFound
+from app.modules.documents.models import Document
+from app.modules.extraction.schemas import ConfirmIn
+from app.modules.records.models import CareAction, Medication, Prescription
+from app.modules.records.schemas import (
+    CareActionOut,
+    CareActionUpdate,
+    MedicationOut,
+    MedicationUpdate,
+    PrescriptionOut,
+    PrescriptionSummary,
+)
+
+
+def medication_status(med: Medication, today: date | None = None) -> str:
+    today = today or date.today()
+    if med.stopped_at is not None:
+        return "stopped"
+    if med.start_date > today:
+        return "upcoming"
+    if med.end_date is not None and med.end_date < today:
+        return "completed"
+    return "active"
+
+
+def to_medication_out(
+    med: Medication,
+    *,
+    today: date | None = None,
+    document_id: uuid.UUID | None = None,
+    prescriber_name: str | None = None,
+) -> MedicationOut:
+    today = today or date.today()
+    out = MedicationOut.model_validate(med)
+    out.status = medication_status(med, today)
+    if out.status == "active" and med.duration_days:
+        out.day_of_course = (today - med.start_date).days + 1
+    out.document_id = document_id
+    out.prescriber_name = prescriber_name
+    return out
+
+
+async def replace_for_document(
+    session: AsyncSession,
+    *,
+    user_id: uuid.UUID,
+    document: Document,
+    extraction_id: uuid.UUID,
+    data: ConfirmIn,
+) -> Prescription:
+    """Create records from a confirmed review, replacing earlier confirmations of the document."""
+    await session.execute(
+        delete(Prescription).where(
+            Prescription.document_id == document.id, Prescription.user_id == user_id
+        )
+    )
+    p = data.prescriber
+    fu = data.follow_up
+    prescription = Prescription(
+        user_id=user_id,
+        document_id=document.id,
+        extraction_id=extraction_id,
+        prescriber_name=p.name if p else None,
+        prescriber_specialty=p.specialty if p else None,
+        clinic_name=p.clinic if p else None,
+        prescriber_contact=p.contact if p else None,
+        issued_on=data.issued_on,
+        follow_up_on=fu.date if fu else None,
+        follow_up_notes=fu.notes if fu else None,
+        summary=data.summary,
+        medications=[],
+        care_actions=[],
+    )
+    default_start = data.issued_on or date.today()
+    for m in data.medications:
+        start = m.start_date or default_start
+        schedule = m.schedule.model_copy()
+        if schedule.as_needed:
+            schedule.times = []
+        prescription.medications.append(
+            Medication(
+                user_id=user_id,
+                name=m.name.strip(),
+                strength=m.strength,
+                form=m.form,
+                dose=m.dose,
+                route=m.route,
+                frequency_raw=m.frequency_raw,
+                schedule=schedule.model_dump(),
+                as_needed=schedule.as_needed,
+                start_date=start,
+                end_date=start + timedelta(days=m.duration_days - 1) if m.duration_days else None,
+                duration_days=m.duration_days,
+                instructions=m.instructions,
+                source_page=m.source_page,
+            )
+        )
+    for a in data.care_actions:
+        prescription.care_actions.append(
+            CareAction(
+                user_id=user_id,
+                kind=a.kind,
+                title=a.title.strip(),
+                notes=a.notes,
+                due_on=a.due_on,
+                source_page=a.source_page,
+            )
+        )
+    session.add(prescription)
+    await session.flush()
+    return prescription
+
+
+def _summary(p: Prescription, title: str | None) -> PrescriptionSummary:
+    today = date.today()
+    out = PrescriptionSummary.model_validate(p)
+    out.document_title = title
+    out.medication_count = len(p.medications)
+    out.active_count = sum(medication_status(m, today) == "active" for m in p.medications)
+    return out
+
+
+async def list_prescriptions(
+    session: AsyncSession, user_id: uuid.UUID
+) -> list[PrescriptionSummary]:
+    rows = await session.execute(
+        select(Prescription, Document.title)
+        .join(Document, Document.id == Prescription.document_id)
+        .where(Prescription.user_id == user_id)
+        .order_by(Prescription.issued_on.desc().nulls_last(), Prescription.created_at.desc())
+    )
+    return [_summary(p, title) for p, title in rows.all()]
+
+
+async def get_prescription(
+    session: AsyncSession, user_id: uuid.UUID, prescription_id: uuid.UUID
+) -> PrescriptionOut:
+    row = (
+        await session.execute(
+            select(Prescription, Document.title)
+            .join(Document, Document.id == Prescription.document_id)
+            .where(Prescription.id == prescription_id, Prescription.user_id == user_id)
+        )
+    ).first()
+    if row is None:
+        raise NotFound("Prescription not found.")
+    p, title = row
+    base = _summary(p, title).model_dump()
+    return PrescriptionOut(
+        **base,
+        prescriber_contact=p.prescriber_contact,
+        follow_up_notes=p.follow_up_notes,
+        summary=p.summary,
+        medications=[
+            to_medication_out(m, document_id=p.document_id, prescriber_name=p.prescriber_name)
+            for m in p.medications
+        ],
+        care_actions=[CareActionOut.model_validate(a) for a in p.care_actions],
+    )
+
+
+async def get_prescription_for_document(
+    session: AsyncSession, user_id: uuid.UUID, document_id: uuid.UUID
+) -> uuid.UUID | None:
+    return await session.scalar(
+        select(Prescription.id).where(
+            Prescription.document_id == document_id, Prescription.user_id == user_id
+        )
+    )
+
+
+async def list_medications(
+    session: AsyncSession, user_id: uuid.UUID, *, status: str | None = None
+) -> list[MedicationOut]:
+    rows = await session.execute(
+        select(Medication, Prescription.document_id, Prescription.prescriber_name)
+        .join(Prescription, Prescription.id == Medication.prescription_id)
+        .where(Medication.user_id == user_id)
+        .order_by(Medication.start_date.desc(), Medication.name)
+    )
+    out = []
+    for med, document_id, prescriber in rows.all():
+        item = to_medication_out(med, document_id=document_id, prescriber_name=prescriber)
+        if status is None or item.status == status:
+            out.append(item)
+    return out
+
+
+async def get_medication(
+    session: AsyncSession, user_id: uuid.UUID, med_id: uuid.UUID
+) -> Medication:
+    med = await session.scalar(
+        select(Medication).where(Medication.id == med_id, Medication.user_id == user_id)
+    )
+    if med is None:
+        raise NotFound("Medication not found.")
+    return med
+
+
+async def update_medication(
+    session: AsyncSession, user_id: uuid.UUID, med_id: uuid.UUID, data: MedicationUpdate
+) -> Medication:
+    med = await get_medication(session, user_id, med_id)
+    if data.schedule is not None:
+        med.schedule = data.schedule.model_dump()
+        med.as_needed = data.schedule.as_needed
+    if data.instructions is not None:
+        med.instructions = data.instructions
+    if data.end_date is not None:
+        med.end_date = data.end_date
+    if data.stopped is not None:
+        med.stopped_at = utcnow() if data.stopped else None
+    await session.flush()
+    return med
+
+
+async def list_care_actions(
+    session: AsyncSession, user_id: uuid.UUID, *, open_only: bool = False
+) -> list[CareAction]:
+    stmt = select(CareAction).where(CareAction.user_id == user_id)
+    if open_only:
+        stmt = stmt.where(CareAction.completed_at.is_(None))
+    stmt = stmt.order_by(CareAction.completed_at.is_not(None), CareAction.due_on.asc().nulls_last())
+    return list((await session.scalars(stmt)).all())
+
+
+async def update_care_action(
+    session: AsyncSession, user_id: uuid.UUID, action_id: uuid.UUID, data: CareActionUpdate
+) -> CareAction:
+    action = await session.scalar(
+        select(CareAction).where(CareAction.id == action_id, CareAction.user_id == user_id)
+    )
+    if action is None:
+        raise NotFound("Task not found.")
+    if data.completed is not None:
+        action.completed_at = utcnow() if data.completed else None
+    if data.due_on is not None:
+        action.due_on = data.due_on
+    if data.title is not None:
+        action.title = data.title.strip()
+    await session.flush()
+    return action
+
+
+def doses_on(meds: list[Medication], day: date) -> list[dict]:
+    """Scheduled doses for a calendar day (as-needed meds excluded), sorted by time."""
+    out = []
+    for m in meds:
+        if m.as_needed or m.stopped_at is not None:
+            continue
+        if m.start_date > day or (m.end_date and m.end_date < day):
+            continue
+        period = (m.schedule or {}).get("period", "daily")
+        if period == "weekly" and (day - m.start_date).days % 7:
+            continue
+        if period == "alternate_days" and (day - m.start_date).days % 2:
+            continue
+        if period == "once" and day != m.start_date:
+            continue
+        for t in (m.schedule or {}).get("times", []):
+            out.append({"time": t, "medication": m})
+    return sorted(out, key=lambda d: d["time"])

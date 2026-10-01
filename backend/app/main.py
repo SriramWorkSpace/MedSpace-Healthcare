@@ -9,6 +9,7 @@ from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
+from app import jobs as _jobs  # noqa: F401  (register background jobs)
 from app import models as _models  # noqa: F401  (register all ORM models)
 from app.core.config import get_settings
 from app.core.db import engine
@@ -17,8 +18,11 @@ from app.core.logging import configure_logging
 from app.core.middleware import CSRFMiddleware, RequestLogMiddleware, SecurityHeadersMiddleware
 from app.modules.audit.router import router as audit_router
 from app.modules.demo.router import router as demo_router
+from app.modules.documents.router import router as documents_router
+from app.modules.extraction.router import router as extraction_router
 from app.modules.identity.router import profile_router
 from app.modules.identity.router import router as auth_router
+from app.modules.records.router import router as records_router
 
 
 @asynccontextmanager
@@ -58,6 +62,9 @@ def create_app() -> FastAPI:
     api.include_router(demo_router)
     api.include_router(profile_router)
     api.include_router(audit_router)
+    api.include_router(documents_router)
+    api.include_router(extraction_router)
+    api.include_router(records_router)
 
     @api.get("/health", tags=["ops"])
     async def health() -> dict[str, str]:
