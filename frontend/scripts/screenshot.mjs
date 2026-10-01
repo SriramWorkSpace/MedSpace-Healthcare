@@ -70,6 +70,26 @@ async function appTour(theme = "light") {
   await page.screenshot({ path: `${out}/${theme}-report.png`, fullPage: true });
   await ctx.close();
 }
+async function askTour(theme = "light") {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: theme });
+  const page = await ctx.newPage();
+  page.on("pageerror", (e) => console.log(`[ask] pageerror:`, e.message));
+  await page.goto(base + "/login");
+  await page.getByRole("button", { name: "Try the demo" }).click();
+  await page.waitForURL("**/app");
+  await page.goto(base + "/app/ask");
+  await page.waitForTimeout(1000);
+  await page.screenshot({ path: `${out}/ask-empty.png` });
+  await page.getByRole("button", { name: "How often do I take Amoxicillin?" }).click();
+  await page.waitForTimeout(350);
+  await page.screenshot({ path: `${out}/ask-streaming.png` });
+  await page.waitForTimeout(2500);
+  await page.locator("#ask-input").fill("What medications am I taking right now?");
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(3500);
+  await page.screenshot({ path: `${out}/ask-answer.png` });
+  await ctx.close();
+}
 const which = process.argv.slice(3);
 const all = {
   "landing-light": () => shot("landing-light", "/", { wait: 6500 }),
@@ -81,6 +101,7 @@ const all = {
   "dashboard": () => shot("dashboard", "/app", { demo: true }),
   "review": () => flow("review"),
   "app": () => appTour(),
+  "ask": () => askTour(),
   "app-dark": () => appTour("dark"),
   "notfound": () => shot("notfound", "/nope", { theme: "dark", wait: 2500 }),
 };

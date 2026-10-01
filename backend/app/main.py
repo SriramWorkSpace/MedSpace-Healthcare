@@ -16,6 +16,7 @@ from app.core.db import engine
 from app.core.errors import ServiceUnavailable, install_error_handlers
 from app.core.logging import configure_logging
 from app.core.middleware import CSRFMiddleware, RequestLogMiddleware, SecurityHeadersMiddleware
+from app.modules.assistant.router import router as assistant_router
 from app.modules.audit.router import router as audit_router
 from app.modules.demo.router import router as demo_router
 from app.modules.documents.router import router as documents_router
@@ -67,6 +68,7 @@ def create_app() -> FastAPI:
     api.include_router(extraction_router)
     api.include_router(records_router)
     api.include_router(timeline_router)
+    api.include_router(assistant_router)
 
     @api.get("/health", tags=["ops"])
     async def health() -> dict[str, str]:

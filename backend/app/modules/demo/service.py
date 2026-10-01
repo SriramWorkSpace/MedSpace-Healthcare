@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.core.db import utcnow
+from app.modules.assistant import service as assistant
 from app.modules.demo import samples
 from app.modules.documents import service as documents
 from app.modules.documents.models import DocumentStatus
@@ -88,6 +89,11 @@ async def seed(session: AsyncSession, user: User) -> None:
     await extraction.save_draft(session, doc, payload, method, model)
     documents.set_status(doc, DocumentStatus.NEEDS_REVIEW)
     await session.flush()
+
+    # Index everything for Ask MedSpace.
+    docs, _ = await documents.list_documents(session, user.id)
+    for d in docs:
+        await assistant.index_document(session, d.id)
 
 
 async def _page_texts(session: AsyncSession, doc_id) -> list[str]:

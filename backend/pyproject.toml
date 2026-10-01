@@ -57,6 +57,7 @@ ignore = [
   "S101",   # assert is fine in tests
   "B008",   # FastAPI Depends() in defaults is idiomatic
   "RUF012", # mutable class attrs are fine on pydantic/sqlalchemy models
+  "SIM905", # "a b c".split() reads better than a list literal for word lists
 ]
 
 [tool.ruff.lint.per-file-ignores]

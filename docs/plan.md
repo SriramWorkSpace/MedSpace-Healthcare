@@ -79,12 +79,12 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 
 ## Phase 5: Ask MedSpace (RAG)
 
-- [ ] `shared/embeddings`: fastembed + hash adapters
-- [ ] Chunking (page-aware, overlap) + embedding job after extraction
-- [ ] Hybrid retrieval: pgvector HNSW + tsvector GIN, RRF fusion, `user_id` scoping
-- [ ] Grounded prompt with numbered sources + guardrails; SSE streaming; citations persisted
-- [ ] Frontend chat: streaming tokens, citation chips that open the source page, suggested questions, thread history
-- [ ] Tests: retrieval isolation between users, refusal of diagnosis/dose-change requests, "not in your records" path
+- [x] `shared/embeddings`: fastembed + hash adapters
+- [x] Chunking (page-aware, overlap) + embedding job after extraction
+- [x] Hybrid retrieval: pgvector HNSW + tsvector GIN, RRF fusion, `user_id` scoping
+- [x] Grounded prompt with numbered sources + guardrails; SSE streaming; citations persisted
+- [x] Frontend chat: streaming tokens, citation chips that open the source page, suggested questions, thread history
+- [x] Tests: retrieval isolation between users, refusal of diagnosis/dose-change requests, "not in your records" path
 
 ## Phase 6: Google Calendar + Tasks
 
@@ -115,6 +115,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 ---
 
 ## Change log
+
+- **2026-10-02**: Phase 5 shipped. Offline mode answers extractively from confirmed records and keyword hits (hash vectors never count as evidence on their own). Generic domain words are excluded from keyword scoring.
 
 - **2026-10-02**: Phases 2-4 shipped. Page previews render server-side as PNG (works on mobile, no PDF viewer needed). Non-prescription documents confirm without a prescription record (ADR-015). Course-completion to-dos stay tasks but are not duplicated on the timeline. Initial graphify graph: 1,022 nodes, 86 communities.
 

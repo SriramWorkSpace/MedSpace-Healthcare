@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import {
   ArrowClockwise,
@@ -65,7 +65,8 @@ export default function DocumentReview() {
   const reprocess = useReprocessDocument();
   const del = useDeleteDocument();
 
-  const [page, setPage] = useState(1);
+  const [searchParams] = useSearchParams();
+  const [page, setPage] = useState(() => Number(searchParams.get("page")) || 1);
   const [highlight, setHighlight] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
