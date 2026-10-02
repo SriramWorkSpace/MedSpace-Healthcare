@@ -284,6 +284,14 @@
     }
   }
 
+  /* navlink compact: nine links share the bar with search and upload on small laptops. */
+  @media (min-width: 1024px) and (max-width: 1279.98px) {
+    .topnav .navlink {
+      padding-inline: 8px;
+      font-size: 13.5px;
+    }
+  }
+
   .searchpill {
     display: inline-flex;
     align-items: center;

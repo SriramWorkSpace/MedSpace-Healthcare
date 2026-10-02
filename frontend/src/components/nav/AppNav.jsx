@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from "react-router";
 import { motion, useReducedMotion } from "motion/react";
 import {
   ChatsCircle,
+  ClipboardText,
   ClockCounterClockwise,
   FileText,
   Flask,
@@ -34,6 +35,7 @@ const APP_LINKS = [
   { to: "/app/labs", label: "Labs", icon: Flask },
   { to: "/app/diet", label: "Diet", icon: ForkKnife },
   { to: "/app/timeline", label: "Timeline", icon: ClockCounterClockwise },
+  { to: "/app/visits", label: "Visits", icon: ClipboardText },
   { to: "/app/ask", label: "Ask", icon: ChatsCircle },
   { to: "/app/sharing", label: "Sharing", icon: ShareNetwork },
 ];

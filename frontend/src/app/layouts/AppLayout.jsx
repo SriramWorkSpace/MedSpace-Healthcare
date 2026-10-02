@@ -47,7 +47,7 @@ export default function AppLayout() {
       {user.is_demo && (
         <aside
           aria-label="Demo account"
-          className="border-b border-line bg-accent-soft/60 px-4 py-2 text-center text-[13px] text-accent-soft-ink"
+          className="no-print border-b border-line bg-accent-soft/60 px-4 py-2 text-center text-[13px] text-accent-soft-ink"
         >
           You're exploring a demo account with synthetic records. It resets in 24 hours.
         </aside>

@@ -112,6 +112,17 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 - [x] Multi-stage web image (nginx + /api proxy), deployment guide (docs/deployment.md), README screenshots
 - [x] Final graphify update and docs sync
 
+## Phase 12: Visit prep
+
+- [x] `visit_preps` table and `visits` module: create, edit details and questions, delete (ADR-022)
+- [x] Live brief: current medicines, changes, dose marks, lab results with previous values, open to-dos, appointments, diet notes, documents; period defaults to the previous visit or 90 days
+- [x] Factual prompts from records, one click to turn into a question
+- [x] Visits page (upcoming, past, quick start from upcoming appointments) and visit page (questions, prompts, details, printable brief)
+- [x] Dashboard "Prepare" on appointments; sharing supports visit briefs; the public view renders them
+- [x] Demo: a prep for the next follow-up with two questions
+- [x] Nav fits nine links at 1024px (compact link spacing between `lg` and `xl`)
+- [x] Tests: 4 backend, 1 unit, 2 e2e (with axe scans), visits in the phone overflow guard
+
 ## Phase 11: Dose tracking and history
 
 - [x] `dose_logs` table and `doses` module: mark a scheduled dose taken or skipped, change or clear it; only scheduled doses, never a future day (ADR-021)
@@ -145,6 +156,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 ---
 
 ## Change log
+
+- **2026-10-02**: Phase 12 shipped: visit prep with a live, shareable brief (ADR-022).
 
 - **2026-10-02**: QA pass across 19 pages x 4 viewports x 2 themes (console errors, failed requests, overflow, full axe incl. best practices, focus visibility). Fixed: Skip and delete-conversation controls were hover-only and unreachable on touch screens; dose and medication names truncated on phones; report and shared-view tables were not keyboard-scrollable; demo banner and 404 header outside landmarks; duplicate landmark label on the lab page; dose history heading started before the medicine did; report back link always pointed to the timeline; timeline filters showed on an empty timeline and "no match" read as "empty". Regression tests added for touch controls and the phone report.
 

@@ -8,6 +8,7 @@ import { Logo } from "@/components/ui/Logo";
 import { LoadingRegion, Skeleton, SkeletonText } from "@/components/ui/Skeleton";
 import { ThemeToggle } from "@/components/nav/ThemeToggle";
 import { ReportBody } from "@/features/records/ReportBody";
+import { VisitBrief } from "@/features/visits/VisitBrief";
 import { publicFileUrl, publicPreviewUrl, usePublicShare } from "@/features/sharing/api";
 import { formatDate } from "@/lib/format";
 
@@ -144,6 +145,9 @@ export default function SharedView() {
             </p>
 
             <div className="mt-8 grid grid-cols-1 gap-6">
+              {(data.visits ?? []).map((brief) => (
+                <VisitBrief key={brief.visit.id} brief={brief} />
+              ))}
               {data.prescriptions.map((rx) => (
                 <div key={rx.id} className="grid grid-cols-1 gap-3">
                   <ReportBody rx={rx} />

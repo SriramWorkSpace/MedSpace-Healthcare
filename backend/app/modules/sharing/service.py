@@ -26,6 +26,8 @@ from app.modules.sharing.schemas import (
     ShareItemOut,
     ShareOut,
 )
+from app.modules.visits import service as visits_service
+from app.modules.visits.models import VisitPrep
 
 
 def link_status(link: ShareLink) -> str:
@@ -41,7 +43,13 @@ def link_status(link: ShareLink) -> str:
 async def _titles(session: AsyncSession, items: list[ShareLinkItem]) -> dict[uuid.UUID, str]:
     doc_ids = [i.item_id for i in items if i.item_type == "document"]
     rx_ids = [i.item_id for i in items if i.item_type == "prescription"]
+    visit_ids = [i.item_id for i in items if i.item_type == "visit"]
     titles: dict[uuid.UUID, str] = {}
+    if visit_ids:
+        rows = await session.execute(
+            select(VisitPrep.id, VisitPrep.title).where(VisitPrep.id.in_(visit_ids))
+        )
+        titles.update({vid: f"Visit brief: {title}" for vid, title in rows.all()})
     if doc_ids:
         rows = await session.execute(
             select(Document.id, Document.title).where(Document.id.in_(doc_ids))
@@ -86,6 +94,20 @@ async def create(
     wanted = {(i.type, i.id) for i in data.items}
     doc_ids = {i for t, i in wanted if t == "document"}
     rx_ids = {i for t, i in wanted if t == "prescription"}
+    visit_ids = {i for t, i in wanted if t == "visit"}
+    owned_visits = (
+        set(
+            (
+                await session.scalars(
+                    select(VisitPrep.id).where(
+                        VisitPrep.user_id == user.id, VisitPrep.id.in_(visit_ids)
+                    )
+                )
+            ).all()
+        )
+        if visit_ids
+        else set()
+    )
     owned_docs = (
         set(
             (
@@ -110,7 +132,7 @@ async def create(
         if rx_ids
         else set()
     )
-    if owned_docs != doc_ids or owned_rx != rx_ids:
+    if owned_docs != doc_ids or owned_rx != rx_ids or owned_visits != visit_ids:
         raise Unprocessable("Some of those items don't exist or aren't yours to share.")
 
     token = new_opaque_token(32)
@@ -236,6 +258,7 @@ async def open_public(session: AsyncSession, token: str, request: Request) -> Pu
     owner = await session.get(User, link.user_id)
     prescriptions = []
     documents = []
+    visits = []
     for item in link.items:
         if item.item_type == "prescription":
             try:
@@ -244,6 +267,14 @@ async def open_public(session: AsyncSession, token: str, request: Request) -> Pu
                 )
             except NotFound:
                 continue
+        elif item.item_type == "visit":
+            prep = await session.scalar(
+                select(VisitPrep).where(
+                    VisitPrep.id == item.item_id, VisitPrep.user_id == link.user_id
+                )
+            )
+            if prep and owner:
+                visits.append(await visits_service.brief(session, owner, prep))
         else:
             doc = await session.scalar(
                 select(Document).where(
@@ -268,6 +299,7 @@ async def open_public(session: AsyncSession, token: str, request: Request) -> Pu
         views_left=None if link.max_views is None else max(0, link.max_views - views),
         prescriptions=prescriptions,
         documents=documents,
+        visits=visits,
     )
 
 

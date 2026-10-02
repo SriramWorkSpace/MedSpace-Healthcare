@@ -15,6 +15,7 @@ from app.modules.records.models import (
     Prescription,
 )
 from app.modules.sharing.models import ShareLink, ShareLinkItem
+from app.modules.visits.models import VisitPrep
 
 __all__ = [
     "AuditLog",
@@ -36,4 +37,5 @@ __all__ = [
     "ShareLinkItem",
     "SyncLink",
     "User",
+    "VisitPrep",
 ]

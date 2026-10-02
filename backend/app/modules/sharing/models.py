@@ -37,7 +37,7 @@ class ShareLinkItem(IdMixin, Base):
     share_link_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("share_links.id", ondelete="CASCADE"), index=True
     )
-    item_type: Mapped[str] = mapped_column(String(16))  # document | prescription
+    item_type: Mapped[str] = mapped_column(String(16))  # document | prescription | visit
     item_id: Mapped[uuid.UUID]
 
     link: Mapped[ShareLink] = relationship(back_populates="items")

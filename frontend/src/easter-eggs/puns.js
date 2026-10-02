@@ -40,6 +40,7 @@ export const EMPTY_QUIPS = {
   review: "Inbox zero, clinically speaking.",
   diet: "No diet notes yet. An apple a day remains a solid default.",
   labs: "A clean slate. Nothing here to test your patience.",
+  visits: "No appointments to prep for. The waiting room can wait.",
 };
 
 /** Shown under a streak of 7+ days with every due dose taken. */

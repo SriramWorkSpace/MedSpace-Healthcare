@@ -13,6 +13,7 @@ import { format, parseISO } from "date-fns";
 import { Chip } from "@/components/ui/Chip";
 import { formatRelativeDay } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { clinicianFrom } from "@/features/visits/clinician";
 
 export function Panel({ title, action, children, className }) {
   return (
@@ -60,10 +61,10 @@ export function ComingUp({ items }) {
         const Icon = UPCOMING_ICON[e.type] ?? CalendarCheck;
         const to = e.prescription_id ? `/app/prescriptions/${e.prescription_id}` : "/app/timeline";
         return (
-          <li key={e.id}>
+          <li key={e.id} className="flex items-center gap-1">
             <Link
               to={to}
-              className="flex items-center gap-3 rounded-[var(--radius-control)] px-2 py-2.5 transition-colors hover:bg-surface-2"
+              className="flex min-w-0 flex-1 items-center gap-3 rounded-[var(--radius-control)] px-2 py-2.5 transition-colors hover:bg-surface-2"
             >
               <span className="grid grid-cols-1 size-9 shrink-0 place-items-center rounded-xl bg-surface-2 text-ink-2">
                 <Icon size={17} weight="duotone" />
@@ -78,6 +79,15 @@ export function ComingUp({ items }) {
                 {formatRelativeDay(e.date)}
               </span>
             </Link>
+            {e.type === "appointment" && (
+              <Link
+                to={`/app/visits?prepare=${e.date}&clinician=${encodeURIComponent(clinicianFrom(e.title) ?? "")}`}
+                aria-label={`Prepare for ${e.title}`}
+                className="shrink-0 rounded-full px-2.5 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent-soft"
+              >
+                Prepare
+              </Link>
+            )}
           </li>
         );
       })}

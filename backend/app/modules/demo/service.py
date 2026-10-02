@@ -24,7 +24,9 @@ from app.modules.extraction import service as extraction
 from app.modules.identity import service as identity
 from app.modules.identity.models import User
 from app.modules.identity.schemas import SignupIn
-from app.modules.records.models import CareAction
+from app.modules.records.models import CareAction, Prescription
+from app.modules.visits import service as visits
+from app.modules.visits.schemas import VisitCreate
 
 logger = logging.getLogger("medspace.demo")
 
@@ -89,6 +91,24 @@ async def seed(session: AsyncSession, user: User) -> None:
     await session.flush()
 
     await doses.seed_history(session, user)
+
+    # A visit prep for the next follow-up, with two questions already written.
+    follow_up = (
+        await session.execute(
+            select(Prescription.follow_up_on, Prescription.prescriber_name)
+            .where(Prescription.user_id == user.id, Prescription.follow_up_on >= today)
+            .order_by(Prescription.follow_up_on)
+            .limit(1)
+        )
+    ).first()
+    if follow_up:
+        prep = await visits.create_prep(
+            session, user, VisitCreate(visit_date=follow_up[0], clinician=follow_up[1])
+        )
+        prep.questions = [
+            {"id": "demo-1", "text": "Do I need another CBC after this one?", "done": False},
+            {"id": "demo-2", "text": "Can Atorvastatin move to the morning?", "done": False},
+        ]
 
     # Index everything for Ask MedSpace.
     docs, _ = await documents.list_documents(session, user.id)

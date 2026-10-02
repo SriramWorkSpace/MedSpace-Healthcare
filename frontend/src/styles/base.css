@@ -108,8 +108,13 @@
   .print-only-show {
     display: inline-flex;
   }
-  .report {
+  .report,
+  [aria-label="Visit brief"] {
     box-shadow: none !important;
     border-color: #d9dedb !important;
+  }
+  .brief-section,
+  .brief-section tr {
+    break-inside: avoid;
   }
 }

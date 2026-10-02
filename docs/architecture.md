@@ -60,7 +60,7 @@ MedSpace/
 │   │   │   └── queue.py          # enqueue(): arq | inline
 │   │   └── modules/              # bounded contexts (see §3)
 │   │       ├── identity/  documents/  extraction/  records/
-│   │       ├── timeline/  search/  doses/  assistant/  integrations/  sharing/
+│   │       ├── timeline/  search/  doses/  visits/  assistant/  integrations/  sharing/
 │   │       └── audit/  demo/
 │   ├── migrations/               # Alembic
 │   └── tests/                    # pytest (unit + API integration against real Postgres)
@@ -102,6 +102,7 @@ modules/<name>/
 | `records` | `prescriptions`, `medications`, `care_actions`, `diet_notes`, `lab_results` | Confirm drafts into official records, medication schedules, prescription reports, diet notes copied from documents (ADR-018), lab results and their trends (ADR-020) |
 | `timeline` | (read model, no tables) | Chronological union over confirmed records, documents, appointments, follow-ups |
 | `doses` | `dose_logs` | Taken/skipped marks per scheduled dose, history and streaks computed from the schedule in the user's timezone; unmarked doses are "not logged", never "missed" (ADR-021) |
+| `visits` | `visit_preps` | Visit prep: the user's questions plus a live brief (current medicines, changes, dose marks, new lab results, open to-dos, appointments) since the last visit; factual prompts to raise; shareable (ADR-022) |
 | `search` | (read model, no tables) | Global search: escaped `ILIKE` on names, prefix full-text with `ts_headline` snippets on document chunks, grouped deep-link hits |
 | `assistant` | `document_chunks`, `chat_threads`, `chat_messages` | Chunking, embeddings, hybrid retrieval (pgvector + full-text, RRF fusion), grounded answers with citations, SSE streaming |
 | `integrations` | `oauth_connections`, `sync_links` | Google OAuth (incremental consent), encrypted tokens, Calendar recurring events, Tasks, idempotent sync/unsync |
@@ -201,7 +202,7 @@ Guardrails (system prompt + post-checks):
 
 ### 4.5 Secure sharing
 
-- `POST /api/shares` creates a link scoped to explicit resources (documents and/or prescription reports) with `expires_at` (required, max 30 days) and optional `max_views`.
+- `POST /api/shares` creates a link scoped to explicit resources (documents, prescription reports and/or visit briefs) with `expires_at` (required, max 30 days) and optional `max_views`.
 - The raw token (32 bytes, url-safe) is shown **once**; only `sha256(token)` is stored.
 - `GET /api/public/shares/{token}` → validates hash, expiry, revocation, view count → increments views → writes audit row (`share.viewed`, ip, user agent) → returns a read-only bundle. Files stream **through the API**, never via long-lived presigned URLs.
 - Revocation is immediate (`revoked_at`), and the audit log shows every view.
@@ -232,6 +233,7 @@ erDiagram
   users ||--o{ oauth_connections : connects
   users ||--o{ sync_links : tracks
   users ||--o{ share_links : creates
+  users ||--o{ visit_preps : prepares
   share_links ||--o{ share_link_items : scopes
   users ||--o{ chat_threads : asks
   chat_threads ||--o{ chat_messages : contains
@@ -259,6 +261,7 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 | Dashboard | `GET /dashboard` (today's doses, upcoming, needs-review queue, stats) |
 | Timeline | `GET /timeline?cursor=&types=` |
 | Doses | `PUT /doses` (mark taken or skipped) · `DELETE /doses?medication_id=&date=&time=` · `GET /adherence?days=` · `GET /adherence/{medication_id}?days=` |
+| Visits | `POST /visits` · `GET /visits` · `GET /visits/{id}` · `PATCH /visits/{id}` (details, questions) · `DELETE /visits/{id}` · `GET /visits/{id}/brief` |
 | Search | `GET /search?q=` (grouped hits with deep links and highlighted snippets) |
 | Assistant | `POST /assistant/threads` · `GET /assistant/threads` · `POST /assistant/threads/{id}/messages` (SSE) |
 | Integrations | `GET /integrations/google/status` · `GET /integrations/google/connect` · `GET /integrations/google/callback` · `POST /integrations/google/sync` · `DELETE /integrations/google/sync/{link_id}` · `DELETE /integrations/google` |
@@ -311,6 +314,8 @@ Route map:
 /app/labs/:key          One test over time (chart + every result)
 /app/diet               Diet notes from documents
 /app/timeline           Health timeline
+/app/visits             Visit preps (upcoming, past, quick start from appointments)
+/app/visits/:id         Questions, prompts from records, printable/shareable brief
 /app/ask                Ask MedSpace (RAG chat)
 /app/sharing            Share links manager
 /app/settings           Profile, integrations, audit log

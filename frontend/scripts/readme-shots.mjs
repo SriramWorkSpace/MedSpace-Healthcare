@@ -49,6 +49,12 @@ for (const theme of ["light", "dark"]) {
   await settle(page);
   await page.screenshot({ path: `${out}/timeline.png` });
 
+  await page.goto(base + "/app/visits");
+  await settle(page, 800);
+  await page.locator('a[href^="/app/visits/"]').first().click();
+  await settle(page);
+  await page.screenshot({ path: `${out}/visit-prep.png` });
+
   await page.goto(base + "/app/medications");
   await settle(page);
   await page.screenshot({ path: `${out}/medications.png` });

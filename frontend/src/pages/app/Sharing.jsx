@@ -7,6 +7,7 @@ import {
   Check,
   Copy,
   Eye,
+  ClipboardText,
   FileText,
   LinkBreak,
   LinkSimple,
@@ -29,6 +30,7 @@ import { usePrescriptions } from "@/features/records/api";
 import { useCreateShare, useRevokeShare, useShares } from "@/features/sharing/api";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { useVisits } from "@/features/visits/api";
 
 const STATUS = {
   active: { tone: "accent", label: "Active" },
@@ -81,18 +83,24 @@ function CreateShareDialog({ open, onClose, preselect }) {
   const rx = usePrescriptions();
   const docs = useDocuments({ status: "confirmed" });
   const create = useCreateShare();
+  const visits = useVisits();
   const [label, setLabel] = useState("");
   const [days, setDays] = useState("7");
   const [maxViews, setMaxViews] = useState("");
-  const [selected, setSelected] = useState(
-    () => new Set(preselect ? [`prescription:${preselect}`] : []),
-  );
+  const [selected, setSelected] = useState(() => new Set(preselect ? [preselect] : []));
   const [created, setCreated] = useState(null);
 
   // Documents already covered by a prescription are offered through the prescription.
   const options = useMemo(() => {
     const rxDocIds = new Set((rx.data ?? []).map((p) => p.document_id));
     return [
+      ...(visits.data ?? []).map((v) => ({
+        key: `visit:${v.id}`,
+        type: "visit",
+        id: v.id,
+        title: `Visit brief: ${v.title}`,
+        meta: v.visit_date ? formatDate(v.visit_date) : "",
+      })),
       ...(rx.data ?? []).map((p) => ({
         key: `prescription:${p.id}`,
         type: "prescription",
@@ -110,7 +118,7 @@ function CreateShareDialog({ open, onClose, preselect }) {
           meta: d.document_date ? formatDate(d.document_date) : "",
         })),
     ];
-  }, [rx.data, docs.data]);
+  }, [rx.data, docs.data, visits.data]);
 
   const toggle = (key) =>
     setSelected((prev) => {
@@ -187,7 +195,12 @@ function CreateShareDialog({ open, onClose, preselect }) {
           ) : (
             <ul className="grid grid-cols-1 max-h-60 gap-1.5 overflow-y-auto pr-1">
               {options.map((o) => {
-                const Icon = o.type === "prescription" ? Prescription : FileText;
+                const Icon =
+                  o.type === "prescription"
+                    ? Prescription
+                    : o.type === "visit"
+                      ? ClipboardText
+                      : FileText;
                 const on = selected.has(o.key);
                 return (
                   <li key={o.key}>
@@ -298,7 +311,11 @@ function ShareCard({ link, onRevoke, index }) {
 
 export default function Sharing() {
   const [params, setParams] = useSearchParams();
-  const preselect = params.get("prescription");
+  const preselect = params.get("prescription")
+    ? `prescription:${params.get("prescription")}`
+    : params.get("visit")
+      ? `visit:${params.get("visit")}`
+      : null;
   const [creating, setCreating] = useState(() => Boolean(preselect));
   const [revoking, setRevoking] = useState(null);
   const shares = useShares();

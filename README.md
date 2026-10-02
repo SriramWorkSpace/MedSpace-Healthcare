@@ -30,7 +30,10 @@ then into calendar reminders, to-dos, a health timeline and answers you can trac
 | ![Side-by-side review of an extracted prescription](docs/screenshots/review.png) | ![Source-grounded answers with citations](docs/screenshots/ask.png) |
 | **Dashboard (dark)** | **Printable report** |
 | ![Today's doses, review queue and upcoming items](docs/screenshots/dashboard-dark.png) | ![Prescription summary report](docs/screenshots/report.png) |
+| **Visit prep** | Before an appointment, collect your questions and get a one-page brief of what changed since last time: medicines, doses, new lab results, open to-dos. Print it or share it with a secure link. |
 | **Dose tracking** | Tick doses off on the dashboard and they sync to every device. Each medicine gets a 14-day strip and a history calendar where you can fill in or correct past days. Unmarked doses stay "not logged": MedSpace never assumes a miss. |
+| **Visit prep** | **Dashboard** |
+| ![Questions, prompts from records and the visit brief](docs/screenshots/visit-prep.png) | ![Today's doses, review queue and upcoming items](docs/screenshots/dashboard.png) |
 | **Medications** | **Dose history** |
 | ![Medication cards with a 14-day dose strip](docs/screenshots/medications.png) | ![Calendar of taken, skipped and not logged doses](docs/screenshots/dose-history.png) |
 | **Lab results over time** | **Search (Ctrl+K)** |

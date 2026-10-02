@@ -7,12 +7,13 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from app.modules.records.schemas import PrescriptionOut
+from app.modules.visits.schemas import VisitBrief
 
 ShareStatus = Literal["active", "expired", "revoked", "exhausted"]
 
 
 class ShareItemIn(BaseModel):
-    type: Literal["document", "prescription"]
+    type: Literal["document", "prescription", "visit"]
     id: uuid.UUID
 
 
@@ -64,3 +65,4 @@ class PublicShare(BaseModel):
     views_left: int | None
     prescriptions: list[PrescriptionOut]
     documents: list[PublicDocument]
+    visits: list[VisitBrief] = []
