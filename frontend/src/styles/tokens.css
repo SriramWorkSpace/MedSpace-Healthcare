@@ -28,6 +28,7 @@
   --accent-ink: oklch(0.99 0.004 160);
   --accent-soft: oklch(0.948 0.034 163);
   --accent-soft-ink: oklch(0.38 0.08 163);
+  --logo-cross: oklch(0.6 0.22 27);
 
   /* Semantic */
   --warn: oklch(0.72 0.135 72);
@@ -91,6 +92,7 @@
   --accent-ink: oklch(0.2 0.03 165);
   --accent-soft: oklch(0.3 0.05 163);
   --accent-soft-ink: oklch(0.86 0.09 163);
+  --logo-cross: oklch(0.6 0.22 27);
 
   --warn: oklch(0.8 0.13 80);
   --warn-soft: oklch(0.32 0.06 75);
