@@ -31,5 +31,14 @@ async def get_current_user(request: Request, session: AsyncSession = Depends(get
     return user
 
 
+async def get_optional_user(
+    request: Request, session: AsyncSession = Depends(get_session)
+) -> User | None:
+    token = _extract_token(request)
+    user_id = decode_access_token(token) if token else None
+    return await session.get(User, user_id) if user_id else None
+
+
 CurrentUser = Annotated[User, Depends(get_current_user)]
+OptionalUser = Annotated[User | None, Depends(get_optional_user)]
 DbSession = Annotated[AsyncSession, Depends(get_session)]

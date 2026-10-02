@@ -10,6 +10,8 @@ import { Field, Input } from "@/components/ui/Field";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { useDemoLogin } from "./useDemoLogin";
+import { GoogleButton } from "./GoogleButton";
+import { GOOGLE_ERRORS } from "./googleAuth";
 
 const loginSchema = z.object({
   email: z.email("Enter a valid email address"),
@@ -93,6 +95,18 @@ function useAuthMutation(path, setError) {
   });
 }
 
+function GoogleFirst() {
+  return (
+    <div className="mt-8">
+      <GoogleButton />
+      <div className="mt-6 flex items-center gap-3 text-xs text-ink-3">
+        <span className="h-px flex-1 bg-line" /> or with email{" "}
+        <span className="h-px flex-1 bg-line" />
+      </div>
+    </div>
+  );
+}
+
 export function LoginForm() {
   const form = useForm({
     resolver: zodResolver(loginSchema),
@@ -100,17 +114,20 @@ export function LoginForm() {
   });
   const login = useAuthMutation("/api/auth/login", form.setError);
   const { errors } = form.formState;
+  const [params] = useSearchParams();
+  const googleError = GOOGLE_ERRORS[params.get("google")];
 
   return (
     <>
       <h1 className="text-3xl font-semibold tracking-tight">Welcome back</h1>
       <p className="mt-2 text-ink-2">Sign in to pick up where you left off.</p>
+      <GoogleFirst />
       <form
-        className="mt-8 grid grid-cols-1 gap-4"
+        className="mt-6 grid grid-cols-1 gap-4"
         noValidate
         onSubmit={form.handleSubmit((v) => login.mutate(v))}
       >
-        <FormError error={login.error?.status !== 422 && login.error?.message} />
+        <FormError error={googleError || (login.error?.status !== 422 && login.error?.message)} />
         <Field label="Email" error={errors.email?.message}>
           <Input type="email" autoComplete="email" {...form.register("email")} />
         </Field>
@@ -144,8 +161,9 @@ export function SignupForm() {
     <>
       <h1 className="text-3xl font-semibold tracking-tight">Create your space</h1>
       <p className="mt-2 text-ink-2">It takes a minute. No paperwork required, ironically.</p>
+      <GoogleFirst />
       <form
-        className="mt-8 grid grid-cols-1 gap-4"
+        className="mt-6 grid grid-cols-1 gap-4"
         noValidate
         onSubmit={form.handleSubmit((v) =>
           signup.mutate({ ...v, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone }),

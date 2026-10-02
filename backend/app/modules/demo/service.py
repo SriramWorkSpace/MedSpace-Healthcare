@@ -96,6 +96,15 @@ async def seed(session: AsyncSession, user: User) -> None:
         await assistant.index_document(session, d.id)
 
 
+async def seed_quietly(session: AsyncSession, user: User) -> None:
+    """Seed demo records for a new simulated account; never let seeding block a sign-in."""
+    try:
+        async with session.begin_nested():
+            await seed(session, user)
+    except Exception:
+        logger.exception("demo seeding failed for %s", user.id)
+
+
 async def _page_texts(session: AsyncSession, doc_id) -> list[str]:
     doc = await documents.get_document_by_id(session, doc_id)
     return [p.text for p in doc.pages] if doc else []

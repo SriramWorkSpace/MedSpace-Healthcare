@@ -6,18 +6,31 @@ import uuid
 from datetime import UTC, datetime, timedelta
 
 import jwt
-from fastapi import APIRouter, Query, Request
+from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 
 from app.core.config import get_settings
-from app.core.deps import CurrentUser, DbSession
+from app.core.deps import CurrentUser, DbSession, OptionalUser
+from app.core.errors import Conflict
+from app.core.ratelimit import rate_limit
 from app.core.security import JWT_ALG, constant_time_equals
+from app.modules.audit import service as audit
+from app.modules.demo import service as demo
+from app.modules.identity import service as identity
+from app.modules.identity.cookies import set_auth_cookies
 from app.modules.integrations import service
-from app.modules.integrations.google import GoogleAPIError, GoogleAuthError, get_google, pkce_pair
+from app.modules.integrations.google import (
+    GoogleAPIError,
+    GoogleAuthError,
+    get_google,
+    has_sync_scopes,
+    pkce_pair,
+)
 
 logger = logging.getLogger("medspace.integrations")
 router = APIRouter(prefix="/integrations/google", tags=["integrations"])
+auth_router = APIRouter(prefix="/auth/google", tags=["auth"])
 
 STATE_COOKIE = "ms_oauth"
 
@@ -36,10 +49,6 @@ class SyncIn(BaseModel):
     tasks: bool = True
 
 
-def _settings_url(result: str) -> str:
-    return f"{get_settings().frontend_url}/app/settings?google={result}#integrations"
-
-
 @router.get("/status", response_model=StatusOut)
 async def status(user: CurrentUser, session: DbSession):
     conn = await service.get_connection(session, user.id)
@@ -55,47 +64,74 @@ async def status(user: CurrentUser, session: DbSession):
     )
 
 
-@router.get("/connect")
-async def connect(user: CurrentUser):
-    """Start OAuth (PKCE). State + verifier ride in a short-lived signed, httpOnly cookie."""
-    verifier, challenge = pkce_pair()
-    state = secrets.token_urlsafe(24)
+def _signed_state(claims: dict) -> str:
     s = get_settings()
-    signed = jwt.encode(
-        {
-            "sub": str(user.id),
-            "state": state,
-            "verifier": verifier,
-            "exp": datetime.now(UTC) + timedelta(minutes=10),
-        },
+    return jwt.encode(
+        {**claims, "exp": datetime.now(UTC) + timedelta(minutes=10)},
         s.jwt_secret.get_secret_value(),
         algorithm=JWT_ALG,
     )
-    resp = RedirectResponse(get_google().auth_url(state, challenge), status_code=302)
+
+
+def _redirect_to_google(claims: dict, *, sign_in: bool) -> RedirectResponse:
+    """Start OAuth (PKCE). State, verifier and intent ride in a short-lived signed cookie."""
+    verifier, challenge = pkce_pair()
+    state = secrets.token_urlsafe(24)
+    resp = RedirectResponse(
+        get_google().auth_url(state, challenge, sign_in=sign_in), status_code=302
+    )
     resp.set_cookie(
         STATE_COOKIE,
-        signed,
+        _signed_state({**claims, "state": state, "verifier": verifier}),
         max_age=600,
         httponly=True,
-        secure=s.cookie_secure,
+        secure=get_settings().cookie_secure,
         samesite="lax",
         path="/api/integrations/google",
     )
     return resp
 
 
+def safe_next(value: str | None) -> str:
+    """Only same-site relative paths, never `//host` or absolute URLs (open-redirect guard)."""
+    if not value or not value.startswith("/") or value.startswith("//") or "\\" in value:
+        return "/app"
+    return value
+
+
+def _frontend(path: str, **params: str) -> str:
+    sep = "&" if "?" in path else "?"
+    query = "&".join(f"{k}={v}" for k, v in params.items())
+    return f"{get_settings().frontend_url}{path}{sep + query if query else ''}"
+
+
+@router.get("/connect")
+async def connect(user: CurrentUser):
+    """Connect Google to an existing MedSpace account (reminders only)."""
+    return _redirect_to_google({"mode": "connect", "sub": str(user.id)}, sign_in=False)
+
+
+@auth_router.get("/start", dependencies=[Depends(rate_limit("auth:google", 20, 60))])
+async def google_sign_in(next: str | None = None):
+    """Sign in (or sign up) with Google, asking for Calendar and Tasks in the same consent."""
+    return _redirect_to_google({"mode": "login", "next": safe_next(next)}, sign_in=True)
+
+
+@auth_router.get("/providers")
+async def providers():
+    return {"google": {"enabled": True, "mode": get_google().mode}}
+
+
 @router.get("/callback")
 async def callback(
     request: Request,
-    user: CurrentUser,
+    user: OptionalUser,
     session: DbSession,
     code: str | None = None,
     state: str | None = None,
     error: str | None = None,
 ):
     s = get_settings()
-    if error or not code:
-        return RedirectResponse(_settings_url("denied" if error else "error"))
     try:
         claims = jwt.decode(
             request.cookies.get(STATE_COOKIE, ""),
@@ -103,20 +139,75 @@ async def callback(
             algorithms=[JWT_ALG],
         )
     except jwt.PyJWTError:
-        return RedirectResponse(_settings_url("expired"))
-    if claims.get("sub") != str(user.id) or not constant_time_equals(claims.get("state"), state):
-        return RedirectResponse(_settings_url("error"))
+        claims = {}
+    mode = claims.get("mode", "connect")
+    fail_page = "/login" if mode == "login" else "/app/settings"
+
+    def fail(reason: str) -> RedirectResponse:
+        resp = RedirectResponse(_frontend(fail_page, google=reason))
+        resp.delete_cookie(STATE_COOKIE, path="/api/integrations/google")
+        return resp
+
+    if error:
+        return fail("denied")
+    if not claims:
+        return fail("expired")
+    if not code or not constant_time_equals(claims.get("state"), state):
+        return fail("error")
 
     google = get_google()
     try:
         tokens = await google.exchange_code(code, claims["verifier"])
-        email = await google.user_email(tokens.access_token)
+        who = await google.user_info(tokens.access_token)
     except (GoogleAPIError, GoogleAuthError):
         logger.exception("google token exchange failed")
-        return RedirectResponse(_settings_url("error"))
-    await service.save_connection(session, user, tokens, email, request)
+        return fail("error")
+    sync_granted = has_sync_scopes(tokens.scope)
+
+    if mode == "login":
+        try:
+            account, outcome = await identity.login_with_google(
+                session,
+                sub=who.sub,
+                email=who.email,
+                email_verified=who.email_verified,
+                name=who.name,
+                is_demo=google.mode == "simulation",
+            )
+        except Conflict:
+            return fail("email_taken")
+        if outcome == "created" and google.mode == "simulation":
+            await demo.seed_quietly(session, account)  # simulated sign-ins get the demo records
+        issued = await identity.issue_session(session, account, request)
+        await audit.record(
+            session,
+            action="auth.google_signup" if outcome == "created" else "auth.google_login",
+            user_id=account.id,
+            request=request,
+            meta={"linked": outcome == "linked", "reminders": sync_granted},
+        )
+        if sync_granted:
+            await service.save_connection(session, account, tokens, who.email, request)
+        await session.commit()
+        resp = RedirectResponse(
+            _frontend(
+                claims.get("next") or "/app",
+                google="signed_in",
+                reminders="connected" if sync_granted else "later",
+            )
+        )
+        set_auth_cookies(resp, issued.access_token, issued.refresh_token)
+        resp.delete_cookie(STATE_COOKIE, path="/api/integrations/google")
+        return resp
+
+    # mode == "connect": attach Google to the signed-in account.
+    if user is None or claims.get("sub") != str(user.id):
+        return fail("error")
+    if not sync_granted:
+        return fail("scopes")
+    await service.save_connection(session, user, tokens, who.email, request)
     await session.commit()
-    resp = RedirectResponse(_settings_url("connected"))
+    resp = RedirectResponse(_frontend("/app/settings", google="connected") + "#integrations")
     resp.delete_cookie(STATE_COOKIE, path="/api/integrations/google")
     return resp
 

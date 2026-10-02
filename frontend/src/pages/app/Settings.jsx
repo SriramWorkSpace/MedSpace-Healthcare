@@ -93,6 +93,16 @@ function ProfileForm() {
       onSubmit={form.handleSubmit((v) => save.mutate(v))}
       className="card card--flat grid grid-cols-1 gap-5 p-5 sm:grid-cols-2"
     >
+      <div className="flex flex-wrap items-center gap-2 text-sm text-ink-2 sm:col-span-2">
+        <span className="font-medium text-ink">Sign-in:</span>
+        {user.google_linked && (
+          <Chip tone="accent">
+            <GoogleLogo size={12} weight="bold" /> Google
+          </Chip>
+        )}
+        {user.has_password && <Chip>Email and password</Chip>}
+        <span className="truncate text-ink-3">{user.email}</span>
+      </div>
       <Field label="Name">
         <Input {...form.register("display_name", { required: true, maxLength: 80 })} />
       </Field>
@@ -128,6 +138,7 @@ function ProfileForm() {
 }
 
 function GoogleCard() {
+  const { user } = useAuth();
   const status = useGoogleStatus();
   const disconnect = useDisconnectGoogle();
   const pull = usePullTasks();
@@ -156,7 +167,9 @@ function GoogleCard() {
           <p className="mt-1 text-sm text-ink-2">
             {s.connected
               ? `${s.email ?? "Google account"} · connected ${timeAgo(s.connected_at)}`
-              : "Recurring dose reminders in Calendar, one-off to-dos in Tasks."}
+              : user.google_linked
+                ? "You sign in with Google. Connect Calendar and Tasks to get dose reminders and to-dos."
+                : "Recurring dose reminders in Calendar, one-off to-dos in Tasks."}
           </p>
         </div>
       </div>

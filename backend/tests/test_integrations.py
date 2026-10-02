@@ -41,7 +41,7 @@ async def test_connect_flow_stores_encrypted_tokens(client: httpx.AsyncClient, s
     await connect(client)
     status = (await client.get("/api/integrations/google/status")).json()
     assert status["connected"] is True
-    assert status["email"] == "you@calendar.simulated"
+    assert status["email"].endswith("@gmail.simulated")
 
     conn = await session.scalar(select(OAuthConnection))
     assert not conn.access_token_enc.startswith("sim-")  # stored encrypted

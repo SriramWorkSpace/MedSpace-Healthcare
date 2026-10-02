@@ -76,6 +76,7 @@ Deep dive: [docs/architecture.md](docs/architecture.md) · Decisions and trade-o
 - **Two-path document extraction:** text-layer PDFs go to a strict JSON-schema LLM call; scans go through a vision model in page batches. Pydantic validation, a repair retry, and per-field confidence and provenance follow.
 - **Deterministic schedule normalization:** `1-0-1`, `BD`, `TDS`, `q8h`, `HS`, `SOS` are parsed by tested Python, not guessed by the model.
 - **Hybrid RAG on pgvector:** HNSW cosine search plus Postgres full-text, fused with Reciprocal Rank Fusion, always scoped by `user_id` in SQL. Answers stream over SSE with citations.
+- **Optional Google sign-in:** one consent covers sign-in and reminders; verified-email account linking only, open-redirect-safe return paths, and a later "connect" path for everyone else.
 - **Security by default:** Argon2id, httpOnly JWT cookies, rotating refresh tokens with reuse detection, CSRF double-submit, rate limiting, encrypted OAuth tokens, hashed share tokens, append-only audit log.
 - **Durable background jobs:** ARQ + Redis with an inline mode for single-instance deploys.
 - **Tested end to end:** 95 pytest tests against real Postgres (auth, privacy isolation, extraction, RAG guardrails, sync, sharing), Vitest unit tests, and a Playwright suite with **axe WCAG 2.1 AA** scans and a phone-width overflow guard, all in CI.
@@ -136,12 +137,15 @@ LLM_PROVIDER=groq
 GROQ_API_KEY=gsk_...
 ```
 
-### Enable Google Calendar & Tasks (optional)
+### Enable Google sign-in, Calendar & Tasks (optional)
+
+"Continue with Google" on the sign-in page logs people in and, in the same consent screen, offers Calendar and Tasks access so reminders work immediately. Anyone who skips that (or uses email and password) can connect Google later from Settings. Without credentials, both flows run as a built-in simulation.
 
 1. In Google Cloud Console, create a project and enable the **Google Calendar API** and **Google Tasks API**.
 2. Configure the OAuth consent screen (External, *Testing* mode) and add yourself as a test user.
 3. Create an **OAuth client ID** (Web application) with redirect URI `http://localhost:8000/api/integrations/google/callback`.
 4. Set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` and `GOOGLE_PROVIDER=google` in `.env`.
+5. Add the `openid`, `email` and `profile` scopes to the consent screen alongside Calendar and Tasks. The same redirect URI serves sign-in and connecting.
 
 > Calendar and Tasks scopes are classified as *sensitive* by Google. Until the app passes Google verification, the consent screen stays in Testing mode (up to 100 named test users).
 

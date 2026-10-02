@@ -80,4 +80,6 @@ class UserOut(BaseModel):
     timezone: str
     dose_times: dict[str, str]
     is_demo: bool
+    has_password: bool = True
+    google_linked: bool = False
     created_at: datetime

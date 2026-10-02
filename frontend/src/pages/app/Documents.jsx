@@ -11,7 +11,8 @@ import { PageHeader } from "@/components/layout/PageSkeleton";
 import { EMPTY_QUIPS } from "@/easter-eggs/puns";
 import { useDocuments } from "@/features/documents/api";
 import { DocumentCard, DocumentGridSkeleton } from "@/features/documents/DocumentCard";
-import { UploadQueue, useUploadQueue } from "@/features/documents/UploadQueue";
+import { UploadQueue } from "@/features/documents/UploadQueue";
+import { useUploadQueue } from "@/features/documents/useUploadQueue";
 import { FILTERS } from "@/features/documents/status";
 import { cn } from "@/lib/cn";
 

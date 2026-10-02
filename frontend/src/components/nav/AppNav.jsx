@@ -21,7 +21,7 @@ import { useScrolled } from "./useScrolled";
 import { useEasterEggs, useRapidClicks } from "@/easter-eggs/EasterEggs";
 import { cn } from "@/lib/cn";
 
-export const APP_LINKS = [
+const APP_LINKS = [
   { to: "/app", label: "Dashboard", icon: SquaresFour, end: true },
   { to: "/app/documents", label: "Documents", icon: FileText },
   { to: "/app/medications", label: "Medications", icon: Pill },

@@ -20,12 +20,20 @@ import httpx
 
 from app.core.config import get_settings
 
-SCOPES = [
-    "openid",
-    "email",
+IDENTITY_SCOPES = ["openid", "email", "profile"]
+SYNC_SCOPES = [
     "https://www.googleapis.com/auth/calendar.events",
     "https://www.googleapis.com/auth/tasks",
 ]
+SCOPES = IDENTITY_SCOPES + SYNC_SCOPES
+
+
+def has_sync_scopes(granted: str) -> bool:
+    """True when the user left both Calendar and Tasks ticked on Google's consent screen."""
+    have = set(granted.split())
+    return all(scope in have for scope in SYNC_SCOPES)
+
+
 AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 TOKEN_URL = "https://oauth2.googleapis.com/token"  # noqa: S105 (URL, not a secret)
 REVOKE_URL = "https://oauth2.googleapis.com/revoke"
@@ -40,6 +48,14 @@ class GoogleAuthError(Exception):
 
 class GoogleAPIError(Exception):
     pass
+
+
+@dataclass
+class GoogleIdentity:
+    sub: str
+    email: str
+    email_verified: bool
+    name: str | None
 
 
 @dataclass
@@ -59,8 +75,9 @@ def pkce_pair() -> tuple[str, str]:
 class GoogleClient(Protocol):
     mode: str
 
-    def auth_url(self, state: str, code_challenge: str) -> str: ...
+    def auth_url(self, state: str, code_challenge: str, *, sign_in: bool = False) -> str: ...
     async def exchange_code(self, code: str, verifier: str) -> Tokens: ...
+    async def user_info(self, access_token: str) -> GoogleIdentity: ...
     async def refresh(self, refresh_token: str) -> Tokens: ...
     async def revoke(self, token: str) -> None: ...
     async def user_email(self, access_token: str) -> str | None: ...
@@ -92,7 +109,7 @@ class HttpGoogleClient:
         self.redirect_uri = redirect_uri
         self.http = httpx.AsyncClient(timeout=20)
 
-    def auth_url(self, state: str, code_challenge: str) -> str:
+    def auth_url(self, state: str, code_challenge: str, *, sign_in: bool = False) -> str:
         return (
             AUTH_URL
             + "?"
@@ -103,7 +120,8 @@ class HttpGoogleClient:
                     "response_type": "code",
                     "scope": " ".join(SCOPES),
                     "access_type": "offline",
-                    "prompt": "consent",
+                    # Sign-in lets people pick an account; consent guarantees a refresh token.
+                    "prompt": "select_account consent" if sign_in else "consent",
                     "include_granted_scopes": "true",
                     "state": state,
                     "code_challenge": code_challenge,
@@ -161,9 +179,19 @@ class HttpGoogleClient:
             )
         return resp.json() if resp.content else None
 
-    async def user_email(self, access_token: str) -> str | None:
+    async def user_info(self, access_token: str) -> GoogleIdentity:
         data = await self._call("GET", USERINFO_URL, access_token)
-        return data.get("email") if data else None
+        if not data or not data.get("sub") or not data.get("email"):
+            raise GoogleAPIError("Google did not return an identity.")
+        return GoogleIdentity(
+            sub=str(data["sub"]),
+            email=data["email"],
+            email_verified=bool(data.get("email_verified")),
+            name=data.get("name"),
+        )
+
+    async def user_email(self, access_token: str) -> str | None:
+        return (await self.user_info(access_token)).email
 
     async def upsert_event(self, access: str, event_id: str | None, body: dict) -> str:
         if event_id:
@@ -203,21 +231,36 @@ class HttpGoogleClient:
 
 
 class FakeGoogleClient:
-    """In-memory Google for demos and tests. State is per access token and per process."""
+    """In-memory Google for demos and tests. State is per access token and per process.
+
+    Each simulated consent produces a distinct Google account (encoded in the code), so demo
+    visitors never share an identity. A code ending in "-identityonly" simulates a user who
+    unticked Calendar and Tasks on the consent screen.
+    """
 
     mode = "simulation"
     store: dict[str, dict[str, dict]] = {}
 
-    def auth_url(self, state: str, code_challenge: str) -> str:
-        return f"/api/integrations/google/callback?code=simulated&state={state}"
+    def auth_url(self, state: str, code_challenge: str, *, sign_in: bool = False) -> str:
+        return f"/api/integrations/google/callback?code=sim-{uuid.uuid4().hex[:10]}&state={state}"
 
     async def exchange_code(self, code: str, verifier: str) -> Tokens:
-        account = uuid.uuid4().hex[:10]
+        identity_only = code.endswith("-identityonly")
+        account = code.removeprefix("sim-").removesuffix("-identityonly") or uuid.uuid4().hex[:10]
         return Tokens(
             access_token=f"sim-access-{account}",
             refresh_token=f"sim-refresh-{account}",
             expires_at=datetime.now(UTC) + timedelta(hours=1),
-            scope=" ".join(SCOPES),
+            scope=" ".join(IDENTITY_SCOPES if identity_only else SCOPES),
+        )
+
+    async def user_info(self, access_token: str) -> GoogleIdentity:
+        account = access_token.removeprefix("sim-access-")
+        return GoogleIdentity(
+            sub=f"sim-{account}",
+            email=f"you.{account[:8]}@gmail.simulated",
+            email_verified=True,
+            name="Sam Rivera",
         )
 
     async def refresh(self, refresh_token: str) -> Tokens:
@@ -239,7 +282,7 @@ class FakeGoogleClient:
         return self.store.setdefault(account, {"events": {}, "lists": {}, "tasks": {}})
 
     async def user_email(self, access_token: str) -> str | None:
-        return "you@calendar.simulated"
+        return (await self.user_info(access_token)).email
 
     async def upsert_event(self, access: str, event_id: str | None, body: dict) -> str:
         events = self._bucket(access)["events"]

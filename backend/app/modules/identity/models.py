@@ -21,12 +21,22 @@ class User(IdMixin, TimestampMixin, Base):
     __tablename__ = "users"
 
     email: Mapped[str] = mapped_column(String(320), unique=True, index=True)
-    password_hash: Mapped[str] = mapped_column(String(256))
+    # Null for accounts created through "Continue with Google" (no password set).
+    password_hash: Mapped[str | None] = mapped_column(String(256))
+    google_sub: Mapped[str | None] = mapped_column(String(64), unique=True, index=True)
     display_name: Mapped[str] = mapped_column(String(80))
     timezone: Mapped[str] = mapped_column(String(64), default="UTC")
     dose_times: Mapped[dict] = mapped_column(JSONB, default=lambda: dict(DEFAULT_DOSE_TIMES))
     is_demo: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    @property
+    def has_password(self) -> bool:
+        return self.password_hash is not None
+
+    @property
+    def google_linked(self) -> bool:
+        return self.google_sub is not None
 
 
 class RefreshToken(IdMixin, Base):

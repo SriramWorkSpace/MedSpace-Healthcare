@@ -86,5 +86,18 @@ test("Google sync works in simulation mode", async ({ page }) => {
   await page.goto("/app/settings");
   await page.getByRole("button", { name: "Connect Google" }).click();
   await expect(page.getByText("Google connected")).toBeVisible();
-  await expect(page.getByText(/you@calendar\.simulated/)).toBeVisible();
+  await expect(page.getByText(/@gmail\.simulated/)).toBeVisible();
+});
+
+test("Continue with Google signs in and connects reminders (simulated)", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByRole("button", { name: "Continue with Google" }).click();
+  await page.waitForURL("**/app");
+  await expect(page.getByText("Signed in with Google")).toBeVisible();
+  await expect(page.getByText(/Calendar and Tasks are connected/)).toBeVisible();
+  await expect(page).not.toHaveURL(/google=/);
+
+  await page.goto("/app/settings");
+  await expect(page.getByText("Connected", { exact: true })).toBeVisible();
+  await expect(page.getByText("Email and password")).toHaveCount(0);
 });

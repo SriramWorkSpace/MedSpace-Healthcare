@@ -4,6 +4,7 @@ import { AppNav } from "@/components/nav/AppNav";
 import { useAuth } from "@/lib/auth";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { PageSkeleton } from "@/components/layout/PageSkeleton";
+import { useGoogleWelcome } from "@/features/auth/useGoogleWelcome";
 
 function ShellSkeleton() {
   return (
@@ -25,6 +26,7 @@ function ShellSkeleton() {
 export default function AppLayout() {
   const { user, isLoading } = useAuth();
   const location = useLocation();
+  useGoogleWelcome();
 
   if (isLoading) return <ShellSkeleton />;
   if (!user) {

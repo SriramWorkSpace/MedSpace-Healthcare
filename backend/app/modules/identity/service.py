@@ -66,11 +66,55 @@ async def authenticate(session: AsyncSession, email: str, password: str) -> User
     if user is None:
         verify_password(_DUMMY_HASH, password)
         raise Unauthorized("That email and password combination doesn't match our records.")
+    if user.password_hash is None:
+        # Google-only account: keep the response identical to a wrong password.
+        verify_password(_DUMMY_HASH, password)
+        raise Unauthorized("That email and password combination doesn't match our records.")
     if not verify_password(user.password_hash, password):
         raise Unauthorized("That email and password combination doesn't match our records.")
     if needs_rehash(user.password_hash):
         user.password_hash = hash_password(password)
     return user
+
+
+async def login_with_google(
+    session: AsyncSession,
+    *,
+    sub: str,
+    email: str,
+    email_verified: bool,
+    name: str | None,
+    is_demo: bool = False,
+) -> tuple[User, str]:
+    """Find or create the account for a Google identity.
+
+    Returns (user, outcome) where outcome is "signed_in", "linked" or "created".
+    An existing password account is linked only when Google has verified the email address;
+    otherwise the email stays with its current owner (prevents account takeover).
+    """
+    user = await session.scalar(select(User).where(User.google_sub == sub))
+    if user:
+        return user, "signed_in"
+
+    email = email.lower()
+    existing = await session.scalar(select(User).where(User.email == email))
+    if existing:
+        if not email_verified or existing.google_sub is not None:
+            raise Conflict("An account with this email already exists. Sign in with your password.")
+        existing.google_sub = sub
+        await session.flush()
+        return existing, "linked"
+
+    user = User(
+        email=email,
+        password_hash=None,
+        google_sub=sub,
+        display_name=(name or email.split("@")[0]).strip()[:80] or "MedSpace user",
+        is_demo=is_demo,
+    )
+    session.add(user)
+    await session.flush()
+    return user, "created"
 
 
 async def issue_session(

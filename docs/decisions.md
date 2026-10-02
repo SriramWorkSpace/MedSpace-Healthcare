@@ -65,7 +65,7 @@ Format: `Status: Accepted | Superseded by ADR-xxx | Deprecated`
 ## ADR-008: Own authentication; Google OAuth only for integrations
 
 - **Date:** 2026-10-01
-- **Status:** Accepted
+- **Status:** Amended by ADR-017 (Google sign-in added as an option)
 - **Context:** Mixing "Sign in with Google" with Calendar/Tasks consent couples login to sensitive scopes and forces Google verification for every user.
 - **Decision:** Email/password auth owned by MedSpace (Argon2id, JWT access cookie, rotating refresh tokens with reuse detection, CSRF double-submit). Google is a separately connected account with incremental consent; tokens are Fernet-encrypted at rest.
 - **Consequences:** Without Google app verification the OAuth consent screen stays in *Testing* mode (≤100 named test users). Documented in README. A demo account works without Google entirely.
@@ -133,3 +133,12 @@ Format: `Status: Accepted | Superseded by ADR-xxx | Deprecated`
 - **Context:** MinIO stopped publishing community images to Docker Hub (and quay.io), so `docker compose up` failed for new clones. Separately, a misconfigured store produced generic 500s on upload and silently empty demo accounts.
 - **Decision:** The compose stack uses SeaweedFS (`chrislusf/seaweedfs`, `server -s3`) on port 8333; the app talks plain S3, so production can use Cloudflare R2 or AWS S3 unchanged. `S3Storage` creates its bucket on first use (no init container) and maps provider errors to `503 File storage is temporarily unavailable`. The embedding model is warmed up at API and worker start so the first demo login doesn't pay the download.
 - **Consequences:** One fewer container; storage outages are explicit to users and in logs.
+
+## ADR-017: Optional "Continue with Google" that can also connect reminders
+
+- **Date:** 2026-10-02
+- **Status:** Accepted (amends ADR-008)
+- **Context:** Users who live in Google expect one-click sign-in, and connecting Calendar/Tasks as a separate step afterwards is friction. Making Google the *only* sign-in would force every user (and every recruiter trying the demo) through Google's sensitive-scope consent screen and its 100-test-user cap.
+- **Decision:** Email/password stays; "Continue with Google" is an option on both auth pages. It requests `openid email profile` plus `calendar.events` and `tasks` in a single consent. If the user leaves Calendar/Tasks ticked, the OAuth connection is stored and reminders work immediately; if they untick them (Google's granular consent allows it), they are simply signed in and can connect later from Settings or the "Add to Google" dialog. Both flows share one callback (`/api/integrations/google/callback`), so only one redirect URI is registered; a signed, httpOnly state cookie carries the intent (`login` or `connect`), the PKCE verifier and a validated relative `next` path.
+- **Account rules:** match on Google's stable `sub` first; link an existing password account only when Google reports the email as verified (otherwise `email_taken`, never silent takeover); otherwise create a password-less account. Password login on a Google-only account fails with the same generic error as a wrong password. In simulation mode each sign-in is a distinct, seeded, 24-hour demo account so visitors never share data.
+- **Consequences:** `users.password_hash` is nullable and `users.google_sub` is unique. One consent screen for the common case, still optional for everyone else.

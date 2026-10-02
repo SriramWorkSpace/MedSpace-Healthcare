@@ -96,7 +96,7 @@ modules/<name>/
 
 | Module | Owns | Key responsibilities |
 |---|---|---|
-| `identity` | `users`, `refresh_tokens` | Signup/login, Argon2 hashing, JWT access cookie, rotating refresh tokens with reuse detection, CSRF, demo login |
+| `identity` | `users`, `refresh_tokens` | Signup/login, optional Google sign-in (account matching and verified-email linking), Argon2 hashing, JWT access cookie, rotating refresh tokens with reuse detection, CSRF, demo login |
 | `documents` | `documents`, `document_pages` | Upload intake (type/size/magic-byte validation, SHA-256 dedupe), object storage, page text, processing status, signed preview streaming |
 | `extraction` | `extractions` | Pipeline: text-layer vs. scanned detection → Groq extraction → Pydantic validation → frequency normalization → draft extraction with per-field confidence + source page |
 | `records` | `prescriptions`, `medications`, `care_actions` | Confirm drafts into official records, medication schedules, prescription reports |
@@ -205,7 +205,7 @@ Guardrails (system prompt + post-checks):
 
 ### 4.6 Google integration
 
-- App login is MedSpace's own; Google is an **optional connected account** (incremental authorization: `calendar.events` + `tasks` scopes, `access_type=offline`, `prompt=consent`).
+- Sign-in is email/password **or optional "Continue with Google"** (ADR-017), which asks for identity plus `calendar.events` + `tasks` in one consent. Users who skip those scopes, or use a password, connect Google later (`access_type=offline`, `prompt=consent`). Both flows share one callback; a signed state cookie records the intent.
 - Refresh tokens encrypted at rest with Fernet (`TOKEN_ENCRYPTION_KEY`).
 - **Calendar**: one recurring event per medication dose time (`RRULE:FREQ=DAILY;UNTIL=...`), appointments and follow-ups as single events. Uses `extendedProperties.private.medspace_id` for idempotency.
 - **Tasks**: one-off care actions (lab tests, finish course, upload report) in a dedicated "MedSpace" task list. Google Tasks stores dates only (no time, no recurrence), so recurring dose reminders always go to Calendar.
@@ -245,7 +245,7 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 
 | Area | Endpoints |
 |---|---|
-| Auth | `POST /auth/signup` · `POST /auth/login` · `POST /auth/demo` · `POST /auth/refresh` · `POST /auth/logout` · `GET /auth/me` |
+| Auth | `POST /auth/signup` · `POST /auth/login` · `POST /auth/demo` · `POST /auth/refresh` · `POST /auth/logout` · `GET /auth/me` · `GET /auth/session` · `GET /auth/google/start` · `GET /auth/google/providers` |
 | Documents | `POST /documents` · `GET /documents` · `GET /documents/{id}` · `GET /documents/{id}/file` · `POST /documents/{id}/reprocess` · `DELETE /documents/{id}` |
 | Extraction | `GET /documents/{id}/extraction` · `POST /extractions/{id}/confirm` · `POST /extractions/{id}/discard` |
 | Records | `GET /prescriptions` · `GET /prescriptions/{id}` · `GET /prescriptions/{id}/report` · `GET /medications?active=true` · `PATCH /medications/{id}` · `GET /care-actions` · `PATCH /care-actions/{id}` |
