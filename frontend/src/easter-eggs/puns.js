@@ -39,6 +39,7 @@ export const EMPTY_QUIPS = {
   chat: "Ask away. Unlike a waiting room, there's no queue.",
   review: "Inbox zero, clinically speaking.",
   diet: "No diet notes yet. An apple a day remains a solid default.",
+  labs: "A clean slate. Nothing here to test your patience.",
 };
 
 export const NOT_FOUND_LINES = [

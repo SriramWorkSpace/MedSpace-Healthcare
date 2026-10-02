@@ -21,6 +21,8 @@ test("no page scrolls sideways on a phone", async ({ page }) => {
     "/app/documents",
     "/app/medications",
     "/app/diet",
+    "/app/labs",
+    "/app/labs/ldl-cholesterol",
     "/app/timeline",
     "/app/ask",
     "/app/sharing",
@@ -34,5 +36,17 @@ test("no page scrolls sideways on a phone", async ({ page }) => {
       clientWidth: document.documentElement.clientWidth,
     }));
     expect(scrollWidth, `${path} overflows horizontally`).toBeLessThanOrEqual(clientWidth);
+  }
+});
+
+test("the app bar fits tablets and small laptops", async ({ page }) => {
+  await startDemo(page);
+  for (const width of [768, 1024, 1180]) {
+    await page.setViewportSize({ width, height: 800 });
+    const { scrollWidth, clientWidth } = await page.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+    }));
+    expect(scrollWidth, `the app bar overflows at ${width}px`).toBeLessThanOrEqual(clientWidth);
   }
 });

@@ -20,7 +20,6 @@ from app.modules.demo import samples
 from app.modules.documents import service as documents
 from app.modules.documents.models import DocumentStatus
 from app.modules.extraction import service as extraction
-from app.modules.extraction.schemas import ExtractionPayload
 from app.modules.identity import service as identity
 from app.modules.identity.models import User
 from app.modules.identity.schemas import SignupIn
@@ -61,21 +60,19 @@ async def seed(session: AsyncSession, user: User) -> None:
     for a in actions.all():
         a.completed_at = datetime.combine(a.due_on, time(17, 0), tzinfo=UTC)
 
-    # A lab report, confirmed as-is.
-    lab = samples.LAB_REPORT
-    lab_date = today - timedelta(days=lab.days_ago)
-    doc = await _ingest(
-        session, user, f"lab-{lab.slug}.pdf", samples.build_lab_pdf(lab, today), lab_date
-    )
-    doc.title = "Lipid profile results"
-    payload = ExtractionPayload(
-        document_type="lab_report",
-        issued_on=lab_date,
-        summary="Lipid panel from Cedar Valley Diagnostics with four results.",
-        overall_confidence=0.95,
-    )
-    draft = await extraction.save_draft(session, doc, payload, "heuristic", None)
-    await extraction.confirm(session, user, draft.id, extraction.payload_to_confirm(payload))
+    # Lab reports run through the same offline extraction and are confirmed as read.
+    for lab in samples.LAB_REPORTS:
+        lab_date = today - timedelta(days=lab.days_ago)
+        doc = await _ingest(
+            session, user, f"lab-{lab.slug}.pdf", samples.build_lab_pdf(lab, today), lab_date
+        )
+        doc.title = lab.title.capitalize()
+        texts = await _page_texts(session, doc.id)
+        payload, method, model = await extraction.extract_document(
+            doc, texts, user.dose_times, offline=True
+        )
+        draft = await extraction.save_draft(session, doc, payload, method, model)
+        await extraction.confirm(session, user, draft.id, extraction.payload_to_confirm(payload))
 
     # A fresh prescription waiting in the review queue.
     pending = samples.PENDING

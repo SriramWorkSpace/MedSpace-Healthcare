@@ -80,6 +80,48 @@ class DietNotesOut(BaseModel):
     medication_notes: list[MedicationFoodNote]
 
 
+class LabResultOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+    analyte_key: str
+    value_text: str
+    value: float | None
+    unit: str | None
+    ref_range: str | None
+    ref_low: float | None
+    ref_high: float | None
+    flag: str | None
+    collected_on: date
+    source_page: int | None
+    document_id: uuid.UUID
+    document_title: str | None = None
+
+
+class LabPoint(BaseModel):
+    value: float
+    collected_on: date
+    flag: str | None
+
+
+class LabTrendOut(BaseModel):
+    """Every result for one test, newest first, with a chartable series in the latest unit."""
+
+    key: str
+    name: str
+    unit: str | None
+    count: int
+    latest: LabResultOut
+    previous: LabResultOut | None
+    points: list[LabPoint]
+    uncharted: int  # results in another unit, or not numeric
+
+
+class LabTrendDetail(LabTrendOut):
+    results: list[LabResultOut]
+
+
 class PrescriptionSummary(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

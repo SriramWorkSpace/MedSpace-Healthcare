@@ -28,6 +28,7 @@ from app.modules.extraction.schemas import (
     ConfirmCareAction,
     ConfirmDietNote,
     ConfirmIn,
+    ConfirmLabResult,
     ConfirmMedication,
     ExtractedCareAction,
     ExtractionPayload,
@@ -105,6 +106,8 @@ def _merge(parts: list[ExtractionPayload]) -> ExtractionPayload:
                 seen.add(key)
                 base.medications.append(m)
         base.care_actions.extend(p.care_actions)
+        base.diet_notes.extend(p.diet_notes)
+        base.lab_results.extend(p.lab_results)
     confs = [p.overall_confidence for p in parts]
     base.overall_confidence = round(sum(confs) / len(confs), 2)
     return base
@@ -197,6 +200,17 @@ def post_process(
             note.source_page = min(max(1, note.source_page), page_count)
             notes.append(note)
     p.diet_notes = notes
+
+    seen_results: set[tuple[str, int]] = set()
+    results = []
+    for r in p.lab_results:
+        r.name = r.name.strip().rstrip(":").strip()
+        r.source_page = min(max(1, r.source_page), page_count)
+        key = (r.name.lower(), r.source_page)
+        if r.name and key not in seen_results:
+            seen_results.add(key)
+            results.append(r)
+    p.lab_results = results
 
     deduped: dict[tuple[str, str], ExtractedCareAction] = {}
     for action in p.care_actions:
@@ -345,6 +359,7 @@ async def confirm(
             "version": extraction.version,
             "medications": len(data.medications),
             "care_actions": len(data.care_actions),
+            "lab_results": len(data.lab_results),
         },
     )
     await session.flush()
@@ -418,5 +433,16 @@ def payload_to_confirm(payload: ExtractionPayload) -> ConfirmIn:
         diet_notes=[
             ConfirmDietNote(text=n.text, category=n.category, source_page=n.source_page)
             for n in payload.diet_notes
+        ],
+        lab_results=[
+            ConfirmLabResult(
+                name=r.name,
+                value=r.value,
+                unit=r.unit,
+                ref_range=r.ref_range,
+                flag=r.flag,
+                source_page=r.source_page,
+            )
+            for r in payload.lab_results
         ],
     )

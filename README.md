@@ -30,6 +30,8 @@ then into calendar reminders, to-dos, a health timeline and answers you can trac
 | ![Side-by-side review of an extracted prescription](docs/screenshots/review.png) | ![Source-grounded answers with citations](docs/screenshots/ask.png) |
 | **Dashboard (dark)** | **Printable report** |
 | ![Today's doses, review queue and upcoming items](docs/screenshots/dashboard-dark.png) | ![Prescription summary report](docs/screenshots/report.png) |
+| **Lab results over time** | **Search (Ctrl+K)** |
+| ![LDL cholesterol charted across three reports with the printed range as a band](docs/screenshots/labs.png) | ![Command palette with grouped results](docs/screenshots/search.png) |
 
 <p align="center">
   <img src="docs/screenshots/mobile-landing.png" alt="Mobile landing" width="24%" />
@@ -50,6 +52,7 @@ then into calendar reminders, to-dos, a health timeline and answers you can trac
 | **Google Tasks** | One-off care actions (get a lab test, finish the course, upload a report) land in a dedicated MedSpace list. |
 | **Ask MedSpace** | A source-grounded assistant (hybrid vector + keyword retrieval) that answers questions about *your* records and cites the document and page for every claim. |
 | **Diet notes** | Food and drink instructions written on your documents ("low-salt diet", "avoid alcohol while on antibiotics") gathered on one page with their source, plus food rules on your current medicines. Copied, never invented. |
+| **Lab results over time** | Values from your lab reports, reviewed like everything else and charted per test with the range printed on the report as a band. Flags compare a result only with its own report's range; MedSpace never interprets them. |
 | **Search everything** | Press Ctrl+K anywhere to find a medicine, doctor, to-do, diet note or a line inside any document as you type. Results jump straight to the right card or page, or hand your question to Ask MedSpace. |
 | **Health timeline** | Prescriptions, medications, appointments and reports in one chronological view. |
 | **Secure sharing** | Scoped, expiring, revocable links with view limits and a full audit trail. |

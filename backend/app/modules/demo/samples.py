@@ -121,19 +121,51 @@ class LabReport:
     rows: list[tuple[str, str, str]]
 
 
-LAB_REPORT = LabReport(
-    slug="cedar-lipid",
-    lab="Cedar Valley Diagnostics",
-    address="41 Laurel Road, Boulder, CO 80302  |  (303) 555-0174",
-    title="Lipid Profile Results",
-    days_ago=47,
-    rows=[
-        ("Total cholesterol", "212 mg/dL", "< 200"),
-        ("LDL cholesterol", "138 mg/dL", "< 130"),
-        ("HDL cholesterol", "48 mg/dL", "> 40"),
-        ("Triglycerides", "131 mg/dL", "< 150"),
-    ],
-)
+_CEDAR = "Cedar Valley Diagnostics"
+_CEDAR_ADDRESS = "41 Laurel Road, Boulder, CO 80302  |  (303) 555-0174"
+
+
+def _lipids(slug: str, days_ago: int, tc: int, ldl: int, hdl: int, tg: int) -> LabReport:
+    return LabReport(
+        slug=slug,
+        lab=_CEDAR,
+        address=_CEDAR_ADDRESS,
+        title="Lipid Profile Results",
+        days_ago=days_ago,
+        rows=[
+            ("Total cholesterol", f"{tc} mg/dL", "< 200"),
+            ("LDL cholesterol", f"{ldl} mg/dL", "< 130"),
+            ("HDL cholesterol", f"{hdl} mg/dL", "> 40"),
+            ("Triglycerides", f"{tg} mg/dL", "< 150"),
+        ],
+    )
+
+
+def _diabetes(slug: str, days_ago: int, a1c: str, glucose: int, creatinine: str) -> LabReport:
+    return LabReport(
+        slug=slug,
+        lab=_CEDAR,
+        address=_CEDAR_ADDRESS,
+        title="Diabetes Monitoring Panel",
+        days_ago=days_ago,
+        rows=[
+            ("HbA1c", f"{a1c} %", "4.0 - 5.6"),
+            ("Fasting glucose", f"{glucose} mg/dL", "70 - 99"),
+            ("Creatinine", f"{creatinine} mg/dL", "0.6 - 1.1"),
+        ],
+    )
+
+
+LAB_REPORT = _lipids("cedar-lipid", 47, 212, 138, 48, 131)
+
+# Older reports give the Labs page a history to chart. Newest first.
+LAB_REPORTS = [
+    LAB_REPORT,
+    _diabetes("cedar-diabetes", 21, "6.8", 118, "0.8"),
+    _diabetes("cedar-diabetes-spring", 203, "7.4", 142, "0.9"),
+    _lipids("cedar-lipid-spring", 231, 224, 149, 46, 154),
+    _lipids("cedar-lipid-last-year", 412, 236, 158, 44, 172),
+]
 
 
 def build_lab_pdf(r: LabReport, today: date | None = None) -> bytes:

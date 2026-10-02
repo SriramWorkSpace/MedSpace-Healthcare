@@ -18,7 +18,7 @@ async def demo(client: httpx.AsyncClient) -> dict:
 async def test_demo_account_is_seeded_with_history(client: httpx.AsyncClient):
     await demo(client)
     docs = (await client.get("/api/documents")).json()
-    assert docs["counts"]["confirmed"] == 4
+    assert docs["counts"]["confirmed"] == 8  # 3 prescriptions + 5 lab reports
     assert docs["counts"]["needs_review"] == 1
 
     prescriptions = (await client.get("/api/prescriptions")).json()
@@ -85,7 +85,8 @@ async def test_export_contains_records_but_no_secrets(client: httpx.AsyncClient)
     assert "attachment" in resp.headers["content-disposition"]
     data = resp.json()
     assert data["format"] == "medspace-export/v1"
-    assert len(data["documents"]) == 5
+    assert len(data["documents"]) == 9
+    assert len(data["lab_results"]) == 18
     assert len(data["prescriptions"]) == 3
     assert data["prescriptions"][0]["medications"]
     assert "auth.demo_login" in {a["action"] for a in data["activity"]}

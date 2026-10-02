@@ -73,6 +73,7 @@ async def build_export(session: AsyncSession, user: User) -> dict:
             "prescriptions": prescriptions,
             "other_to_dos": standalone_actions,
             "diet_notes": (await records.list_diet_notes(session, user.id)).notes,
+            "lab_results": await records.list_lab_results(session, user.id),
             "conversations": threads,
             "share_links": shares,
             "activity": activity,

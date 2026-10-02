@@ -13,12 +13,16 @@ from app.core.db import utcnow
 from app.core.errors import NotFound
 from app.modules.documents.models import Document
 from app.modules.extraction.schemas import ConfirmIn
-from app.modules.records.models import CareAction, DietNote, Medication, Prescription
+from app.modules.records.models import CareAction, DietNote, LabResult, Medication, Prescription
 from app.modules.records.schemas import (
     CareActionOut,
     CareActionUpdate,
     DietNoteOut,
     DietNotesOut,
+    LabPoint,
+    LabResultOut,
+    LabTrendDetail,
+    LabTrendOut,
     MedicationFoodNote,
     MedicationOut,
     MedicationUpdate,
@@ -76,6 +80,25 @@ async def replace_for_document(
     await session.execute(
         delete(DietNote).where(DietNote.document_id == document.id, DietNote.user_id == user_id)
     )
+    await session.execute(
+        delete(LabResult).where(LabResult.document_id == document.id, LabResult.user_id == user_id)
+    )
+    collected_on = data.issued_on or document.document_date or document.created_at.date()
+    for position, r in enumerate(data.lab_results):
+        session.add(
+            LabResult(
+                user_id=user_id,
+                document_id=document.id,
+                name=r.name.strip(),
+                value_text=r.value.strip(),
+                unit=(r.unit or "").strip() or None,
+                ref_range=(r.ref_range or "").strip() or None,
+                collected_on=collected_on,
+                position=position,
+                source_page=r.source_page,
+                **r.normalized(),
+            )
+        )
 
     def add_diet_notes(prescription_id: uuid.UUID | None) -> None:
         for n in data.diet_notes:
@@ -361,6 +384,81 @@ async def delete_diet_note(session: AsyncSession, user_id: uuid.UUID, note_id: u
     if note is None:
         raise NotFound("Diet note not found.")
     await session.delete(note)
+    await session.flush()
+
+
+# ---- Lab results (ADR-020) ----------------------------------------------------------------------
+
+
+def _lab_out(r: LabResult, title: str | None) -> LabResultOut:
+    out = LabResultOut.model_validate(r)
+    out.document_title = title
+    return out
+
+
+def _trend(results: list[LabResultOut]) -> LabTrendOut:
+    """results: one test, newest first."""
+    latest = results[0]
+    unit = (latest.unit or "").lower()
+    charted = [r for r in results if r.value is not None and (r.unit or "").lower() == unit]
+    return LabTrendOut(
+        key=latest.analyte_key,
+        name=latest.name,
+        unit=latest.unit,
+        count=len(results),
+        latest=latest,
+        previous=results[1] if len(results) > 1 else None,
+        points=[
+            LabPoint(value=r.value, collected_on=r.collected_on, flag=r.flag)
+            for r in reversed(charted)
+        ],
+        uncharted=len(results) - len(charted),
+    )
+
+
+async def _lab_results(
+    session: AsyncSession, user_id: uuid.UUID, key: str | None = None
+) -> dict[str, list[LabResultOut]]:
+    query = (
+        select(LabResult, Document.title)
+        .join(Document, Document.id == LabResult.document_id)
+        .where(LabResult.user_id == user_id)
+        .order_by(LabResult.collected_on.desc(), Document.created_at.desc(), LabResult.position)
+    )
+    if key is not None:
+        query = query.where(LabResult.analyte_key == key)
+    grouped: dict[str, list[LabResultOut]] = {}
+    for r, title in (await session.execute(query)).all():
+        grouped.setdefault(r.analyte_key, []).append(_lab_out(r, title))
+    return grouped
+
+
+async def list_lab_results(session: AsyncSession, user_id: uuid.UUID) -> list[LabResultOut]:
+    return [r for group in (await _lab_results(session, user_id)).values() for r in group]
+
+
+async def list_lab_trends(session: AsyncSession, user_id: uuid.UUID) -> list[LabTrendOut]:
+    """One entry per test; tests from the most recent report first, in report order."""
+    # Grouping keeps insertion order, which already follows each test's newest result.
+    return [_trend(results) for results in (await _lab_results(session, user_id)).values()]
+
+
+async def get_lab_trend(session: AsyncSession, user_id: uuid.UUID, key: str) -> LabTrendDetail:
+    results = (await _lab_results(session, user_id, key)).get(key)
+    if not results:
+        raise NotFound("No results for this test.")
+    return LabTrendDetail(**_trend(results).model_dump(), results=results)
+
+
+async def delete_lab_result(
+    session: AsyncSession, user_id: uuid.UUID, result_id: uuid.UUID
+) -> None:
+    result = await session.scalar(
+        select(LabResult).where(LabResult.id == result_id, LabResult.user_id == user_id)
+    )
+    if result is None:
+        raise NotFound("Lab result not found.")
+    await session.delete(result)
     await session.flush()
 
 

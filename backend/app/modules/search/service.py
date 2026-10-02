@@ -1,4 +1,4 @@
-"""Global search: one query across medications, prescriptions, documents, to-dos and diet notes.
+"""Global search across medications, prescriptions, documents, to-dos, diet notes and labs.
 
 A read model like the timeline (no tables of its own). Names use case-insensitive substring
 matching; document contents use Postgres full-text search with prefix matching, so "amox"
@@ -7,6 +7,7 @@ finds "Amoxicillin" as the user types. Every query is scoped by user_id.
 
 from __future__ import annotations
 
+import datetime as dt
 import re
 import uuid
 
@@ -16,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.assistant.models import DocumentChunk
 from app.modules.documents.models import Document
-from app.modules.records.models import CareAction, DietNote, Medication, Prescription
+from app.modules.records.models import CareAction, DietNote, LabResult, Medication, Prescription
 from app.modules.records.service import medication_status
 
 PER_GROUP = 5
@@ -24,7 +25,7 @@ _WORD = re.compile(r"[a-z0-9]+")
 
 
 class SearchHit(BaseModel):
-    type: str  # medication | prescription | document | care_action | diet_note
+    type: str  # medication | prescription | document | care_action | diet_note | lab_result
     id: uuid.UUID
     title: str
     subtitle: str | None = None
@@ -41,6 +42,12 @@ class SearchResults(BaseModel):
 def _like(q: str) -> str:
     escaped = q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
     return f"%{escaped}%"
+
+
+def _when(d: Document) -> str:
+    """Documents often share a title ("Lipid profile results"), so hits carry their date."""
+    day: dt.date = d.document_date or d.created_at.date()
+    return f"{day:%b} {day.day}, {day.year}"
 
 
 def _prefix_tsquery(q: str) -> str | None:
@@ -129,7 +136,7 @@ async def search(session: AsyncSession, user_id: uuid.UUID, q: str) -> SearchRes
             type="document",
             id=d.id,
             title=d.title,
-            subtitle=d.kind.replace("_", " ").capitalize(),
+            subtitle=" · ".join(filter(None, [d.kind.replace("_", " ").capitalize(), _when(d)])),
             href=f"/app/documents/{d.id}",
         )
     tsq_text = _prefix_tsquery(q)
@@ -143,21 +150,21 @@ async def search(session: AsyncSession, user_id: uuid.UUID, q: str) -> SearchRes
         )
         rows = (
             await session.execute(
-                select(DocumentChunk.document_id, DocumentChunk.page_no, Document.title, headline)
+                select(DocumentChunk.document_id, DocumentChunk.page_no, Document, headline)
                 .join(Document, Document.id == DocumentChunk.document_id)
                 .where(DocumentChunk.user_id == user_id, DocumentChunk.tsv.op("@@")(tsq))
                 .order_by(func.ts_rank_cd(DocumentChunk.tsv, tsq).desc())
                 .limit(PER_GROUP * 3)
             )
         ).all()
-        for doc_id, page_no, title, snippet in rows:
+        for doc_id, page_no, d, snippet in rows:
             if doc_id in docs or len(docs) >= PER_GROUP:
                 continue
             docs[doc_id] = SearchHit(
                 type="document",
                 id=doc_id,
-                title=title,
-                subtitle=f"Page {page_no}",
+                title=d.title,
+                subtitle=" · ".join(filter(None, [_when(d), f"page {page_no}"])),
                 snippet=" ".join(snippet.split()),
                 href=f"/app/documents/{doc_id}?page={page_no}",
             )
@@ -202,6 +209,36 @@ async def search(session: AsyncSession, user_id: uuid.UUID, q: str) -> SearchRes
             href="/app/diet",
         )
         for n in notes
+    ]
+
+    # Lab results: one hit per test (its newest result), linking to the trend.
+    latest: dict[str, LabResult] = {}
+    for r in (
+        await session.scalars(
+            select(LabResult)
+            .where(LabResult.user_id == user_id, LabResult.name.ilike(like))
+            .order_by(LabResult.collected_on.desc(), LabResult.position)
+            .limit(PER_GROUP * 6)
+        )
+    ).all():
+        latest.setdefault(r.analyte_key, r)
+    groups["lab_results"] = [
+        SearchHit(
+            type="lab_result",
+            id=r.id,
+            title=r.name,
+            subtitle=" · ".join(
+                filter(
+                    None,
+                    [
+                        f"{r.value_text} {r.unit or ''}".strip(),
+                        f"{r.collected_on:%b} {r.collected_on.day}, {r.collected_on.year}",
+                    ],
+                )
+            ),
+            href=f"/app/labs/{r.analyte_key}",
+        )
+        for r in list(latest.values())[:PER_GROUP]
     ]
 
     groups = {k: v for k, v in groups.items() if v}

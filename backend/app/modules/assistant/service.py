@@ -52,7 +52,9 @@ ADVICE = re.compile(
     r"is it (?:safe|ok|okay|dangerous|bad)|can i (?:take|mix|drink|stop|skip|double|combine)|"
     r"diagnos\w*|what(?:'s| is) wrong with me|do i have|am i (?:sick|ill)|"
     r"(?:increase|decrease|change|adjust|lower|raise) (?:my )?(?:dose|dosage)|"
-    r"side effects? (?:of|from)|interact\w*|overdose|instead of)\b",
+    r"side effects? (?:of|from)|interact\w*|overdose|instead of|"
+    r"is (?:my|this|that)(?: [a-z0-9]+){1,4} (?:bad|good|normal|high|low|ok|okay|dangerous|healthy|"
+    r"worrying|concerning)|what does (?:my|this|that|it) [a-z0-9 ]{0,30}mean)\b",
     re.IGNORECASE,
 )
 MEDS_LIST = re.compile(
@@ -67,6 +69,15 @@ DIET = re.compile(
     r"nutrition|nutrients?|snack|snacks|fried|fatty)\b",
     re.IGNORECASE,
 )
+
+LABS = re.compile(
+    r"\b(labs?|lab results?|test results?|results?|blood ?work|blood tests?|cholesterol|ldl|hdl|"
+    r"triglycerides?|lipids?|hba1c|a1c|glucose|sugar levels?|creatinine|tsh|thyroid|"
+    r"vitamin [a-z0-9]+|ha?emoglobin|reference range)\b",
+    re.IGNORECASE,
+)
+_LAB_ALIASES = {"a1c": "hba1c", "sugar": "glucose", "lipid": "cholesterol", "lipids": "cholesterol"}
+_LAB_GENERIC = {"total", "fasting", "serum", "random", "level"}
 
 ADVICE_REPLY = (
     "I can't give medical advice, diagnose, or suggest changing a medication or dose. "
@@ -306,6 +317,17 @@ async def gather_sources(
                 )
             )
 
+    # Lab questions: confirmed results with the range printed on each report. No interpretation.
+    if LABS.search(question):
+        from app.modules.records import service as records
+
+        trends = await records.list_lab_trends(session, user_id)
+        words = set(re.findall(r"[a-z0-9]+", question.lower()))
+        words |= {_LAB_ALIASES[w] for w in words if w in _LAB_ALIASES}
+        specific = [t for t in trends if (set(t.key.split("-")) - _LAB_GENERIC) & words]
+        for t in (specific or trends)[:10]:
+            sources.append(_lab_source(len(sources) + 1, t))
+
     if chunk_ids:
         chunk_rows = (
             await session.execute(
@@ -380,6 +402,33 @@ def describe_medication(m: Medication) -> str:
         span = f", ongoing since {_day(m.start_date)}"
     extra = f", {m.instructions}" if m.instructions else ""
     return f"{name}: {how}{span}{extra}"
+
+
+def _lab_source(n: int, t) -> Source:
+    """t: a records LabTrendOut. States the value and the printed range, nothing more."""
+    r = t.latest
+    unit = f" {r.unit}" if r.unit else ""
+    line = f"{t.name}: {r.value_text}{unit} on {_day(r.collected_on)}, {r.collected_on.year}"
+    if r.ref_range:
+        where = {"high": "above", "low": "below", "normal": "within"}.get(r.flag or "")
+        marked = f", {where} that range" if where else ""
+        line += f" (range printed on the report: {r.ref_range}{marked})"
+    line += "."
+    if p := t.previous:
+        p_unit = f" {p.unit}" if p.unit else ""
+        line += (
+            f" Previous: {p.value_text}{p_unit} on {_day(p.collected_on)}, {p.collected_on.year}."
+        )
+    return Source(
+        n=n,
+        kind="record",
+        title=f"{t.name} (lab result)",
+        page_no=r.source_page,
+        snippet=line[:220],
+        document_id=str(r.document_id),
+        confirmed=True,
+        text=f"{line} Source: {r.document_title} page {r.source_page or 1}.",
+    )
 
 
 def compose_offline(question: str, intent: str, sources: list[Source]) -> str:

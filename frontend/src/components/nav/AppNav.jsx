@@ -5,6 +5,7 @@ import {
   ChatsCircle,
   ClockCounterClockwise,
   FileText,
+  Flask,
   ForkKnife,
   List,
   MagnifyingGlass,
@@ -30,6 +31,7 @@ const APP_LINKS = [
   { to: "/app", label: "Dashboard", icon: SquaresFour, end: true },
   { to: "/app/documents", label: "Documents", icon: FileText },
   { to: "/app/medications", label: "Medications", icon: Pill },
+  { to: "/app/labs", label: "Labs", icon: Flask },
   { to: "/app/diet", label: "Diet", icon: ForkKnife },
   { to: "/app/timeline", label: "Timeline", icon: ClockCounterClockwise },
   { to: "/app/ask", label: "Ask", icon: ChatsCircle },
@@ -61,7 +63,7 @@ export function AppNav() {
           <Logo />
         </Link>
 
-        <ul className="hidden items-center gap-0.5 md:flex">
+        <ul className="hidden items-center gap-0.5 lg:flex">
           {APP_LINKS.map(({ to, label, end }) => (
             <li key={to}>
               <NavLink to={to} end={end} className="navlink isolate">
@@ -95,8 +97,8 @@ export function AppNav() {
             className="searchpill"
           >
             <MagnifyingGlass size={16} weight="bold" />
-            <span className="hidden lg:inline">Search…</span>
-            <kbd className="kbd hidden lg:inline">{IS_MAC ? "⌘K" : "Ctrl K"}</kbd>
+            <span className="hidden xl:inline">Search…</span>
+            <kbd className="kbd hidden xl:inline">{IS_MAC ? "⌘K" : "Ctrl K"}</kbd>
           </button>
           <Button
             size="sm"
@@ -112,7 +114,7 @@ export function AppNav() {
             variant="ghost"
             size="sm"
             icon
-            className="md:hidden"
+            className="lg:hidden"
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             aria-controls="mobile-nav"
@@ -123,7 +125,12 @@ export function AppNav() {
         </div>
       </nav>
 
-      <MobileDrawer id="mobile-nav" open={open} onClose={() => setOpen(false)}>
+      <MobileDrawer
+        id="mobile-nav"
+        open={open}
+        onClose={() => setOpen(false)}
+        hiddenFrom="lg:hidden"
+      >
         <ul className="grid grid-cols-1 gap-1">
           {APP_LINKS.map(({ to, label, icon: Icon, end }, i) => (
             <motion.li

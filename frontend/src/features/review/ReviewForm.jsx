@@ -1,4 +1,4 @@
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "motion/react";
 import { CheckCircle, Plus, Trash, Warning } from "@phosphor-icons/react";
@@ -9,6 +9,7 @@ import {
   CARE_KINDS,
   emptyCareAction,
   emptyDietNote,
+  emptyLabResult,
   DIET_CATEGORIES,
   emptyMedication,
   formToConfirm,
@@ -42,10 +43,74 @@ export function ReviewForm({ extraction, onConfirm, onDiscard, confirming, onChe
   const meds = useFieldArray({ control, name: "medications" });
   const actions = useFieldArray({ control, name: "care_actions" });
   const diet = useFieldArray({ control, name: "diet_notes" });
+  const results = useFieldArray({ control, name: "lab_results" });
+  const isLabReport = useWatch({ control, name: "document_kind" }) === "lab_report";
   const errors = formState.errors;
   const flagged = (payload.medications ?? []).filter(
     (m) => (m.confidence ?? 1) < 0.85 || m.uncertain_fields?.length,
   ).length;
+
+  const labSection = (
+    <Section
+      title="Lab results"
+      description="Values, units and reference ranges exactly as printed. MedSpace compares each value only with the range on this report."
+      action={
+        <Button variant="secondary" size="sm" onClick={() => results.append(emptyLabResult())}>
+          <Plus size={14} weight="bold" /> Add
+        </Button>
+      }
+    >
+      {results.fields.length === 0 ? (
+        <p className="rounded-card border border-dashed border-line-strong px-5 py-6 text-center text-sm text-ink-2">
+          No test results on this document.
+        </p>
+      ) : (
+        <ul className="card card--flat divide-y divide-line">
+          <AnimatePresence initial={false}>
+            {results.fields.map((f, i) => (
+              <motion.li
+                key={f.id}
+                layout
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, transition: { duration: 0.12 } }}
+                className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-[1.5fr_0.8fr_0.8fr_1fr_auto] sm:items-end"
+              >
+                <Field
+                  label="Test"
+                  error={errors.lab_results?.[i]?.name?.message}
+                  className="col-span-2 sm:col-span-1"
+                >
+                  <Input {...register(`lab_results.${i}.name`)} />
+                </Field>
+                <Field label="Result" error={errors.lab_results?.[i]?.value?.message}>
+                  <Input className="tabular" {...register(`lab_results.${i}.value`)} />
+                </Field>
+                <Field label="Unit" optional>
+                  <Input {...register(`lab_results.${i}.unit`)} />
+                </Field>
+                <Field label="Reference range" optional className="col-span-2 sm:col-span-1">
+                  <Input className="tabular" {...register(`lab_results.${i}.ref_range`)} />
+                </Field>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon
+                  aria-label="Remove result"
+                  onClick={() => results.remove(i)}
+                  className="col-span-2 justify-self-end sm:col-span-1 sm:mb-1"
+                >
+                  <Trash size={15} />
+                </Button>
+              </motion.li>
+            ))}
+          </AnimatePresence>
+        </ul>
+      )}
+    </Section>
+  );
+  // On a lab report the results are the point, so they come straight after the details.
+  const labFirst = isLabReport || (results.fields.length > 0 && meds.fields.length === 0);
 
   return (
     <form
@@ -105,6 +170,8 @@ export function ReviewForm({ extraction, onConfirm, onDiscard, confirming, onChe
           </Field>
         </div>
       </Section>
+
+      {labFirst && labSection}
 
       <Section
         title="Medications"
@@ -252,6 +319,8 @@ export function ReviewForm({ extraction, onConfirm, onDiscard, confirming, onChe
           </ul>
         )}
       </Section>
+
+      {!labFirst && labSection}
 
       {/* Sticky action bar */}
       <div

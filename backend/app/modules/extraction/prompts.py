@@ -1,4 +1,4 @@
-"""Prompts and the strict JSON schema for prescription extraction."""
+"""Prompts and the strict JSON schema for document extraction."""
 
 from __future__ import annotations
 
@@ -24,6 +24,12 @@ tests, follow-up visits, reports to bring. Do not invent any.
 diet", "avoid alcohol while on antibiotics"). Copy the wording. category is one of avoid, \
 limit, include, timing or general. Never add nutrition advice of your own. Instructions that \
 belong to a single medicine ("after food") stay in that medicine's instructions.
+- lab_results are test results printed on a lab report: name as printed, value exactly as \
+printed ("212", "5.8", "<0.5", "Negative"), unit, and the reference range text exactly as \
+printed ("< 200", "70 - 99"). Set flag to high or low only when the report itself marks the \
+value (H, L, High, Low, *); otherwise null. Never supply a reference range that is not \
+printed and never interpret a result. A test that is ordered but has no result is a \
+care_action, not a lab result.
 - summary: one or two neutral sentences describing what the document contains. No advice.
 - Use null for anything not present. Output JSON only."""
 
@@ -89,6 +95,21 @@ _DIET = {
 }
 _DIET["required"] = list(_DIET["properties"])
 
+_LAB_RESULT = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "name": {"type": "string"},
+        "value": {"type": "string"},
+        "unit": _nullable("string"),
+        "ref_range": _nullable("string"),
+        "flag": {"type": ["string", "null"], "enum": ["high", "low", None]},
+        "source_page": {"type": "integer"},
+        "confidence": {"type": "number"},
+    },
+}
+_LAB_RESULT["required"] = list(_LAB_RESULT["properties"])
+
 _PRESCRIBER = {
     "type": ["object", "null"],
     "additionalProperties": False,
@@ -120,6 +141,7 @@ EXTRACTION_SCHEMA: dict[str, Any] = {
         "medications": {"type": "array", "items": _MED},
         "care_actions": {"type": "array", "items": _ACTION},
         "diet_notes": {"type": "array", "items": _DIET},
+        "lab_results": {"type": "array", "items": _LAB_RESULT},
         "summary": _nullable("string"),
         "overall_confidence": {"type": "number"},
     },
@@ -132,6 +154,7 @@ JSON_SHAPE_HINT = (
     "frequency_raw,duration_raw,duration_days,instructions,as_needed,source_page,confidence,"
     "uncertain_fields[]}], care_actions[{kind,title,due_on,notes,source_page,confidence}], "
     "diet_notes[{text,category,source_page,confidence}], "
+    "lab_results[{name,value,unit,ref_range,flag,source_page,confidence}], "
     "summary, overall_confidence."
 )
 

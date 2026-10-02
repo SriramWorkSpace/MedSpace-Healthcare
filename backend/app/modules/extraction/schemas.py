@@ -9,6 +9,9 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.modules.extraction import labs
+from app.modules.extraction.labs import LabFlag
+
 CareActionKind = Literal[
     "lab_test", "follow_up", "course_completion", "upload_report", "prepare_documents", "other"
 ]
@@ -83,6 +86,18 @@ class ExtractedDietNote(BaseModel):
     confidence: float = Field(0.8, ge=0, le=1)
 
 
+class ExtractedLabResult(BaseModel):
+    """One test result, copied as printed: the value, its unit and the report's reference range."""
+
+    name: str = Field(min_length=1, max_length=120)
+    value: str = Field(min_length=1, max_length=40)
+    unit: str | None = Field(None, max_length=30)
+    ref_range: str | None = Field(None, max_length=60)
+    flag: LabFlag | None = None
+    source_page: int = Field(1, ge=1)
+    confidence: float = Field(0.8, ge=0, le=1)
+
+
 class ExtractionPayload(BaseModel):
     document_type: Literal["prescription", "lab_report", "other"] = "prescription"
     prescriber: Prescriber | None = None
@@ -92,6 +107,7 @@ class ExtractionPayload(BaseModel):
     medications: list[ExtractedMedication] = Field(default_factory=list)
     care_actions: list[ExtractedCareAction] = Field(default_factory=list)
     diet_notes: list[ExtractedDietNote] = Field(default_factory=list)
+    lab_results: list[ExtractedLabResult] = Field(default_factory=list)
     summary: str | None = None
     overall_confidence: float = Field(0.8, ge=0, le=1)
     warnings: list[str] = Field(default_factory=list)
@@ -144,6 +160,26 @@ class ConfirmDietNote(BaseModel):
     source_page: int | None = None
 
 
+class ConfirmLabResult(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+    value: str = Field(min_length=1, max_length=40)
+    unit: str | None = Field(None, max_length=30)
+    ref_range: str | None = Field(None, max_length=60)
+    flag: LabFlag | None = None  # as printed on the report; the printed range takes precedence
+    source_page: int | None = None
+
+    def normalized(self) -> dict:
+        """Columns derived deterministically from what the user confirmed."""
+        ref = labs.parse_range(self.ref_range)
+        return {
+            "analyte_key": labs.analyte_key(self.name),
+            "value": labs.parse_value(self.value),
+            "ref_low": ref.low if ref else None,
+            "ref_high": ref.high if ref else None,
+            "flag": labs.resolve_flag(self.value, self.ref_range, self.flag),
+        }
+
+
 class ConfirmIn(BaseModel):
     document_kind: Literal["prescription", "lab_report", "other"] = "prescription"
     prescriber: Prescriber | None = None
@@ -152,4 +188,5 @@ class ConfirmIn(BaseModel):
     medications: list[ConfirmMedication] = Field(default_factory=list, max_length=40)
     care_actions: list[ConfirmCareAction] = Field(default_factory=list, max_length=40)
     diet_notes: list[ConfirmDietNote] = Field(default_factory=list, max_length=30)
+    lab_results: list[ConfirmLabResult] = Field(default_factory=list, max_length=80)
     summary: str | None = Field(None, max_length=2000)

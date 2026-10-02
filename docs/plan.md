@@ -112,6 +112,18 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 - [x] Multi-stage web image (nginx + /api proxy), deployment guide (docs/deployment.md), README screenshots
 - [x] Final graphify update and docs sync
 
+## Phase 10: Lab results and trends
+
+- [x] Extraction: `lab_results` in the LLM schema and prompt (copy as printed, flag only when the report marks it); offline extractor reads lab tables in one-line and split name/value/range layouts and stops turning result rows into "get this test" to-dos (ADR-020)
+- [x] Deterministic parsing: values, printed ranges (`< 200`, `>= 40`, `70 - 99`, `up to 5.6`), flags against the printed range, test-name synonyms (`analyte_key`)
+- [x] `lab_results` table replaced on every confirmation; `GET /labs`, `GET /labs/{key}`, `DELETE /lab-results/{id}`; export includes results
+- [x] Review form: a Lab results section, placed first on lab reports
+- [x] Labs page (grouped by report, sparklines, direction of change) and a per-test page (trend chart with the printed range as a band, every result with its source page)
+- [x] Search finds tests; Ask MedSpace cites results with their printed ranges and refuses to interpret them
+- [x] Demo: five dated lab reports (three lipid panels, two diabetes panels) run through the real offline pipeline
+- [x] Fixed: the app bar overflowed sideways between 768px and 1279px; links now collapse into the drawer below `lg`
+- [x] Tests: 28 backend, 5 unit, 2 e2e plus tablet-width overflow checks
+
 ## Phase 9: Global search
 
 - [x] `GET /api/search?q=`: medications and strengths, prescribers and clinics, document titles, text inside documents (prefix full-text with highlighted snippets), to-dos and diet notes, 5 per group, always scoped by `user_id` (ADR-019)
@@ -123,6 +135,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 ---
 
 ## Change log
+
+- **2026-10-02**: Phase 10 shipped: structured lab results with trends (ADR-020). Demo documents grew from 5 to 9. Document search hits now show their date, since several reports can share a title.
 
 - **2026-10-02**: Phase 9 shipped: global search with a Ctrl+K command palette (ADR-019). The palette opens instantly with no animation because it is summoned from the keyboard.
 

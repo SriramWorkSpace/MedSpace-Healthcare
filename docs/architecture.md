@@ -99,7 +99,7 @@ modules/<name>/
 | `identity` | `users`, `refresh_tokens` | Signup/login, optional Google sign-in (account matching and verified-email linking), Argon2 hashing, JWT access cookie, rotating refresh tokens with reuse detection, CSRF, demo login |
 | `documents` | `documents`, `document_pages` | Upload intake (type/size/magic-byte validation, SHA-256 dedupe), object storage, page text, processing status, signed preview streaming |
 | `extraction` | `extractions` | Pipeline: text-layer vs. scanned detection → Groq extraction → Pydantic validation → frequency normalization → draft extraction with per-field confidence + source page |
-| `records` | `prescriptions`, `medications`, `care_actions`, `diet_notes` | Confirm drafts into official records, medication schedules, prescription reports, diet notes copied from documents (ADR-018) |
+| `records` | `prescriptions`, `medications`, `care_actions`, `diet_notes`, `lab_results` | Confirm drafts into official records, medication schedules, prescription reports, diet notes copied from documents (ADR-018), lab results and their trends (ADR-020) |
 | `timeline` | (read model, no tables) | Chronological union over confirmed records, documents, appointments, follow-ups |
 | `search` | (read model, no tables) | Global search: escaped `ILIKE` on names, prefix full-text with `ts_headline` snippets on document chunks, grouped deep-link hits |
 | `assistant` | `document_chunks`, `chat_threads`, `chat_messages` | Chunking, embeddings, hybrid retrieval (pgvector + full-text, RRF fusion), grounded answers with citations, SSE streaming |
@@ -162,10 +162,11 @@ sequenceDiagram
 ### 4.2 Extraction pipeline details
 
 1. **Classify input**: PDF with ≥ 40 chars/page text layer → *text path*; otherwise → *vision path*.
-2. **Extract**: Groq returns JSON matching `PrescriptionExtraction` (prescriber, issued date, medications[], care actions[], follow-up). Every field carries `source_page` and the model's `confidence` (0-1).
+2. **Extract**: Groq returns JSON matching `ExtractionPayload` (prescriber, issued date, medications[], care actions[], diet notes[], lab results[], follow-up). Every field carries `source_page` and the model's `confidence` (0-1).
 3. **Validate**: Pydantic model with strict types. On validation failure: one repair retry (send errors back), then mark `failed` with a reason.
 4. **Normalize**: deterministic Python parser maps `frequency_raw` (`1-0-1`, `BD`, `TDS`, `q8h`, `once daily at bedtime`, `SOS`) to a `Schedule {times[], days_of_week?, as_needed}` using the user's preferred dose times. Unparseable → `needs_attention=true` flag for the reviewer.
-5. **Draft**: stored as `extractions.payload` (JSONB, versioned). Nothing is "official" until the user confirms.
+5. **Lab results** (ADR-020): value, unit and reference range are copied as printed. On confirm, `extraction/labs.py` parses the value and the printed range, flags the value only against that range, and maps the test name to an `analyte_key` ("LDL-C" and "LDL cholesterol" share `ldl-cholesterol`) so reports from different labs chart together. The offline extractor reads a page with a reference-range header as a lab report, in both one-line and split name/value/range layouts.
+6. **Draft**: stored as `extractions.payload` (JSONB, versioned). Nothing is "official" until the user confirms.
 
 ### 4.3 Data lifecycle
 
@@ -186,7 +187,7 @@ flowchart LR
   E --> V[pgvector cosine<br/>WHERE user_id = :uid]
   V --> RRF[Reciprocal Rank Fusion<br/>top 6 chunks]
   FT --> RRF
-  CR[Confirmed medication records] --> P
+  CR[Confirmed records:<br/>medications, diet notes, lab results] --> P
   RRF --> P[Prompt: numbered sources<br/>+ guardrails]
   P --> LLM[Groq gpt-oss-120b<br/>streamed]
   LLM --> SSE[SSE tokens + citations<br/>doc, page, snippet]
@@ -224,6 +225,8 @@ erDiagram
   extractions ||--o| prescriptions : "confirmed into"
   prescriptions ||--o{ medications : lists
   prescriptions ||--o{ care_actions : requires
+  documents ||--o{ diet_notes : "copied from"
+  documents ||--o{ lab_results : "copied from"
   users ||--o{ oauth_connections : connects
   users ||--o{ sync_links : tracks
   users ||--o{ share_links : creates
@@ -250,6 +253,7 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 | Documents | `POST /documents` · `GET /documents` · `GET /documents/{id}` · `GET /documents/{id}/file` · `POST /documents/{id}/reprocess` · `DELETE /documents/{id}` |
 | Extraction | `GET /documents/{id}/extraction` · `POST /extractions/{id}/confirm` · `POST /extractions/{id}/discard` |
 | Records | `GET /prescriptions` · `GET /prescriptions/{id}` · `GET /medications?status=` · `PATCH /medications/{id}` · `GET /care-actions` · `PATCH /care-actions/{id}` · `GET /diet-notes` · `DELETE /diet-notes/{id}` |
+| Labs | `GET /labs` (one trend per test, newest report first) · `GET /labs/{key}` (every result plus a chartable series) · `DELETE /lab-results/{id}` |
 | Dashboard | `GET /dashboard` (today's doses, upcoming, needs-review queue, stats) |
 | Timeline | `GET /timeline?cursor=&types=` |
 | Search | `GET /search?q=` (grouped hits with deep links and highlighted snippets) |
@@ -299,7 +303,9 @@ Route map:
 /app/documents/:id      Review workspace (source preview ↔ extracted fields)
 /app/prescriptions/:id  Prescription report
 /app/medications        Medication schedule
-/app/diet                Diet notes from documents
+/app/labs               Lab results, grouped by report
+/app/labs/:key          One test over time (chart + every result)
+/app/diet               Diet notes from documents
 /app/timeline           Health timeline
 /app/ask                Ask MedSpace (RAG chat)
 /app/sharing            Share links manager
@@ -308,7 +314,7 @@ Route map:
 *                       404 (with a pun)
 ```
 
-Navigation is a **top bar on every screen size**; below `md` it collapses into a compact top drawer.
+Navigation is a **top bar on every screen size**; below `lg` it collapses into a compact top drawer, and the search pill shows its label from `xl`.
 
 ## 9. Testing
 

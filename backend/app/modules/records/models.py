@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -91,6 +91,37 @@ class DietNote(IdMixin, TimestampMixin, Base):
     )
     text: Mapped[str] = mapped_column(String(300))
     category: Mapped[str] = mapped_column(String(16), default="general")
+    source_page: Mapped[int | None] = mapped_column(Integer)
+
+
+class LabResult(IdMixin, TimestampMixin, Base):
+    """One test result copied from a confirmed lab report (ADR-020).
+
+    value_text and ref_range are exactly as printed; value, ref_low, ref_high and flag are parsed
+    from them deterministically so results can be charted. The flag only ever compares a value
+    with the range printed on the same report.
+    """
+
+    __tablename__ = "lab_results"
+    __table_args__ = (Index("ix_lab_results_user_analyte", "user_id", "analyte_key"),)
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    document_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("documents.id", ondelete="CASCADE"), index=True
+    )
+    name: Mapped[str] = mapped_column(String(120))
+    analyte_key: Mapped[str] = mapped_column(String(80))
+    value_text: Mapped[str] = mapped_column(String(40))
+    value: Mapped[float | None] = mapped_column(Float)
+    unit: Mapped[str | None] = mapped_column(String(30))
+    ref_range: Mapped[str | None] = mapped_column(String(60))
+    ref_low: Mapped[float | None] = mapped_column(Float)
+    ref_high: Mapped[float | None] = mapped_column(Float)
+    flag: Mapped[str | None] = mapped_column(String(8))
+    collected_on: Mapped[date] = mapped_column(Date)
+    position: Mapped[int] = mapped_column(Integer, default=0)
     source_page: Mapped[int | None] = mapped_column(Integer)
 
 

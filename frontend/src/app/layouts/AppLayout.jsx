@@ -12,7 +12,7 @@ function ShellSkeleton() {
     <div aria-hidden>
       <div className="flex h-[var(--nav-h)] items-center gap-4 px-6">
         <Skeleton className="h-7 w-32" />
-        <div className="hidden gap-2 md:flex">
+        <div className="hidden gap-2 lg:flex">
           {Array.from({ length: 6 }, (_, i) => (
             <Skeleton key={i} className="h-5 w-20" />
           ))}

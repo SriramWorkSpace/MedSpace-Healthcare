@@ -308,7 +308,7 @@
   .searchpill:active {
     transform: scale(0.97);
   }
-  @media (min-width: 1024px) {
+  @media (min-width: 1280px) {
     .searchpill {
       justify-content: flex-start;
       width: 200px;
@@ -402,5 +402,28 @@
   }
   100% {
     outline-color: transparent;
+  }
+}
+
+/* Lab trend chart: the line draws in once, then the points appear along it. */
+.trend-line {
+  stroke-dasharray: 1;
+  animation: trend-draw 800ms var(--ease-out) both;
+}
+@keyframes trend-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.trend-dot {
+  transition: r 120ms var(--ease-out);
+  animation: trend-dot-in 200ms var(--ease-out) both;
+}
+@keyframes trend-dot-in {
+  from {
+    opacity: 0;
   }
 }

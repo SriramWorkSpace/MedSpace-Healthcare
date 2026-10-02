@@ -15,6 +15,7 @@ from app.modules.extraction.normalize import normalize_frequency, parse_duration
 from app.modules.extraction.schemas import (
     ExtractedCareAction,
     ExtractedDietNote,
+    ExtractedLabResult,
     ExtractedMedication,
     ExtractionPayload,
     FollowUp,
@@ -68,7 +69,9 @@ _DUR_RE = re.compile(
     r"\d{1,3}\s*(?:days?|weeks?|months?)\b|ongoing|continue)",
     re.IGNORECASE,
 )
-_DATE_LINE = re.compile(r"\b(?:date|dated|issued)\s*[:\-]?\s*(?P<d>[^\n]+)", re.IGNORECASE)
+_DATE_LINE = re.compile(
+    r"\b(?:date|dated|issued|collected|reported)\s*[:\-]?\s*(?P<d>[^\n]+)", re.IGNORECASE
+)
 _FOLLOW_UP = re.compile(
     r"\b(?:follow[\s-]?up|review|next visit)\b[:\s\-]*(?P<rest>[^\n]*)", re.IGNORECASE
 )
@@ -100,6 +103,90 @@ _DIET = re.compile(
     re.IGNORECASE,
 )
 _DIET_PREFIX = re.compile(r"^\s*(?:diet|advice|lifestyle|nutrition|food)\s*[:\-]\s*", re.IGNORECASE)
+
+
+# ---- Lab reports (ADR-020) -------------------------------------------------------------------
+# A page with a reference-range header is read as a lab report. Rows come either on one line
+# ("LDL cholesterol: 138 mg/dL H (< 130)") or, as PDF text extraction often yields them, as
+# separate name / value / range lines.
+_LAB_HEADER = re.compile(
+    r"^\s*(?:reference(?:\s+(?:range|interval|values?))?|ref\.?\s*range|normal\s+range|"
+    r"biological\s+reference(?:\s+interval)?)\s*:?\s*$",
+    re.IGNORECASE | re.MULTILINE,
+)
+_NUM = r"\d{1,6}(?:,\d{3})*(?:\.\d+)?"
+_UNIT = r"(?:%|[A-Za-zµμ][A-Za-z0-9µμ/.^]*(?:/[A-Za-z0-9µμ.^]+)?)"
+_RANGE = rf"(?:(?:<=|>=|≤|≥|<|>)\s*{_NUM}|{_NUM}\s*(?:-|–|to)\s*{_NUM})(?:\s*{_UNIT})?"
+_VALUE = rf"(?:[<>]\s?)?{_NUM}|negative|positive|nil|trace|not detected|detected"
+_RESULT_LINE = re.compile(
+    rf"^(?P<name>[A-Za-z][A-Za-z0-9 ,()/\-.+]*?[A-Za-z0-9)])\s*:?\s+(?P<value>{_VALUE})"
+    rf"(?:\s*(?P<unit>{_UNIT}))?(?:\s+(?P<flag>H|L|High|Low)\*?)?"
+    rf"(?:\s*\(?\s*(?:ref(?:erence)?(?:\s+range)?\s*:?\s*)?(?P<ref>{_RANGE})\s*\)?)?\s*$",
+    re.IGNORECASE,
+)
+_NAME_ONLY = re.compile(r"^(?P<name>[A-Za-z][A-Za-z0-9 ,()/\-.+]{1,60}?)\s*:?$")
+_VALUE_LINE = re.compile(
+    rf"^(?P<value>{_VALUE})(?:\s*(?P<unit>{_UNIT}))?(?:\s+(?P<flag>H|L|High|Low)\*?)?$",
+    re.IGNORECASE,
+)
+_RANGE_LINE = re.compile(rf"^\(?\s*(?P<ref>{_RANGE})\s*\)?$")
+_NOT_A_TEST = re.compile(
+    r"^(patient|name|age|sex|gender|date|collected|reported|received|page|test|tests|result|"
+    r"results|units?|reference|ref|specimen|sample|lab|doctor|dr|phone|tel|id|mrn)\b",
+    re.IGNORECASE,
+)
+_FLAG_WORDS = {"h": "high", "high": "high", "l": "low", "low": "low"}
+
+
+def _lab_row(
+    name: str, value: str, unit: str | None, flag: str | None, ref: str | None, page_no: int
+) -> ExtractedLabResult | None:
+    if _NOT_A_TEST.match(name):
+        return None
+    # "212 H" can read as value + unit "H"; a lone H/L is the report's own flag.
+    if unit and unit.lower() in _FLAG_WORDS and not flag:
+        unit, flag = None, unit
+    return ExtractedLabResult(
+        name=name.strip().rstrip(":").strip(),
+        value=" ".join(value.split()),
+        unit=unit,
+        ref_range=" ".join(ref.split()) if ref else None,
+        flag=_FLAG_WORDS.get((flag or "").lower()),
+        source_page=page_no,
+        confidence=0.9 if ref else 0.75,
+    )
+
+
+def _lab_results(lines: list[str], page_no: int) -> tuple[list[ExtractedLabResult], set[int]]:
+    results: list[ExtractedLabResult] = []
+    used: set[int] = set()
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        if (m := _RESULT_LINE.match(line)) and (
+            row := _lab_row(m["name"], m["value"], m["unit"], m["flag"], m["ref"], page_no)
+        ):
+            results.append(row)
+            used.add(i)
+            i += 1
+            continue
+        if (
+            (n := _NAME_ONLY.match(line))
+            and i + 1 < len(lines)
+            and (v := _VALUE_LINE.match(lines[i + 1]))
+        ):
+            r = _RANGE_LINE.match(lines[i + 2]) if i + 2 < len(lines) else None
+            row = _lab_row(
+                n["name"], v["value"], v["unit"], v["flag"], r["ref"] if r else None, page_no
+            )
+            if row:
+                results.append(row)
+                step = 3 if r else 2
+                used.update(range(i, i + step))
+                i += step
+                continue
+        i += 1
+    return results, used
 
 
 def diet_category(text: str) -> str:
@@ -190,10 +277,18 @@ def extract(pages: list[str]) -> ExtractionPayload:
     patient: str | None = None
     lab_lines_seen: set[str] = set()
     diet: list[ExtractedDietNote] = []
+    results: list[ExtractedLabResult] = []
+    lab_mode = any(_LAB_HEADER.search(t) for t in pages)
 
     for page_no, text in enumerate(pages, start=1):
         lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+        result_lines: set[int] = set()
+        if lab_mode:
+            page_results, result_lines = _lab_results(lines, page_no)
+            results.extend(page_results)
         for idx, line in enumerate(lines):
+            if idx in result_lines:
+                continue
             if prescriber.clinic is None and idx < 6 and _CLINIC.search(line) and "Dr" not in line:
                 prescriber.clinic = line[:120]
             if prescriber.name is None and (d := _DOCTOR.search(line)):
@@ -238,7 +333,8 @@ def extract(pages: list[str]) -> ExtractionPayload:
             ):
                 diet.extend(_diet_notes(line, page_no))
                 continue
-            labs = [] if _MED_LINE.match(line) else list(_LAB.finditer(line))
+            # On a lab report, test names are results, not tests to go and get.
+            labs = [] if lab_mode or _MED_LINE.match(line) else list(_LAB.finditer(line))
             for lab in labs:
                 label = lab.group(1)
                 key = label.lower()
@@ -263,7 +359,12 @@ def extract(pages: list[str]) -> ExtractionPayload:
 
     has_meds = bool(meds)
     summary = None
-    if prescriber.name or prescriber.clinic or has_meds:
+    if results and not has_meds:
+        where = f" from {prescriber.clinic}" if prescriber.clinic else ""
+        when = f" dated {issued_on:%B} {issued_on.day}, {issued_on.year}" if issued_on else ""
+        count = f"{len(results)} result{'s' if len(results) != 1 else ''}"
+        summary = f"Lab report{where}{when} with {count}."
+    elif prescriber.name or prescriber.clinic or has_meds:
         who = prescriber.name or prescriber.clinic or "the prescriber"
         when = f" dated {issued_on:%B} {issued_on.day}, {issued_on.year}" if issued_on else ""
         listing = (
@@ -272,8 +373,10 @@ def extract(pages: list[str]) -> ExtractionPayload:
         follow = " and a follow-up visit" if follow_up else ""
         summary = f"Prescription from {who}{when}{listing}{follow}."
 
-    confidences = [m.confidence for m in meds] or [0.5]
-    doc_type = "prescription" if has_meds else ("lab_report" if lab_lines_seen else "other")
+    confidences = [m.confidence for m in meds] or [r.confidence for r in results] or [0.5]
+    doc_type = (
+        "prescription" if has_meds else ("lab_report" if results or lab_lines_seen else "other")
+    )
     return ExtractionPayload(
         document_type=doc_type,
         prescriber=prescriber if any(prescriber.model_dump().values()) else None,
@@ -283,6 +386,7 @@ def extract(pages: list[str]) -> ExtractionPayload:
         medications=meds,
         care_actions=actions,
         diet_notes=diet,
+        lab_results=results,
         summary=summary,
         overall_confidence=round(sum(confidences) / len(confidences), 2),
     )

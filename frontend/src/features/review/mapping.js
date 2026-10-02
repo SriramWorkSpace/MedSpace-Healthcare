@@ -71,6 +71,16 @@ export const reviewSchema = z.object({
       source_page: z.number().nullable().optional(),
     }),
   ),
+  lab_results: z.array(
+    z.object({
+      name: z.string().trim().min(1, "Name the test or remove it").max(120),
+      value: z.string().trim().min(1, "Enter the result as printed").max(40),
+      unit: z.string().max(30).optional(),
+      ref_range: z.string().max(60).optional(),
+      flag: z.enum(["high", "low", "normal"]).nullable().optional(),
+      source_page: z.number().nullable().optional(),
+    }),
+  ),
 });
 
 /** Extraction payload -> form values (strings for inputs, never null). */
@@ -119,6 +129,14 @@ export function payloadToForm(payload) {
       category: n.category ?? "general",
       source_page: n.source_page ?? null,
     })),
+    lab_results: (p.lab_results ?? []).map((r) => ({
+      name: r.name ?? "",
+      value: r.value ?? "",
+      unit: r.unit ?? "",
+      ref_range: r.ref_range ?? "",
+      flag: r.flag ?? null,
+      source_page: r.source_page ?? null,
+    })),
   };
 }
 
@@ -151,6 +169,10 @@ export function emptyCareAction() {
 
 export function emptyDietNote() {
   return { text: "", category: "general", source_page: null };
+}
+
+export function emptyLabResult() {
+  return { name: "", value: "", unit: "", ref_range: "", flag: null, source_page: null };
 }
 
 /** Form values -> ConfirmIn body for POST /api/extractions/{id}/confirm. */
@@ -203,6 +225,14 @@ export function formToConfirm(v) {
       text: n.text.trim(),
       category: n.category,
       source_page: n.source_page ?? null,
+    })),
+    lab_results: (v.lab_results ?? []).map((r) => ({
+      name: r.name.trim(),
+      value: r.value.trim(),
+      unit: blank(r.unit?.trim()),
+      ref_range: blank(r.ref_range?.trim()),
+      flag: r.flag ?? null,
+      source_page: r.source_page ?? null,
     })),
   };
 }

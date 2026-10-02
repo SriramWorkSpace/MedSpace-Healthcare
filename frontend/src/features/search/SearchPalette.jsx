@@ -7,6 +7,7 @@ import {
   CheckSquare,
   ClockCounterClockwise,
   FileText,
+  Flask,
   ForkKnife,
   GearSix,
   MagnifyingGlass,
@@ -22,6 +23,7 @@ import { useSearch } from "./api";
 const GROUPS = [
   { key: "medications", label: "Medications", icon: Pill },
   { key: "prescriptions", label: "Prescriptions", icon: Prescription },
+  { key: "lab_results", label: "Lab results", icon: Flask },
   { key: "documents", label: "Documents", icon: FileText },
   { key: "to_dos", label: "To-dos", icon: CheckSquare },
   { key: "diet_notes", label: "Diet notes", icon: ForkKnife },
@@ -31,6 +33,7 @@ const JUMP_TO = [
   { title: "Dashboard", href: "/app", icon: SquaresFour },
   { title: "Upload a document", href: "/app/documents?upload=1", icon: UploadSimple },
   { title: "Medications", href: "/app/medications", icon: Pill },
+  { title: "Lab results", href: "/app/labs", icon: Flask },
   { title: "Diet notes", href: "/app/diet", icon: ForkKnife },
   { title: "Timeline", href: "/app/timeline", icon: ClockCounterClockwise },
   { title: "Ask MedSpace", href: "/app/ask", icon: ChatsCircle },
@@ -176,7 +179,7 @@ export default function SearchPalette({ onClose }) {
               setActive(0);
             }}
             onKeyDown={onKeyDown}
-            placeholder="Search medicines, doctors, documents, to-dos…"
+            placeholder="Search medicines, doctors, documents, lab results…"
             role="combobox"
             aria-expanded="true"
             aria-controls={listId}
@@ -249,6 +252,7 @@ export default function SearchPalette({ onClose }) {
                     </span>
                     {item.snippet ? (
                       <span className="block truncate text-xs text-ink-3">
+                        {item.subtitle && <span className="text-ink-2">{item.subtitle} · </span>}
                         <Snippet text={item.snippet} />
                       </span>
                     ) : (

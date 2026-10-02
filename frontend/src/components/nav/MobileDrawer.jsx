@@ -1,8 +1,11 @@
 import { useEffect } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
-/** Compact top drawer used for navigation below the md breakpoint. */
-export function MobileDrawer({ open, onClose, children, id }) {
+/**
+ * Compact top drawer used for navigation on narrow screens. `hiddenFrom` is the Tailwind class
+ * that hides it once the inline nav takes over (a literal, so Tailwind can see it).
+ */
+export function MobileDrawer({ open, onClose, children, id, hiddenFrom = "md:hidden" }) {
   const reduce = useReducedMotion();
 
   useEffect(() => {
@@ -22,7 +25,7 @@ export function MobileDrawer({ open, onClose, children, id }) {
       {open && (
         <>
           <motion.div
-            className="fixed inset-0 top-[var(--nav-h)] bg-[oklch(0.2_0.02_165/0.3)] md:hidden"
+            className={`fixed inset-0 top-[var(--nav-h)] bg-[oklch(0.2_0.02_165/0.3)] ${hiddenFrom}`}
             style={{ zIndex: "var(--z-drawer)" }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -32,7 +35,7 @@ export function MobileDrawer({ open, onClose, children, id }) {
           />
           <motion.div
             id={id}
-            className="fixed inset-x-0 top-[var(--nav-h)] origin-top border-b border-line bg-bg px-4 pb-6 pt-2 shadow-md md:hidden"
+            className={`fixed inset-x-0 top-[var(--nav-h)] origin-top border-b border-line bg-bg px-4 pb-6 pt-2 shadow-md ${hiddenFrom}`}
             style={{ zIndex: "var(--z-drawer)" }}
             initial={reduce ? { opacity: 0 } : { opacity: 0, y: -12, scaleY: 0.98 }}
             animate={{ opacity: 1, y: 0, scaleY: 1 }}

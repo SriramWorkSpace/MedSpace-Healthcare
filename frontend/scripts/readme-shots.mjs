@@ -49,6 +49,21 @@ for (const theme of ["light", "dark"]) {
   await settle(page);
   await page.screenshot({ path: `${out}/timeline.png` });
 
+  await page.goto(base + "/app/labs/ldl-cholesterol");
+  await settle(page);
+  const chart = page.getByRole("img", { name: /LDL cholesterol/ });
+  const box = await chart.boundingBox();
+  if (box) await page.mouse.move(box.x + box.width / 2 - 30, box.y + box.height / 2);
+  await settle(page, 400);
+  await page.screenshot({ path: `${out}/labs.png` });
+
+  await page.mouse.move(0, 0);
+  await page.keyboard.press("Control+k");
+  await page.getByRole("combobox").fill("chol");
+  await settle(page, 900);
+  await page.screenshot({ path: `${out}/search.png` });
+  await page.keyboard.press("Escape");
+
   await page.goto(base + "/app/ask");
   await settle(page, 800);
   await page.getByRole("button", { name: "How often do I take Amoxicillin?" }).click();

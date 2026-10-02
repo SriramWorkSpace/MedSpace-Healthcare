@@ -23,7 +23,7 @@ test("Ctrl+K searches records and jumps to the result", async ({ page }) => {
   // Text inside a document comes back with the matching words highlighted.
   await page.getByRole("button", { name: "Search your records" }).click();
   await page.getByRole("combobox").fill("triglycerides");
-  const doc = page.getByRole("option", { name: /Lipid profile results/ });
+  const doc = page.getByRole("option", { name: /Lipid profile results/ }).first();
   await expect(doc.locator("mark").first()).toHaveText(/triglycerides/i);
   await doc.click();
   await expect(page).toHaveURL(/\/app\/documents\/.+\?page=1/);

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Path, Query
 
 from app.core.deps import CurrentUser, DbSession
 from app.modules.records import service
@@ -10,6 +10,8 @@ from app.modules.records.schemas import (
     CareActionOut,
     CareActionUpdate,
     DietNotesOut,
+    LabTrendDetail,
+    LabTrendOut,
     MedicationOut,
     MedicationUpdate,
     PrescriptionOut,
@@ -55,6 +57,24 @@ async def list_diet_notes(user: CurrentUser, session: DbSession):
 @router.delete("/diet-notes/{note_id}", status_code=204)
 async def delete_diet_note(note_id: uuid.UUID, user: CurrentUser, session: DbSession):
     await service.delete_diet_note(session, user.id, note_id)
+    await session.commit()
+
+
+@router.get("/labs", response_model=list[LabTrendOut])
+async def list_lab_trends(user: CurrentUser, session: DbSession):
+    return await service.list_lab_trends(session, user.id)
+
+
+@router.get("/labs/{key}", response_model=LabTrendDetail)
+async def get_lab_trend(
+    user: CurrentUser, session: DbSession, key: str = Path(pattern=r"^[a-z0-9-]{1,80}$")
+):
+    return await service.get_lab_trend(session, user.id, key)
+
+
+@router.delete("/lab-results/{result_id}", status_code=204)
+async def delete_lab_result(result_id: uuid.UUID, user: CurrentUser, session: DbSession):
+    await service.delete_lab_result(session, user.id, result_id)
     await session.commit()
 
 
