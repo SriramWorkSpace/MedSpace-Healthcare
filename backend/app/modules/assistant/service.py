@@ -50,6 +50,7 @@ STOPWORDS = frozenset(_GENERAL + _DOMAIN)
 ADVICE = re.compile(
     r"\b(should i (?:take|stop|start|skip|increase|decrease|double|switch|keep)|"
     r"is it (?:safe|ok|okay|dangerous|bad)|can i (?:take|mix|drink|stop|skip|double|combine)|"
+    r"(?:what|should) (?:should|do) i do if i (?:miss|missed|forgot|forget|skip|skipped)|"
     r"diagnos\w*|what(?:'s| is) wrong with me|do i have|am i (?:sick|ill)|"
     r"(?:increase|decrease|change|adjust|lower|raise) (?:my )?(?:dose|dosage)|"
     r"side effects? (?:of|from)|interact\w*|overdose|instead of|"
@@ -74,6 +75,12 @@ LABS = re.compile(
     r"\b(labs?|lab results?|test results?|results?|blood ?work|blood tests?|cholesterol|ldl|hdl|"
     r"triglycerides?|lipids?|hba1c|a1c|glucose|sugar levels?|creatinine|tsh|thyroid|"
     r"vitamin [a-z0-9]+|ha?emoglobin|reference range)\b",
+    re.IGNORECASE,
+)
+DOSES = re.compile(
+    r"\b(did i (?:take|miss|skip)|have i (?:taken|missed|skipped)|missed|skipped|adherence|"
+    r"streak|on track|doses? (?:taken|logged)|took my|how (?:often|many)\b.*\b(?:taken|took|"
+    r"missed|skipped))\b",
     re.IGNORECASE,
 )
 _LAB_ALIASES = {"a1c": "hba1c", "sugar": "glucose", "lipid": "cholesterol", "lipids": "cholesterol"}
@@ -314,6 +321,33 @@ async def gather_sources(
                     document_id=str(food.document_id) if food.document_id else None,
                     confirmed=True,
                     text=f"Take {label} {food.text.lower()}.",
+                )
+            )
+
+    # Dose questions: what the user logged in the last two weeks, stated without judgment.
+    if DOSES.search(question):
+        from app.modules.doses import service as doses
+        from app.modules.identity.models import User
+
+        user = await session.get(User, user_id)
+        history = await doses.adherence(session, user, 14) if user else None
+        for med in (history.medications if history else [])[:8]:
+            c = med.counts
+            label = f"{med.name} {med.strength}".strip() if med.strength else med.name
+            line = (
+                f"{label}: {c.taken} of {c.due} scheduled doses in the last 14 days marked "
+                f"taken, {c.skipped} skipped, {c.unlogged} not logged."
+            )
+            sources.append(
+                Source(
+                    n=len(sources) + 1,
+                    kind="record",
+                    title=f"{med.name} dose log",
+                    page_no=None,
+                    snippet=line,
+                    document_id=None,
+                    confirmed=True,
+                    text=f"{line} Source: your dose log.",
                 )
             )
 

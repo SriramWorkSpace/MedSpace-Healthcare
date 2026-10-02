@@ -37,6 +37,7 @@ class DoseOut(BaseModel):
     strength: str | None
     instructions: str | None
     prescription_id: uuid.UUID
+    status: str | None = None  # taken | skipped, when the user logged it
 
 
 class AsNeededOut(BaseModel):

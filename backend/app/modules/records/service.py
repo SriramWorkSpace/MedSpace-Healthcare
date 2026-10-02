@@ -462,21 +462,27 @@ async def delete_lab_result(
     await session.flush()
 
 
+def times_on(m: Medication, day: date) -> list[str]:
+    """Scheduled HH:MM times for one medicine on one day, by its schedule and course dates.
+
+    Ignores stopped_at on purpose: callers decide whether a stopped medicine still counts
+    (today's schedule: no; history before the stop: yes).
+    """
+    if m.as_needed or m.start_date > day or (m.end_date and m.end_date < day):
+        return []
+    period = (m.schedule or {}).get("period", "daily")
+    if period == "weekly" and (day - m.start_date).days % 7:
+        return []
+    if period == "alternate_days" and (day - m.start_date).days % 2:
+        return []
+    if period == "once" and day != m.start_date:
+        return []
+    return sorted((m.schedule or {}).get("times", []))
+
+
 def doses_on(meds: list[Medication], day: date) -> list[dict]:
-    """Scheduled doses for a calendar day (as-needed meds excluded), sorted by time."""
-    out = []
-    for m in meds:
-        if m.as_needed or m.stopped_at is not None:
-            continue
-        if m.start_date > day or (m.end_date and m.end_date < day):
-            continue
-        period = (m.schedule or {}).get("period", "daily")
-        if period == "weekly" and (day - m.start_date).days % 7:
-            continue
-        if period == "alternate_days" and (day - m.start_date).days % 2:
-            continue
-        if period == "once" and day != m.start_date:
-            continue
-        for t in (m.schedule or {}).get("times", []):
-            out.append({"time": t, "medication": m})
+    """Scheduled doses for a calendar day (as-needed and stopped meds excluded), sorted by time."""
+    out = [
+        {"time": t, "medication": m} for m in meds if m.stopped_at is None for t in times_on(m, day)
+    ]
     return sorted(out, key=lambda d: d["time"])

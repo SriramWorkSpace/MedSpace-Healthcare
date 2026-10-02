@@ -49,6 +49,13 @@ for (const theme of ["light", "dark"]) {
   await settle(page);
   await page.screenshot({ path: `${out}/timeline.png` });
 
+  await page.goto(base + "/app/medications");
+  await settle(page);
+  await page.screenshot({ path: `${out}/medications.png` });
+  await page.getByRole("link", { name: /Dose history for Metformin/ }).click();
+  await settle(page);
+  await page.screenshot({ path: `${out}/dose-history.png` });
+
   await page.goto(base + "/app/labs/ldl-cholesterol");
   await settle(page);
   const chart = page.getByRole("img", { name: /LDL cholesterol/ });

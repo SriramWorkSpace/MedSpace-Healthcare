@@ -60,7 +60,7 @@ MedSpace/
 │   │   │   └── queue.py          # enqueue(): arq | inline
 │   │   └── modules/              # bounded contexts (see §3)
 │   │       ├── identity/  documents/  extraction/  records/
-│   │       ├── timeline/  search/  assistant/  integrations/  sharing/
+│   │       ├── timeline/  search/  doses/  assistant/  integrations/  sharing/
 │   │       └── audit/  demo/
 │   ├── migrations/               # Alembic
 │   └── tests/                    # pytest (unit + API integration against real Postgres)
@@ -101,6 +101,7 @@ modules/<name>/
 | `extraction` | `extractions` | Pipeline: text-layer vs. scanned detection → Groq extraction → Pydantic validation → frequency normalization → draft extraction with per-field confidence + source page |
 | `records` | `prescriptions`, `medications`, `care_actions`, `diet_notes`, `lab_results` | Confirm drafts into official records, medication schedules, prescription reports, diet notes copied from documents (ADR-018), lab results and their trends (ADR-020) |
 | `timeline` | (read model, no tables) | Chronological union over confirmed records, documents, appointments, follow-ups |
+| `doses` | `dose_logs` | Taken/skipped marks per scheduled dose, history and streaks computed from the schedule in the user's timezone; unmarked doses are "not logged", never "missed" (ADR-021) |
 | `search` | (read model, no tables) | Global search: escaped `ILIKE` on names, prefix full-text with `ts_headline` snippets on document chunks, grouped deep-link hits |
 | `assistant` | `document_chunks`, `chat_threads`, `chat_messages` | Chunking, embeddings, hybrid retrieval (pgvector + full-text, RRF fusion), grounded answers with citations, SSE streaming |
 | `integrations` | `oauth_connections`, `sync_links` | Google OAuth (incremental consent), encrypted tokens, Calendar recurring events, Tasks, idempotent sync/unsync |
@@ -187,7 +188,7 @@ flowchart LR
   E --> V[pgvector cosine<br/>WHERE user_id = :uid]
   V --> RRF[Reciprocal Rank Fusion<br/>top 6 chunks]
   FT --> RRF
-  CR[Confirmed records:<br/>medications, diet notes, lab results] --> P
+  CR[Confirmed records:<br/>medications, diet notes, lab results, dose log] --> P
   RRF --> P[Prompt: numbered sources<br/>+ guardrails]
   P --> LLM[Groq gpt-oss-120b<br/>streamed]
   LLM --> SSE[SSE tokens + citations<br/>doc, page, snippet]
@@ -224,6 +225,7 @@ erDiagram
   documents ||--o{ extractions : "versions"
   extractions ||--o| prescriptions : "confirmed into"
   prescriptions ||--o{ medications : lists
+  medications ||--o{ dose_logs : "marked in"
   prescriptions ||--o{ care_actions : requires
   documents ||--o{ diet_notes : "copied from"
   documents ||--o{ lab_results : "copied from"
@@ -256,6 +258,7 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 | Labs | `GET /labs` (one trend per test, newest report first) · `GET /labs/{key}` (every result plus a chartable series) · `DELETE /lab-results/{id}` |
 | Dashboard | `GET /dashboard` (today's doses, upcoming, needs-review queue, stats) |
 | Timeline | `GET /timeline?cursor=&types=` |
+| Doses | `PUT /doses` (mark taken or skipped) · `DELETE /doses?medication_id=&date=&time=` · `GET /adherence?days=` · `GET /adherence/{medication_id}?days=` |
 | Search | `GET /search?q=` (grouped hits with deep links and highlighted snippets) |
 | Assistant | `POST /assistant/threads` · `GET /assistant/threads` · `POST /assistant/threads/{id}/messages` (SSE) |
 | Integrations | `GET /integrations/google/status` · `GET /integrations/google/connect` · `GET /integrations/google/callback` · `POST /integrations/google/sync` · `DELETE /integrations/google/sync/{link_id}` · `DELETE /integrations/google` |
@@ -302,7 +305,8 @@ Route map:
 /app/documents          Library + drag-and-drop upload
 /app/documents/:id      Review workspace (source preview ↔ extracted fields)
 /app/prescriptions/:id  Prescription report
-/app/medications        Medication schedule
+/app/medications        Medication schedule, with a 14-day dose strip per medicine
+/app/medications/:id    Dose history: stats, calendar, mark or correct past doses
 /app/labs               Lab results, grouped by report
 /app/labs/:key          One test over time (chart + every result)
 /app/diet               Diet notes from documents

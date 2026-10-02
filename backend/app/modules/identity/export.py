@@ -15,6 +15,7 @@ from app.modules.assistant import service as assistant
 from app.modules.audit import service as audit
 from app.modules.documents import service as documents
 from app.modules.documents.schemas import DocumentOut
+from app.modules.doses import service as doses
 from app.modules.identity.models import User
 from app.modules.identity.schemas import UserOut
 from app.modules.records import service as records
@@ -74,6 +75,7 @@ async def build_export(session: AsyncSession, user: User) -> dict:
             "other_to_dos": standalone_actions,
             "diet_notes": (await records.list_diet_notes(session, user.id)).notes,
             "lab_results": await records.list_lab_results(session, user.id),
+            "dose_log": await doses.list_logs(session, user.id),
             "conversations": threads,
             "share_links": shares,
             "activity": activity,

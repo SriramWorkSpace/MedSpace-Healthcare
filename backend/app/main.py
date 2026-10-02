@@ -21,6 +21,7 @@ from app.modules.assistant.router import router as assistant_router
 from app.modules.audit.router import router as audit_router
 from app.modules.demo.router import router as demo_router
 from app.modules.documents.router import router as documents_router
+from app.modules.doses.router import router as doses_router
 from app.modules.extraction.router import router as extraction_router
 from app.modules.identity.router import profile_router
 from app.modules.identity.router import router as auth_router
@@ -79,6 +80,7 @@ def create_app() -> FastAPI:
     api.include_router(records_router)
     api.include_router(timeline_router)
     api.include_router(search_router)
+    api.include_router(doses_router)
     api.include_router(assistant_router)
     api.include_router(integrations_router)
     api.include_router(google_auth_router)

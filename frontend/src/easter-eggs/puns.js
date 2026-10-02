@@ -42,6 +42,9 @@ export const EMPTY_QUIPS = {
   labs: "A clean slate. Nothing here to test your patience.",
 };
 
+/** Shown under a streak of 7+ days with every due dose taken. */
+export const STREAK_LINE = "A full week on track. Your pill organizer is proud.";
+
 export const NOT_FOUND_LINES = [
   "This page skipped its appointment.",
   "We checked for a pulse. Nothing.",

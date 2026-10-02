@@ -19,6 +19,7 @@ from app.modules.assistant import service as assistant
 from app.modules.demo import samples
 from app.modules.documents import service as documents
 from app.modules.documents.models import DocumentStatus
+from app.modules.doses import service as doses
 from app.modules.extraction import service as extraction
 from app.modules.identity import service as identity
 from app.modules.identity.models import User
@@ -86,6 +87,8 @@ async def seed(session: AsyncSession, user: User) -> None:
     await extraction.save_draft(session, doc, payload, method, model)
     documents.set_status(doc, DocumentStatus.NEEDS_REVIEW)
     await session.flush()
+
+    await doses.seed_history(session, user)
 
     # Index everything for Ask MedSpace.
     docs, _ = await documents.list_documents(session, user.id)

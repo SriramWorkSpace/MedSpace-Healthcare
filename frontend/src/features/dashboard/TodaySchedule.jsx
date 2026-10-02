@@ -1,7 +1,9 @@
-import { useCallback, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { Check, Pill, Sun, SunHorizon, Moon, MoonStars } from "@phosphor-icons/react";
 import { cn } from "@/lib/cn";
+import { useSetDose } from "@/features/doses/api";
 import { formatClock } from "@/lib/format";
 
 const SLOTS = [
@@ -13,31 +15,34 @@ const SLOTS = [
 
 const slotFor = (time) => SLOTS.find((s) => time < s.until)?.key ?? "night";
 
-/** Taken-dose ticks are a personal convenience stored on this device only (not health data). */
-function useTaken(dateKey) {
-  const storageKey = `ms-taken-${dateKey}`;
-  const [taken, setTaken] = useState(() => {
+/**
+ * Ticks used to live in localStorage. Move today's leftovers to the account once, then forget them.
+ */
+function useMigrateDeviceTicks(dateKey, doses, setDose) {
+  const done = useRef(false);
+  useEffect(() => {
+    if (done.current) return;
+    done.current = true;
+    const key = `ms-taken-${dateKey}`;
+    let ids;
     try {
-      return new Set(JSON.parse(localStorage.getItem(storageKey) ?? "[]"));
+      ids = JSON.parse(localStorage.getItem(key) ?? "[]");
+      localStorage.removeItem(key);
     } catch {
-      return new Set();
+      return;
     }
-  });
-  const toggle = useCallback(
-    (id) =>
-      setTaken((prev) => {
-        const next = new Set(prev);
-        next.has(id) ? next.delete(id) : next.add(id);
-        try {
-          localStorage.setItem(storageKey, JSON.stringify([...next]));
-        } catch {
-          /* storage unavailable */
-        }
-        return next;
-      }),
-    [storageKey],
-  );
-  return [taken, toggle];
+    for (const id of ids) {
+      const dose = doses.find((d) => `${d.medication_id}@${d.time}` === id);
+      if (dose && !dose.status) {
+        setDose.mutate({
+          medication_id: dose.medication_id,
+          date: dateKey,
+          time: dose.time,
+          status: "taken",
+        });
+      }
+    }
+  }, [dateKey, doses, setDose]);
 }
 
 function nowHHMM() {
@@ -46,11 +51,18 @@ function nowHHMM() {
 }
 
 export function TodaySchedule({ doses, dateKey }) {
-  const [taken, toggle] = useTaken(dateKey);
+  const setDose = useSetDose();
+  useMigrateDeviceTicks(dateKey, doses, setDose);
   const [now] = useState(nowHHMM);
-  const nextIndex = doses.findIndex(
-    (d) => d.time >= now && !taken.has(`${d.medication_id}@${d.time}`),
-  );
+  const nextIndex = doses.findIndex((d) => d.time >= now && !d.status);
+  const mark = (d, status) =>
+    setDose.mutate({
+      medication_id: d.medication_id,
+      date: dateKey,
+      time: d.time,
+      status,
+      fallbackState: d.time > now ? "upcoming" : "unlogged",
+    });
 
   const groups = useMemo(() => {
     const out = SLOTS.map((s) => ({ ...s, items: [] }));
@@ -60,7 +72,7 @@ export function TodaySchedule({ doses, dateKey }) {
     return out.filter((g) => g.items.length);
   }, [doses]);
 
-  const doneCount = doses.filter((d) => taken.has(`${d.medication_id}@${d.time}`)).length;
+  const doneCount = doses.filter((d) => d.status === "taken").length;
 
   return (
     <div>
@@ -86,20 +98,26 @@ export function TodaySchedule({ doses, dateKey }) {
             <ul className="grid grid-cols-1 gap-1.5">
               {items.map((d) => {
                 const id = `${d.medication_id}@${d.time}`;
-                const isTaken = taken.has(id);
+                const isTaken = d.status === "taken";
+                const isSkipped = d.status === "skipped";
                 const isNext = d.index === nextIndex;
+                const label = `${d.name}${d.strength ? ` ${d.strength}` : ""} at ${formatClock(d.time)}`;
                 return (
-                  <li key={id}>
+                  <li
+                    key={id}
+                    className={cn(
+                      "group flex items-center gap-1 rounded-[var(--radius-control)] border pr-1.5 transition-colors duration-150",
+                      isNext
+                        ? "border-accent/40 bg-accent-soft/50"
+                        : "border-transparent bg-surface-2 hover:bg-surface-3",
+                    )}
+                  >
                     <button
                       type="button"
-                      onClick={() => toggle(id)}
+                      onClick={() => mark(d, isTaken ? null : "taken")}
                       aria-pressed={isTaken}
-                      className={cn(
-                        "group flex w-full items-center gap-3 rounded-[var(--radius-control)] border px-3.5 py-3 text-left transition-[background-color,border-color,transform] duration-150 active:scale-[0.99]",
-                        isNext
-                          ? "border-accent/40 bg-accent-soft/50"
-                          : "border-transparent bg-surface-2 hover:bg-surface-3",
-                      )}
+                      aria-label={`${isTaken ? "Taken: " : "Mark taken: "}${label}`}
+                      className="flex min-w-0 flex-1 items-center gap-3 rounded-[var(--radius-control)] px-3.5 py-3 text-left transition-transform duration-150 active:scale-[0.99]"
                     >
                       <span className="tabular w-[70px] shrink-0 text-sm font-semibold text-ink-2">
                         {formatClock(d.time)}
@@ -109,6 +127,7 @@ export function TodaySchedule({ doses, dateKey }) {
                           className={cn(
                             "block truncate text-[15px] font-medium transition-colors",
                             isTaken && "text-ink-3 line-through",
+                            isSkipped && "text-ink-3",
                           )}
                         >
                           {d.name}{" "}
@@ -122,9 +141,12 @@ export function TodaySchedule({ doses, dateKey }) {
                           </span>
                         )}
                       </span>
-                      {isNext && !isTaken && (
-                        <span className="chip chip--accent shrink-0">Next</span>
+                      {isNext && (
+                        <span className="chip chip--accent hidden shrink-0 sm:inline-flex">
+                          Next
+                        </span>
                       )}
+                      {isSkipped && <span className="chip shrink-0">Skipped</span>}
                       <span
                         className={cn(
                           "grid size-7 shrink-0 place-items-center rounded-full border-2 transition-colors duration-150",
@@ -148,6 +170,16 @@ export function TodaySchedule({ doses, dateKey }) {
                         </AnimatePresence>
                       </span>
                     </button>
+                    {!isTaken && (
+                      <button
+                        type="button"
+                        onClick={() => mark(d, isSkipped ? null : "skipped")}
+                        aria-label={`${isSkipped ? "Undo skip" : "Skip"}: ${label}`}
+                        className="rounded-full px-2.5 py-1.5 text-xs font-medium text-ink-3 transition-[opacity,color] hover:bg-surface hover:text-ink-2 focus-visible:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                      >
+                        {isSkipped ? "Undo" : "Skip"}
+                      </button>
+                    )}
                   </li>
                 );
               })}
@@ -155,8 +187,11 @@ export function TodaySchedule({ doses, dateKey }) {
           </section>
         ))}
       </div>
-      <p className="mt-4 flex items-center gap-1.5 text-xs text-ink-3">
-        <Pill size={13} /> Ticks are saved on this device only.
+      <p className="mt-4 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-ink-3">
+        <Pill size={13} /> Saved to your account, so every device stays in sync.
+        <Link to="/app/medications" className="text-accent hover:underline">
+          See dose history
+        </Link>
       </p>
     </div>
   );

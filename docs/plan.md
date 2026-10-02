@@ -112,6 +112,16 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 - [x] Multi-stage web image (nginx + /api proxy), deployment guide (docs/deployment.md), README screenshots
 - [x] Final graphify update and docs sync
 
+## Phase 11: Dose tracking and history
+
+- [x] `dose_logs` table and `doses` module: mark a scheduled dose taken or skipped, change or clear it; only scheduled doses, never a future day (ADR-021)
+- [x] History read model in the user's timezone: taken / skipped / not logged / later today, counts, rate, days-in-a-row; stopped medicines keep their past
+- [x] Dashboard ticks saved to the account (optimistic), a Skip action, and a one-time move of old device-only ticks
+- [x] Medication cards: 14-day strip and "Taken X of Y"; per-medicine history page with a calendar and a day panel to fill in past doses
+- [x] Ask MedSpace states dose-log counts; questions about what to do after a missed dose get the no-advice reply
+- [x] Demo: four weeks of seeded history (mostly taken, a few skips and gaps), today left for the visitor
+- [x] Tests: 6 backend, 4 unit, 2 e2e (with axe scans and a phone overflow check)
+
 ## Phase 10: Lab results and trends
 
 - [x] Extraction: `lab_results` in the LLM schema and prompt (copy as printed, flag only when the report marks it); offline extractor reads lab tables in one-line and split name/value/range layouts and stops turning result rows into "get this test" to-dos (ADR-020)
@@ -135,6 +145,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 ---
 
 ## Change log
+
+- **2026-10-02**: Phase 11 shipped: dose tracking moved from the browser to the account, with history and backfilling (ADR-021). Also registered `LabResult` in `app/models.py`, which Phase 10 had missed.
 
 - **2026-10-02**: Phase 10 shipped: structured lab results with trends (ADR-020). Demo documents grew from 5 to 9. Document search hits now show their date, since several reports can share a title.
 

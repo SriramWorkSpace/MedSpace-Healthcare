@@ -23,6 +23,8 @@ import { EMPTY_QUIPS } from "@/easter-eggs/puns";
 import { useMedications, useUpdateMedication } from "@/features/records/api";
 import { formatClock, formatDate } from "@/lib/format";
 import { scheduleLabel } from "@/features/review/mapping";
+import { useAdherence } from "@/features/doses/api";
+import { AdherenceLine } from "@/features/doses/AdherenceLine";
 
 const TABS = [
   { key: "active", label: "Active" },
@@ -131,7 +133,7 @@ function CourseProgress({ med }) {
   );
 }
 
-function MedicationCard({ med, onEdit, index, focused }) {
+function MedicationCard({ med, onEdit, index, focused, history, window }) {
   const update = useUpdateMedication();
   const stopped = med.status === "stopped";
   return (
@@ -178,6 +180,7 @@ function MedicationCard({ med, onEdit, index, focused }) {
       )}
       {med.instructions && <p className="mt-3 text-sm text-ink-2">{med.instructions}</p>}
       <CourseProgress med={med} />
+      {history && <AdherenceLine history={history} window={window} />}
       {med.status === "upcoming" && (
         <p className="mt-3 text-xs text-ink-3">Starts {formatDate(med.start_date)}</p>
       )}
@@ -225,6 +228,11 @@ export default function Medications() {
   const [chosenTab, setTab] = useState(null);
   const [editing, setEditing] = useState(null);
   const { data, isPending } = useMedications();
+  const adherence = useAdherence(14);
+  const historyById = useMemo(
+    () => new Map((adherence.data?.medications ?? []).map((h) => [h.medication_id, h])),
+    [adherence.data],
+  );
   // Search links here with ?focus={id}: open that medicine's tab and bring its card into view.
   const focusMed = focusId ? data?.find((m) => m.id === focusId) : undefined;
   const tab = chosenTab ?? focusMed?.status ?? "active";
@@ -292,6 +300,8 @@ export default function Medications() {
                     index={i}
                     onEdit={setEditing}
                     focused={m.id === focusMed?.id && chosenTab === null}
+                    history={historyById.get(m.id)}
+                    window={adherence.data}
                   />
                 ))}
               </AnimatePresence>

@@ -13,6 +13,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.documents.models import Document, DocumentKind, DocumentStatus
+from app.modules.doses import service as doses_service
 from app.modules.identity.models import User
 from app.modules.records import service as records
 from app.modules.records.models import CareAction, Medication, Prescription
@@ -190,6 +191,7 @@ async def dashboard(session: AsyncSession, user: User) -> DashboardOut:
     )
     meds = list(rows.scalars().all())
 
+    logged = await doses_service.statuses_on(session, uid, today)
     doses = [
         DoseOut(
             time=d["time"],
@@ -198,6 +200,7 @@ async def dashboard(session: AsyncSession, user: User) -> DashboardOut:
             strength=d["medication"].strength,
             instructions=d["medication"].instructions,
             prescription_id=d["medication"].prescription_id,
+            status=logged.get((d["medication"].id, d["time"])),
         )
         for d in records.doses_on(meds, today)
     ]

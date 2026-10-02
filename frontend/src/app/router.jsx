@@ -32,6 +32,10 @@ export const router = createBrowserRouter([
           { path: "documents/:id", lazy: page(() => import("@/pages/app/DocumentReview")) },
           { path: "prescriptions/:id", lazy: page(() => import("@/pages/app/PrescriptionReport")) },
           { path: "medications", lazy: page(() => import("@/pages/app/Medications")) },
+          {
+            path: "medications/:id",
+            lazy: page(() => import("@/pages/app/MedicationHistory")),
+          },
           { path: "labs", lazy: page(() => import("@/pages/app/Labs")) },
           { path: "labs/:key", lazy: page(() => import("@/pages/app/LabDetail")) },
           { path: "diet", lazy: page(() => import("@/pages/app/Diet")) },
