@@ -37,9 +37,9 @@ function ReviewSkeleton() {
     <LoadingRegion label="Loading document">
       <Skeleton className="h-4 w-24" />
       <Skeleton className="mt-4 h-9 w-72" />
-      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+      <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
         <Skeleton className="aspect-[0.75] w-full rounded-card" />
-        <div className="grid content-start gap-4">
+        <div className="grid grid-cols-1 content-start gap-4">
           {[0, 1, 2].map((i) => (
             <div key={i} className="card card--flat p-5">
               <Skeleton className="h-4 w-40" />
@@ -166,7 +166,7 @@ export default function DocumentReview() {
     const ex = extraction.data;
     const isDraft = ex.status === "draft";
     body = (
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-8">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-8">
         <div className="lg:sticky lg:top-[calc(var(--nav-h)+20px)] lg:h-[calc(100dvh-var(--nav-h)-140px)]">
           <SourceViewer doc={d} page={page} onPageChange={setPage} highlight={highlight} />
         </div>
@@ -181,7 +181,7 @@ export default function DocumentReview() {
               onCheckSource={checkSource}
             />
           ) : (
-            <div className="card grid gap-4 p-6">
+            <div className="card grid grid-cols-1 gap-4 p-6">
               <p className="flex items-center gap-2 font-semibold">
                 <CheckCircle size={20} weight="fill" className="text-accent" /> Confirmed
                 {ex.confirmed_at && ` on ${formatDate(ex.confirmed_at)}`}

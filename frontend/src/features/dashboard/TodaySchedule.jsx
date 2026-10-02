@@ -77,13 +77,13 @@ export function TodaySchedule({ doses, dateKey }) {
           />
         </div>
       </div>
-      <div className="grid gap-5">
+      <div className="grid grid-cols-1 gap-5">
         {groups.map(({ key, label, icon: Icon, items }) => (
           <section key={key} aria-label={label}>
             <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-ink-3">
               <Icon size={14} weight="bold" /> {label}
             </p>
-            <ul className="grid gap-1.5">
+            <ul className="grid grid-cols-1 gap-1.5">
               {items.map((d) => {
                 const id = `${d.medication_id}@${d.time}`;
                 const isTaken = taken.has(id);

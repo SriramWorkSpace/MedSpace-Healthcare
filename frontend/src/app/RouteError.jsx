@@ -9,9 +9,9 @@ export default function RouteError() {
 
   if (import.meta.env.DEV) console.error(error);
   return (
-    <div className="grid min-h-[70dvh] place-items-center px-4 text-center">
+    <div className="grid grid-cols-1 min-h-[70dvh] place-items-center px-4 text-center">
       <div className="max-w-md">
-        <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-danger-soft text-danger-ink">
+        <div className="mx-auto grid grid-cols-1 size-14 place-items-center rounded-2xl bg-danger-soft text-danger-ink">
           <FirstAidKit size={26} weight="duotone" />
         </div>
         <h1 className="mt-6 text-2xl font-semibold">Something needs a quick check-up</h1>

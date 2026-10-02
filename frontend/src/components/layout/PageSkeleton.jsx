@@ -10,7 +10,7 @@ export function PageSkeleton() {
       <Skeleton className="h-9 w-64" />
       <Skeleton className="mt-3 h-4 w-80 max-w-full" />
       <p className="mt-4 text-xs text-ink-3">{pun}…</p>
-      <div className="mt-8 grid gap-4 md:grid-cols-3">
+      <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
         {Array.from({ length: 3 }, (_, i) => (
           <div key={i} className="card card--flat p-5">
             <Skeleton className="h-4 w-24" />

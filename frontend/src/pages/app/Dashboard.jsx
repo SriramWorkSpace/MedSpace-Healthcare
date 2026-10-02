@@ -31,16 +31,16 @@ function DashboardSkeleton() {
     <LoadingRegion label="Loading your day">
       <Skeleton className="h-9 w-72" />
       <Skeleton className="mt-3 h-4 w-48" />
-      <div className="mt-8 grid gap-4 lg:grid-cols-[1.55fr_1fr]">
+      <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-[1.55fr_1fr]">
         <div className="card card--flat p-6">
           <Skeleton className="h-4 w-32" />
-          <div className="mt-5 grid gap-2">
+          <div className="mt-5 grid grid-cols-1 gap-2">
             {Array.from({ length: 5 }, (_, i) => (
               <Skeleton key={i} className="h-14 w-full" />
             ))}
           </div>
         </div>
-        <div className="grid content-start gap-4">
+        <div className="grid grid-cols-1 content-start gap-4">
           <div className="grid grid-cols-2 gap-3">
             {Array.from({ length: 4 }, (_, i) => (
               <Skeleton key={i} className="h-[76px] rounded-card" />
@@ -99,8 +99,8 @@ export default function Dashboard() {
           quip={EMPTY_QUIPS.documents}
         />
       ) : (
-        <div className="grid gap-4 lg:grid-cols-[1.55fr_1fr] lg:items-start">
-          <motion.div {...stagger(1)} className="grid gap-4">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] lg:items-start">
+          <motion.div {...stagger(1)} className="grid grid-cols-1 min-w-0 gap-4">
             <NeedsReview items={data.needs_review} processing={data.processing} />
             <Panel
               title="Today's doses"
@@ -127,7 +127,7 @@ export default function Dashboard() {
             </Panel>
           </motion.div>
 
-          <div className="grid gap-4">
+          <div className="grid grid-cols-1 min-w-0 gap-4">
             <motion.div {...stagger(2)} className="grid grid-cols-2 gap-3">
               <StatTile
                 label="Active medications"

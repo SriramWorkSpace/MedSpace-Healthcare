@@ -42,7 +42,7 @@ function Toggle({ checked, onChange, icon: Icon, title, description, count }) {
 function ItemList({ items, kind }) {
   if (!items.length) return <p className="text-xs text-ink-3">Nothing to add.</p>;
   return (
-    <ul className="grid max-h-44 gap-1 overflow-y-auto pr-1">
+    <ul className="grid grid-cols-1 max-h-44 gap-1 overflow-y-auto pr-1">
       {items.map((it, i) => (
         <li
           key={i}
@@ -125,8 +125,8 @@ export function SyncDialog({ open, onClose, prescriptionId }) {
       {status.isPending ? (
         <Skeleton className="h-24" />
       ) : !connected ? (
-        <div className="grid justify-items-center gap-3 py-4 text-center">
-          <span className="grid size-12 place-items-center rounded-2xl bg-surface-2">
+        <div className="grid grid-cols-1 justify-items-center gap-3 py-4 text-center">
+          <span className="grid grid-cols-1 size-12 place-items-center rounded-2xl bg-surface-2">
             <GoogleLogo size={24} weight="bold" />
           </span>
           <p className="max-w-sm text-sm text-ink-2">
@@ -141,12 +141,12 @@ export function SyncDialog({ open, onClose, prescriptionId }) {
           )}
         </div>
       ) : preview.isPending ? (
-        <div className="grid gap-2">
+        <div className="grid grid-cols-1 gap-2">
           <Skeleton className="h-16" />
           <Skeleton className="h-16" />
         </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid grid-cols-1 gap-4">
           {simulated && (
             <p className="flex items-center gap-2 rounded-[var(--radius-control)] bg-surface-2 px-3 py-2 text-xs text-ink-2">
               <Info size={14} /> Simulation mode: syncing is fully functional but stays inside

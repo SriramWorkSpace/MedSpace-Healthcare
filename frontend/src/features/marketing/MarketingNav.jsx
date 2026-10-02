@@ -77,7 +77,7 @@ export function MarketingNav() {
         </div>
       </nav>
       <MobileDrawer id="marketing-mobile-nav" open={open} onClose={() => setOpen(false)}>
-        <ul className="grid gap-1">
+        <ul className="grid grid-cols-1 gap-1">
           {LINKS.map((l) => (
             <li key={l.href}>
               <a
@@ -90,7 +90,7 @@ export function MarketingNav() {
             </li>
           ))}
         </ul>
-        <div className="mt-4 grid gap-2 sm:hidden">{ctas}</div>
+        <div className="mt-4 grid grid-cols-1 gap-2 sm:hidden">{ctas}</div>
       </MobileDrawer>
     </header>
   );

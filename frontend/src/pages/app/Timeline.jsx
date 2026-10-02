@@ -92,7 +92,7 @@ function Group({ title, events, accent }) {
       >
         {title}
       </h2>
-      <ol className="relative ml-[13px] grid gap-0.5 border-l border-line-strong pl-5">
+      <ol className="relative ml-[13px] grid grid-cols-1 gap-0.5 border-l border-line-strong pl-5">
         {events.map((e) => (
           <EventRow key={e.id} e={e} />
         ))}
@@ -163,13 +163,13 @@ export default function Timeline() {
       </div>
 
       {isPending ? (
-        <LoadingRegion label="Loading timeline" className="grid max-w-3xl gap-8">
+        <LoadingRegion label="Loading timeline" className="grid grid-cols-1 max-w-3xl gap-8">
           {[0, 1].map((g) => (
             <div key={g}>
               <Skeleton className="mb-4 h-4 w-28" />
-              <div className="ml-4 grid gap-5 border-l border-line pl-6">
+              <div className="ml-4 grid grid-cols-1 gap-5 border-l border-line pl-6">
                 {Array.from({ length: 4 }, (_, i) => (
-                  <div key={i} className="grid gap-2">
+                  <div key={i} className="grid grid-cols-1 gap-2">
                     <Skeleton className="h-4 w-3/5" />
                     <Skeleton className="h-3 w-2/5" />
                   </div>
@@ -190,7 +190,7 @@ export default function Timeline() {
           quip={EMPTY_QUIPS.timeline}
         />
       ) : (
-        <div className="grid max-w-3xl gap-10">
+        <div className="grid grid-cols-1 max-w-3xl gap-10">
           {upcoming.length > 0 && <Group title="Upcoming" events={upcoming} accent />}
           {months.map(([key, events]) => (
             <Group key={key} title={format(parseISO(`${key}-01`), "MMMM yyyy")} events={events} />

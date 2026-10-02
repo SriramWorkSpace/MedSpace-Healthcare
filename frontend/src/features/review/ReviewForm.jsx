@@ -16,7 +16,7 @@ import {
 
 function Section({ title, description, action, children }) {
   return (
-    <section className="grid gap-4">
+    <section className="grid grid-cols-1 gap-4">
       <div className="flex items-end justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">{title}</h2>
@@ -48,12 +48,12 @@ export function ReviewForm({ extraction, onConfirm, onDiscard, confirming, onChe
     <form
       noValidate
       onSubmit={handleSubmit((values) => onConfirm(formToConfirm(values)))}
-      className="grid gap-10 pb-28"
+      className="grid grid-cols-1 gap-10 pb-28"
     >
       {payload.warnings?.length > 0 && (
         <div className="flex gap-3 rounded-card bg-warn-soft px-4 py-3.5 text-sm text-warn-ink">
           <Warning size={18} weight="fill" className="mt-0.5 shrink-0" />
-          <div className="grid gap-1">
+          <div className="grid grid-cols-1 gap-1">
             {payload.warnings.map((w) => (
               <p key={w}>{w}</p>
             ))}
@@ -69,7 +69,7 @@ export function ReviewForm({ extraction, onConfirm, onDiscard, confirming, onChe
       )}
 
       <Section title="Document details">
-        <div className="card card--flat grid gap-4 p-5 sm:grid-cols-2">
+        <div className="card card--flat grid grid-cols-1 gap-4 p-5 sm:grid-cols-2">
           <Field label="Type">
             <Select {...register("document_kind")}>
               <option value="prescription">Prescription</option>
@@ -121,7 +121,7 @@ export function ReviewForm({ extraction, onConfirm, onDiscard, confirming, onChe
             No medications on this one. Lab reports and letters often have none.
           </p>
         ) : (
-          <ul className="grid gap-4">
+          <ul className="grid grid-cols-1 gap-4">
             <AnimatePresence initial={false}>
               {meds.fields.map((f, i) => (
                 <MedicationEditor
@@ -162,7 +162,7 @@ export function ReviewForm({ extraction, onConfirm, onDiscard, confirming, onChe
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0, transition: { duration: 0.12 } }}
-                  className="grid gap-3 p-4 sm:grid-cols-[1.6fr_1fr_0.9fr_auto] sm:items-end"
+                  className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-[1.6fr_1fr_0.9fr_auto] sm:items-end"
                 >
                   <Field label="Task" error={errors.care_actions?.[i]?.title?.message}>
                     <Input {...register(`care_actions.${i}.title`)} />

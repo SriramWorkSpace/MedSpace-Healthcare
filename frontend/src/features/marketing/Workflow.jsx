@@ -77,7 +77,7 @@ function Preview({ stepKey }) {
   switch (stepKey) {
     case "upload":
       return (
-        <div className="grid h-full place-items-center">
+        <div className="grid grid-cols-1 h-full place-items-center">
           <div className="w-full max-w-sm rounded-card border-2 border-dashed border-accent/50 bg-accent-soft/40 p-8 text-center">
             <CloudArrowUp size={36} weight="duotone" className="mx-auto text-accent" />
             <p className="mt-3 font-semibold">Drop files to upload</p>
@@ -95,7 +95,7 @@ function Preview({ stepKey }) {
       );
     case "extract":
       return (
-        <div className="grid content-center gap-2">
+        <div className="grid grid-cols-1 content-center gap-2">
           {[
             ["Medicine", "Metformin 500 mg", 99],
             ["Frequency", "BD after meals", 95],
@@ -128,7 +128,7 @@ function Preview({ stepKey }) {
             <p className="rounded bg-warn-soft px-1 text-warn-ink">BD p.c. x 90/7</p>
             <p>Atorvastatin 20mg HS</p>
           </div>
-          <div className="grid content-start gap-2">
+          <div className="grid grid-cols-1 content-start gap-2">
             <label className="field">
               <span className="field__label text-xs">Frequency</span>
               <span className="input input--attention flex items-center text-sm">Twice daily</span>
@@ -145,7 +145,7 @@ function Preview({ stepKey }) {
       );
     case "organize":
       return (
-        <ol className="relative grid content-center gap-5 pl-6 before:absolute before:inset-y-2 before:left-[7px] before:w-px before:bg-line-strong">
+        <ol className="relative grid grid-cols-1 content-center gap-5 pl-6 before:absolute before:inset-y-2 before:left-[7px] before:w-px before:bg-line-strong">
           {[
             ["Mar 18", "Follow-up with Dr. Oduya", "Appointment"],
             ["Mar 4", "Amoxicillin course started", "Medication"],
@@ -168,7 +168,7 @@ function Preview({ stepKey }) {
       );
     default:
       return (
-        <div className="grid content-center gap-3">
+        <div className="grid grid-cols-1 content-center gap-3">
           <div className="rounded-[var(--radius-control)] border border-line bg-surface p-4">
             <p className="flex items-center gap-2 text-xs font-semibold text-ink-3">
               <CalendarCheck size={14} /> Google Calendar
@@ -205,7 +205,7 @@ export function Workflow() {
         </p>
       </div>
 
-      <div className="mt-6 grid gap-x-16 lg:grid-cols-[1fr_1.05fr]">
+      <div className="mt-6 grid grid-cols-1 gap-x-16 lg:grid-cols-[1fr_1.05fr]">
         <div>
           {STEPS.map((s, i) => (
             <Step key={s.key} step={s} index={i} onActive={setActive} />

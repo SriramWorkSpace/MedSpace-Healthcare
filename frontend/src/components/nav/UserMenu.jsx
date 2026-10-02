@@ -41,7 +41,7 @@ export function UserMenu() {
         aria-expanded={open}
         aria-label="Account menu"
         onClick={() => setOpen((v) => !v)}
-        className="grid size-8 place-items-center rounded-full bg-accent-soft text-[12px] font-semibold text-accent-soft-ink ring-1 ring-line transition-transform duration-150 active:scale-95"
+        className="grid grid-cols-1 size-8 place-items-center rounded-full bg-accent-soft text-[12px] font-semibold text-accent-soft-ink ring-1 ring-line transition-transform duration-150 active:scale-95"
       >
         {initials(user.display_name)}
       </button>

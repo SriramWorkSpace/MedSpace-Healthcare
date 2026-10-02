@@ -43,7 +43,7 @@ function Item({ q, a }) {
           <motion.span
             animate={{ rotate: open ? 45 : 0 }}
             transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-            className="grid size-8 shrink-0 place-items-center rounded-full bg-surface-2 text-ink-2"
+            className="grid grid-cols-1 size-8 shrink-0 place-items-center rounded-full bg-surface-2 text-ink-2"
           >
             <Plus size={14} weight="bold" />
           </motion.span>
@@ -72,7 +72,7 @@ export function Faq() {
   return (
     <section
       id="faq"
-      className="mx-auto grid max-w-[1280px] gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:py-28"
+      className="mx-auto grid grid-cols-1 max-w-[1280px] gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:py-28"
     >
       <Reveal>
         <h2 className="text-3xl font-semibold tracking-tight sm:text-5xl">Questions, answered.</h2>

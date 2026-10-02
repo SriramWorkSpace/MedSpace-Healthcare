@@ -33,7 +33,7 @@ export function StatTile({ label, value, to, icon: Icon }) {
         <p className="text-xs font-medium text-ink-3">{label}</p>
         <p className="tabular mt-1 text-2xl font-semibold tracking-tight">{value}</p>
       </div>
-      <span className="grid size-10 place-items-center rounded-xl bg-accent-soft text-accent-soft-ink">
+      <span className="grid grid-cols-1 size-10 place-items-center rounded-xl bg-accent-soft text-accent-soft-ink">
         <Icon size={19} weight="duotone" />
       </span>
     </Link>
@@ -55,7 +55,7 @@ export function ComingUp({ items }) {
     );
   }
   return (
-    <ul className="grid gap-1">
+    <ul className="grid grid-cols-1 gap-1">
       {items.map((e) => {
         const Icon = UPCOMING_ICON[e.type] ?? CalendarCheck;
         const to = e.prescription_id ? `/app/prescriptions/${e.prescription_id}` : "/app/timeline";
@@ -65,7 +65,7 @@ export function ComingUp({ items }) {
               to={to}
               className="flex items-center gap-3 rounded-[var(--radius-control)] px-2 py-2.5 transition-colors hover:bg-surface-2"
             >
-              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-surface-2 text-ink-2">
+              <span className="grid grid-cols-1 size-9 shrink-0 place-items-center rounded-xl bg-surface-2 text-ink-2">
                 <Icon size={17} weight="duotone" />
               </span>
               <span className="min-w-0 flex-1">

@@ -1,0 +1,34 @@
+server {
+  listen 80;
+  server_name _;
+  root /usr/share/nginx/html;
+
+  # Same-origin API: auth cookies stay first-party (ADR-014).
+  location /api/ {
+    proxy_pass ${API_UPSTREAM};
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_http_version 1.1;
+    proxy_buffering off;            # stream Ask MedSpace answers (SSE) as they arrive
+    proxy_read_timeout 120s;
+    client_max_body_size 16m;       # uploads are capped at 15 MB by the API
+  }
+
+  # Hashed build assets can be cached forever.
+  location /assets/ {
+    add_header Cache-Control "public, max-age=31536000, immutable";
+    try_files $uri =404;
+  }
+
+  # SPA fallback; HTML is never cached so deploys show up immediately.
+  location / {
+    add_header Cache-Control "no-cache";
+    add_header X-Content-Type-Options nosniff;
+    add_header Referrer-Policy strict-origin-when-cross-origin;
+    try_files $uri /index.html;
+  }
+
+  gzip on;
+  gzip_types text/css application/javascript application/json image/svg+xml;
+}

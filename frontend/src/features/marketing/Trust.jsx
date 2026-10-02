@@ -28,7 +28,7 @@ const PRINCIPLES = [
 export function Trust() {
   return (
     <section id="privacy" className="border-y border-line bg-bg-sunken">
-      <div className="mx-auto grid max-w-[1280px] gap-14 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:py-28">
+      <div className="mx-auto grid grid-cols-1 max-w-[1280px] gap-14 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:py-28">
         <Reveal>
           <h2 className="text-3xl font-semibold tracking-tight sm:text-5xl">
             AI reads it.
@@ -56,7 +56,7 @@ export function Trust() {
           </div>
         </Reveal>
 
-        <ul className="grid content-center gap-0 divide-y divide-line">
+        <ul className="grid grid-cols-1 content-center gap-0 divide-y divide-line">
           {PRINCIPLES.map(({ icon: Icon, title, body }, i) => (
             <Reveal
               as="li"
@@ -64,7 +64,7 @@ export function Trust() {
               delay={i * 0.06}
               className="flex gap-4 py-6 first:pt-0 last:pb-0"
             >
-              <span className="mt-0.5 grid size-10 shrink-0 place-items-center rounded-xl bg-surface text-accent shadow-xs ring-1 ring-line">
+              <span className="mt-0.5 grid grid-cols-1 size-10 shrink-0 place-items-center rounded-xl bg-surface text-accent shadow-xs ring-1 ring-line">
                 <Icon size={20} weight="duotone" />
               </span>
               <div>

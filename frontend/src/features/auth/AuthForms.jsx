@@ -34,7 +34,7 @@ function PasswordInput(props) {
         type="button"
         onClick={() => setVisible((v) => !v)}
         aria-label={visible ? "Hide password" : "Show password"}
-        className="absolute right-1.5 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-lg text-ink-3 hover:text-ink"
+        className="absolute right-1.5 top-1/2 grid grid-cols-1 size-8 -translate-y-1/2 place-items-center rounded-lg text-ink-3 hover:text-ink"
       >
         {visible ? <EyeSlash size={17} /> : <Eye size={17} />}
       </button>
@@ -106,7 +106,7 @@ export function LoginForm() {
       <h1 className="text-3xl font-semibold tracking-tight">Welcome back</h1>
       <p className="mt-2 text-ink-2">Sign in to pick up where you left off.</p>
       <form
-        className="mt-8 grid gap-4"
+        className="mt-8 grid grid-cols-1 gap-4"
         noValidate
         onSubmit={form.handleSubmit((v) => login.mutate(v))}
       >
@@ -145,7 +145,7 @@ export function SignupForm() {
       <h1 className="text-3xl font-semibold tracking-tight">Create your space</h1>
       <p className="mt-2 text-ink-2">It takes a minute. No paperwork required, ironically.</p>
       <form
-        className="mt-8 grid gap-4"
+        className="mt-8 grid grid-cols-1 gap-4"
         noValidate
         onSubmit={form.handleSubmit((v) =>
           signup.mutate({ ...v, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone }),

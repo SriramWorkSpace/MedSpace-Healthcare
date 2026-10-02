@@ -74,9 +74,10 @@ services:
       api: { condition: service_started }
 
   web:
-    build: { context: ./frontend }
+    build: { context: ./frontend, target: dev }
     environment:
       VITE_API_PROXY: http://api:8000
+      VITE_USE_POLLING: "true"
     command: npm run dev -- --host 0.0.0.0
     ports: ["5173:5173"]
     volumes:

@@ -77,7 +77,7 @@ function EditTimesDialog({ med, onClose }) {
               type="button"
               aria-label={`Remove ${formatClock(t)}`}
               onClick={() => setTimes(times.filter((x) => x !== t))}
-              className="grid size-4 place-items-center rounded-full"
+              className="grid grid-cols-1 size-4 place-items-center rounded-full"
             >
               <X size={10} weight="bold" />
             </button>
@@ -145,7 +145,7 @@ function MedicationCard({ med, onEdit, index }) {
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent-soft-ink">
+          <span className="grid grid-cols-1 size-10 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent-soft-ink">
             <Pill size={19} weight="duotone" />
           </span>
           <div className="min-w-0">
@@ -237,7 +237,7 @@ export default function Medications() {
       {isPending ? (
         <LoadingRegion label="Loading medications">
           <Skeleton className="mb-5 h-10 w-80 rounded-full" />
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: 6 }, (_, i) => (
               <Skeleton key={i} className="h-48 rounded-card" />
             ))}
@@ -269,7 +269,7 @@ export default function Medications() {
               Nothing {tab} right now.
             </p>
           ) : (
-            <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
               <AnimatePresence mode="popLayout">
                 {visible.map((m, i) => (
                   <MedicationCard key={m.id} med={m} index={i} onEdit={setEditing} />

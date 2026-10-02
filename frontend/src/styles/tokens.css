@@ -18,7 +18,7 @@
   --surface-3: oklch(0.945 0.008 155);
   --ink: oklch(0.235 0.022 165);
   --ink-2: oklch(0.44 0.018 165);
-  --ink-3: oklch(0.56 0.014 165);
+  --ink-3: oklch(0.52 0.014 165); /* >= 4.5:1 on every light surface */
   --line: oklch(0.905 0.009 160);
   --line-strong: oklch(0.84 0.012 160);
 

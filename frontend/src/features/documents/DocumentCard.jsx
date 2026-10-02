@@ -16,7 +16,7 @@ export function DocumentThumb({ doc, className }) {
     <div className={cn("relative overflow-hidden bg-surface-2 px-6 pt-12", className)}>
       {!loaded && !failed && <Skeleton className="absolute inset-0 rounded-none" />}
       {failed ? (
-        <div className="grid h-full place-items-center text-ink-3">
+        <div className="grid grid-cols-1 h-full place-items-center text-ink-3">
           {doc.mime_type === "application/pdf" ? <FileText size={32} /> : <ImageIcon size={32} />}
         </div>
       ) : (
@@ -77,11 +77,11 @@ export function DocumentCard({ doc, index = 0 }) {
 
 export function DocumentGridSkeleton({ count = 6 }) {
   return (
-    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-hidden>
+    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-hidden>
       {Array.from({ length: count }, (_, i) => (
         <li key={i} className="card card--flat overflow-hidden">
           <Skeleton className="aspect-[4/3] rounded-none" />
-          <div className="grid gap-2 p-4">
+          <div className="grid grid-cols-1 gap-2 p-4">
             <Skeleton className="h-4 w-3/5" />
             <Skeleton className="h-3 w-2/5" />
           </div>

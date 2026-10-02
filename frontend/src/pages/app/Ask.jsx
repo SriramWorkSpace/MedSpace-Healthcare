@@ -49,7 +49,7 @@ function SourceChips({ sources, onOpen }) {
           title={s.snippet}
           className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-line bg-surface px-2.5 py-1 text-xs text-ink-2 transition-colors hover:border-accent hover:text-ink"
         >
-          <span className="grid size-4 place-items-center rounded bg-accent-soft text-[10px] font-semibold text-accent-soft-ink">
+          <span className="grid grid-cols-1 size-4 place-items-center rounded bg-accent-soft text-[10px] font-semibold text-accent-soft-ink">
             {s.n}
           </span>
           <span className="truncate">{s.title}</span>
@@ -84,7 +84,7 @@ function AssistantBubble({ text, citations, streaming, searching, onOpen }) {
       transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
       className="flex max-w-[92%] gap-3"
     >
-      <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent-soft-ink">
+      <span className="mt-0.5 grid grid-cols-1 size-8 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent-soft-ink">
         <Sparkle size={16} weight="fill" />
       </span>
       <div className="min-w-0 flex-1 pt-1">
@@ -115,7 +115,7 @@ function EmptyChat({ onPick }) {
   const reduce = useReducedMotion();
   return (
     <div className="mx-auto flex max-w-xl flex-col items-center py-10 text-center">
-      <div className="grid size-14 place-items-center rounded-2xl bg-accent-soft text-accent-soft-ink">
+      <div className="grid grid-cols-1 size-14 place-items-center rounded-2xl bg-accent-soft text-accent-soft-ink">
         <ChatsCircle size={28} weight="duotone" />
       </div>
       <h2 className="mt-5 text-2xl font-semibold tracking-tight">Ask about your records</h2>
@@ -150,7 +150,7 @@ function ThreadList({ activeId, onSelect, onNew, onDelete }) {
       </Button>
       <div className="mt-4 flex-1 overflow-y-auto">
         {isPending ? (
-          <div className="grid gap-2">
+          <div className="grid grid-cols-1 gap-2">
             {[0, 1, 2].map((i) => (
               <Skeleton key={i} className="h-12" />
             ))}
@@ -158,7 +158,7 @@ function ThreadList({ activeId, onSelect, onNew, onDelete }) {
         ) : data.length === 0 ? (
           <p className="px-2 text-sm text-ink-3">No conversations yet.</p>
         ) : (
-          <ul className="grid gap-0.5">
+          <ul className="grid grid-cols-1 gap-0.5">
             {data.map((t) => (
               <li key={t.id} className="group relative">
                 <button
@@ -178,7 +178,7 @@ function ThreadList({ activeId, onSelect, onNew, onDelete }) {
                   type="button"
                   aria-label={`Delete conversation ${t.title}`}
                   onClick={() => onDelete(t.id)}
-                  className="absolute right-2 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-lg text-ink-3 opacity-0 transition-opacity hover:bg-surface-3 hover:text-danger-ink focus-visible:opacity-100 group-hover:opacity-100"
+                  className="absolute right-2 top-1/2 grid grid-cols-1 size-7 -translate-y-1/2 place-items-center rounded-lg text-ink-3 opacity-0 transition-opacity hover:bg-surface-3 hover:text-danger-ink focus-visible:opacity-100 group-hover:opacity-100"
                 >
                   <Trash size={14} />
                 </button>
@@ -276,7 +276,7 @@ export default function Ask() {
   );
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
       <aside className="hidden lg:block lg:h-[calc(100dvh-var(--nav-h)-120px)] lg:sticky lg:top-[calc(var(--nav-h)+24px)]">
         {threadList}
       </aside>
@@ -314,14 +314,14 @@ export default function Ask() {
 
         <div className="flex-1" aria-live="polite">
           {threadId && thread.isPending ? (
-            <div className="grid gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <Skeleton className="ml-auto h-10 w-2/5 rounded-2xl" />
               <Skeleton className="h-24 w-4/5 rounded-2xl" />
             </div>
           ) : messages.length === 0 && !pending ? (
             <EmptyChat onPick={send} />
           ) : (
-            <div className="grid gap-6 pb-6">
+            <div className="grid grid-cols-1 gap-6 pb-6">
               {messages.map((m) =>
                 m.role === "user" ? (
                   <UserBubble key={m.id} text={m.content} />

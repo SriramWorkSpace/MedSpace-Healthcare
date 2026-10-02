@@ -167,7 +167,7 @@ function CreateShareDialog({ open, onClose, preselect }) {
         </>
       }
     >
-      <div className="grid gap-5">
+      <div className="grid grid-cols-1 gap-5">
         <Field label="Label" hint="Only you see this. It helps you tell links apart.">
           <Input
             value={label}
@@ -185,7 +185,7 @@ function CreateShareDialog({ open, onClose, preselect }) {
               Confirm a document first. Only confirmed records can be shared.
             </p>
           ) : (
-            <ul className="grid max-h-60 gap-1.5 overflow-y-auto pr-1">
+            <ul className="grid grid-cols-1 max-h-60 gap-1.5 overflow-y-auto pr-1">
               {options.map((o) => {
                 const Icon = o.type === "prescription" ? Prescription : FileText;
                 const on = selected.has(o.key);
@@ -215,7 +215,7 @@ function CreateShareDialog({ open, onClose, preselect }) {
             </ul>
           )}
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Expires after">
             <Select value={days} onChange={(e) => setDays(e.target.value)}>
               {[1, 3, 7, 14, 30].map((d) => (
@@ -321,7 +321,7 @@ export default function Sharing() {
         }
       />
       {shares.isPending ? (
-        <LoadingRegion label="Loading share links" className="grid gap-3">
+        <LoadingRegion label="Loading share links" className="grid grid-cols-1 gap-3">
           {[0, 1, 2].map((i) => (
             <Skeleton key={i} className="h-24 rounded-card" />
           ))}
@@ -339,7 +339,7 @@ export default function Sharing() {
           quip={EMPTY_QUIPS.shares}
         />
       ) : (
-        <ul className="grid gap-3">
+        <ul className="grid grid-cols-1 gap-3">
           {shares.data.map((link, i) => (
             <ShareCard key={link.id} link={link} index={i} onRevoke={setRevoking} />
           ))}

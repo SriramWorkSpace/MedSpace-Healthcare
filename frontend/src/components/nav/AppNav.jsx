@@ -106,7 +106,7 @@ export function AppNav() {
       </nav>
 
       <MobileDrawer id="mobile-nav" open={open} onClose={() => setOpen(false)}>
-        <ul className="grid gap-1">
+        <ul className="grid grid-cols-1 gap-1">
           {APP_LINKS.map(({ to, label, icon: Icon, end }, i) => (
             <motion.li
               key={to}

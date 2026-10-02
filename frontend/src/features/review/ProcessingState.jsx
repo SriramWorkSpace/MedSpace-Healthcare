@@ -53,7 +53,7 @@ export function ProcessingState({ status }) {
             </motion.p>
           </AnimatePresence>
         </div>
-        <ol className="mt-6 grid gap-3.5">
+        <ol className="mt-6 grid grid-cols-1 gap-3.5">
           {STEPS.map((s, i) => {
             const done = i < current;
             const active = i === current;

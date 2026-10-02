@@ -51,7 +51,7 @@ export function useUploadQueue() {
 
 export function UploadQueue({ items, onDismiss }) {
   return (
-    <ul className="grid gap-2" aria-live="polite">
+    <ul className="grid grid-cols-1 gap-2" aria-live="polite">
       <AnimatePresence initial={false}>
         {items.map((it) => (
           <motion.li
@@ -117,7 +117,7 @@ export function UploadQueue({ items, onDismiss }) {
                 type="button"
                 onClick={() => (it.status === "uploading" ? it.abort() : onDismiss(it.id))}
                 aria-label={it.status === "uploading" ? "Cancel upload" : "Dismiss"}
-                className="grid size-7 place-items-center rounded-full text-ink-3 hover:bg-surface-2 hover:text-ink"
+                className="grid grid-cols-1 size-7 place-items-center rounded-full text-ink-3 hover:bg-surface-2 hover:text-ink"
               >
                 <X size={14} weight="bold" />
               </button>

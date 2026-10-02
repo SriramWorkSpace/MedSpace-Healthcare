@@ -22,7 +22,7 @@ function ScheduleEditor({ control, index }) {
   };
 
   return (
-    <div className="grid gap-2.5">
+    <div className="grid grid-cols-1 gap-2.5">
       <div className="flex items-center justify-between gap-3">
         <span className="field__label">Schedule</span>
         <label className="inline-flex cursor-pointer items-center gap-2 text-[13px] text-ink-2">
@@ -48,7 +48,7 @@ function ScheduleEditor({ control, index }) {
                 type="button"
                 aria-label={`Remove ${formatClock(t)}`}
                 onClick={() => times.onChange(times.value.filter((x) => x !== t))}
-                className="grid size-4 place-items-center rounded-full hover:bg-[color-mix(in_oklch,var(--accent),transparent_80%)]"
+                className="grid grid-cols-1 size-4 place-items-center rounded-full hover:bg-[color-mix(in_oklch,var(--accent),transparent_80%)]"
               >
                 <X size={10} weight="bold" />
               </button>
@@ -133,7 +133,7 @@ export function MedicationEditor({ index, control, register, errors, onRemove, o
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="Medicine" error={err.name?.message}>
           <Input className={attn("name")} {...register(`medications.${index}.name`)} />
         </Field>

@@ -22,7 +22,9 @@ function Cell({ className, title, body, icon: Icon, children, delay = 0, tone = 
       delay={delay}
       className={cn(
         "card card--interactive relative flex flex-col overflow-hidden p-6",
-        tone === "accent" && "border-transparent bg-accent text-accent-ink",
+        // Fixed deep evergreen in both themes so the translucent chips keep AA contrast.
+        tone === "accent" &&
+          "border-transparent bg-[oklch(0.36_0.075_163)] text-[oklch(0.97_0.01_160)]",
         tone === "sunken" && "bg-surface-2",
         className,
       )}
@@ -48,7 +50,7 @@ function CalendarWeek() {
       {DAYS.map((d, i) => (
         <div key={d} className="rounded-[var(--radius-control)] border border-line bg-surface p-2">
           <p className="text-center text-[11px] font-medium text-ink-3">{d}</p>
-          <div className="mt-2 grid gap-1">
+          <div className="mt-2 grid grid-cols-1 gap-1">
             {["8:00", "20:00"].map((t) => (
               <span
                 key={t}
@@ -69,7 +71,7 @@ function CalendarWeek() {
 
 function ChatPreview() {
   return (
-    <div className="grid gap-3">
+    <div className="grid grid-cols-1 gap-3">
       <div className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-ink px-3.5 py-2.5 text-sm text-bg">
         How often do I take Metformin?
       </div>
@@ -100,7 +102,7 @@ function TaskList() {
 
   const items = ["Get CBC test before Mar 18", "Finish Amoxicillin course", "Upload lab report"];
   return (
-    <ul ref={ref} className="grid gap-2">
+    <ul ref={ref} className="grid grid-cols-1 gap-2">
       {items.map((t, i) => {
         const checked = i < done;
         return (
@@ -129,7 +131,7 @@ function MiniTimeline() {
     ["Feb 12", "Lipid panel added"],
   ];
   return (
-    <ol className="relative grid gap-3 pl-5 before:absolute before:inset-y-1 before:left-[5px] before:w-px before:bg-line-strong">
+    <ol className="relative grid grid-cols-1 gap-3 pl-5 before:absolute before:inset-y-1 before:left-[5px] before:w-px before:bg-line-strong">
       {rows.map(([d, t]) => (
         <li key={t} className="relative text-sm">
           <span className="absolute -left-5 top-1.5 size-[11px] rounded-full border-2 border-surface bg-accent" />
@@ -147,7 +149,7 @@ function ShareLink() {
       <div className="flex min-w-0 items-center gap-3 rounded-full bg-[oklch(1_0_0/0.14)] py-2 pl-4 pr-2 ring-1 ring-[oklch(1_0_0/0.2)]">
         <LinkSimple size={16} weight="bold" />
         <span className="truncate font-mono text-[13px]">medspace.app/s/k3J9q-Wm…</span>
-        <span className="ml-auto shrink-0 rounded-full bg-[oklch(1_0_0/0.18)] px-2.5 py-1 text-[11px] font-semibold">
+        <span className="ml-auto shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-[oklch(1_0_0/0.35)]">
           Expires in 6 days
         </span>
       </div>
@@ -175,7 +177,7 @@ export function FeatureBento() {
         </p>
       </Reveal>
 
-      <div className="mt-12 grid gap-4 md:grid-cols-6">
+      <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-6">
         <Cell
           className="md:col-span-4"
           icon={CalendarBlank}

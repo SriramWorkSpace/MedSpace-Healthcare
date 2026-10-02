@@ -78,8 +78,8 @@ function SharedDocument({ token, doc }) {
 function Unavailable({ status, message }) {
   const gone = status === 410;
   return (
-    <div className="mx-auto grid max-w-md justify-items-center py-20 text-center">
-      <span className="grid size-14 place-items-center rounded-2xl bg-surface-2 text-ink-2">
+    <div className="mx-auto grid grid-cols-1 max-w-md justify-items-center py-20 text-center">
+      <span className="grid grid-cols-1 size-14 place-items-center rounded-2xl bg-surface-2 text-ink-2">
         <LinkBreak size={26} />
       </span>
       <h1 className="mt-6 text-2xl font-semibold tracking-tight">
@@ -143,9 +143,9 @@ export default function SharedView() {
               )}
             </p>
 
-            <div className="mt-8 grid gap-6">
+            <div className="mt-8 grid grid-cols-1 gap-6">
               {data.prescriptions.map((rx) => (
-                <div key={rx.id} className="grid gap-3">
+                <div key={rx.id} className="grid grid-cols-1 gap-3">
                   <ReportBody rx={rx} />
                   <details className="group">
                     <summary className="inline-flex cursor-pointer items-center gap-1.5 text-sm font-medium text-accent">

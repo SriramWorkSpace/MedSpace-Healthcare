@@ -14,7 +14,7 @@ export function EmptyState({ icon: Icon, title, description, action, quip, class
       )}
     >
       {Icon && (
-        <div className="mb-5 grid size-14 place-items-center rounded-2xl bg-accent-soft text-accent-soft-ink">
+        <div className="mb-5 grid grid-cols-1 size-14 place-items-center rounded-2xl bg-accent-soft text-accent-soft-ink">
           <Icon size={26} weight="duotone" />
         </div>
       )}

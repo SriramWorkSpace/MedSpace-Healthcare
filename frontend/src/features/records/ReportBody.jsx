@@ -32,7 +32,7 @@ export function ReportBody({ rx, compact = false }) {
         <Logo size={24} className="print-only-show opacity-90" />
       </header>
 
-      <dl className="grid gap-5 border-b border-line px-6 py-5 sm:grid-cols-4 sm:px-8">
+      <dl className="grid grid-cols-1 gap-5 border-b border-line px-6 py-5 sm:grid-cols-4 sm:px-8">
         <Meta label="Issued" value={rx.issued_on && formatDate(rx.issued_on)} />
         <Meta label="Specialty" value={rx.prescriber_specialty} />
         <Meta label="Follow-up" value={rx.follow_up_on && formatDate(rx.follow_up_on)} />
@@ -97,7 +97,7 @@ export function ReportBody({ rx, compact = false }) {
       {rx.care_actions.length > 0 && (
         <section className="border-t border-line px-6 py-6 sm:px-8">
           <h2 className="mb-3 text-sm font-semibold">Follow-ups and to-dos</h2>
-          <ul className="grid gap-2 sm:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {rx.care_actions.map((a) => (
               <li key={a.id} className="rounded-[var(--radius-control)] bg-surface-2 px-4 py-3">
                 <p

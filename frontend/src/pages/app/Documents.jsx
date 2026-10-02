@@ -94,7 +94,7 @@ export default function Documents() {
           onClick={open}
           className="mb-6 flex w-full items-center gap-4 rounded-card border border-dashed border-line-strong bg-surface/60 px-5 py-4 text-left transition-colors hover:border-accent hover:bg-accent-soft/30"
         >
-          <span className="grid size-10 place-items-center rounded-xl bg-accent-soft text-accent-soft-ink">
+          <span className="grid grid-cols-1 size-10 place-items-center rounded-xl bg-accent-soft text-accent-soft-ink">
             <CloudArrowUp size={20} weight="duotone" />
           </span>
           <span>
@@ -107,7 +107,7 @@ export default function Documents() {
       )}
 
       {(uploads.length > 0 || rejections.length > 0) && (
-        <div className="mb-6 grid gap-2">
+        <div className="mb-6 grid grid-cols-1 gap-2">
           <UploadQueue items={uploads} onDismiss={remove} />
           {rejections.map((r) => (
             <p
@@ -159,7 +159,7 @@ export default function Documents() {
               Nothing here right now. {EMPTY_QUIPS.review}
             </p>
           ) : (
-            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <AnimatePresence mode="popLayout">
                 {visible.map((doc, i) => (
                   <DocumentCard key={doc.id} doc={doc} index={i} />
@@ -174,7 +174,7 @@ export default function Documents() {
       <AnimatePresence>
         {isDragActive && (
           <motion.div
-            className="pointer-events-none fixed inset-0 grid place-items-center bg-[color-mix(in_oklch,var(--bg),transparent_15%)] backdrop-blur-sm"
+            className="pointer-events-none fixed inset-0 grid grid-cols-1 place-items-center bg-[color-mix(in_oklch,var(--bg),transparent_15%)] backdrop-blur-sm"
             style={{ zIndex: "var(--z-dialog)" }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

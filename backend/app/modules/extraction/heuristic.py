@@ -73,7 +73,9 @@ _FOLLOW_UP = re.compile(
 )
 _DOCTOR = re.compile(r"\bDr\.?\s+(?P<name>[A-Z][A-Za-z.'\-]+(?:\s+[A-Z][A-Za-z.'\-]+){0,3})")
 _CLINIC = re.compile(
-    r"(clinic|hospital|medical|health|centre|center|practice|surgery)", re.IGNORECASE
+    r"(clinic|hospital|medical|health|centre|center|practice|surgery|urgent care|care|"
+    r"diagnostics|associates|institute|wellness|pharmacy)",
+    re.IGNORECASE,
 )
 _LAB = re.compile(
     r"\b(cbc|complete blood count|lipid (?:panel|profile)|hba1c|blood (?:test|work|sugar)|"

@@ -58,7 +58,7 @@ export function Dialog({ open, onClose, title, description, children, footer, si
     <AnimatePresence>
       {open && (
         <div
-          className="fixed inset-0 grid place-items-center p-4"
+          className="fixed inset-0 grid grid-cols-1 place-items-center p-4"
           style={{ zIndex: "var(--z-dialog)" }}
         >
           <motion.div

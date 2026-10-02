@@ -90,7 +90,7 @@ function ProfileForm() {
   return (
     <form
       onSubmit={form.handleSubmit((v) => save.mutate(v))}
-      className="card card--flat grid gap-5 p-5 sm:grid-cols-2"
+      className="card card--flat grid grid-cols-1 gap-5 p-5 sm:grid-cols-2"
     >
       <Field label="Name">
         <Input {...form.register("display_name", { required: true, maxLength: 80 })} />
@@ -137,7 +137,7 @@ function GoogleCard() {
   return (
     <div className="card card--flat flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-start gap-4">
-        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-surface-2">
+        <span className="grid grid-cols-1 size-11 shrink-0 place-items-center rounded-2xl bg-surface-2">
           <GoogleLogo size={22} weight="bold" />
         </span>
         <div>
@@ -228,7 +228,7 @@ function ActivityLog() {
   const items = data?.pages.flatMap((p) => p.items) ?? [];
   if (isPending) {
     return (
-      <div className="card card--flat grid gap-3 p-5">
+      <div className="card card--flat grid grid-cols-1 gap-3 p-5">
         {[0, 1, 2, 3].map((i) => (
           <Skeleton key={i} className="h-10" />
         ))}
@@ -302,7 +302,7 @@ function EggTracker() {
           ? "Full marks. The doctor will see you never."
           : "Laughter is the best medicine."}
       </p>
-      <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+      <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
         {Object.keys(EGGS).map((id) => {
           const got = found.includes(id);
           return (
@@ -390,9 +390,9 @@ export default function Settings() {
         title="Settings"
         description="Your profile, connections and a record of everything that happened."
       />
-      <div className="grid gap-10 lg:grid-cols-[200px_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[200px_minmax(0,1fr)]">
         <nav aria-label="Settings sections" className="hidden lg:block">
-          <ul className="sticky top-[calc(var(--nav-h)+24px)] grid gap-0.5">
+          <ul className="sticky top-[calc(var(--nav-h)+24px)] grid grid-cols-1 gap-0.5">
             {SECTIONS.map(({ id, label, icon: Icon }) => (
               <li key={id}>
                 <a
@@ -405,7 +405,7 @@ export default function Settings() {
             ))}
           </ul>
         </nav>
-        <div className="grid max-w-3xl gap-12">
+        <div className="grid grid-cols-1 max-w-3xl gap-12">
           <Section id="profile" title="Profile">
             <ProfileForm />
           </Section>

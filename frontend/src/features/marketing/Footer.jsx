@@ -5,7 +5,7 @@ import { Logo } from "@/components/ui/Logo";
 export function Footer() {
   return (
     <footer className="border-t border-line">
-      <div className="mx-auto grid max-w-[1280px] gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr]">
+      <div className="mx-auto grid grid-cols-1 max-w-[1280px] gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
           <Logo />
           <p className="mt-4 max-w-[42ch] text-sm text-ink-2">
@@ -16,7 +16,7 @@ export function Footer() {
             Laughter is the best medicine. Still, follow your prescription.
           </p>
         </div>
-        <nav aria-label="Product" className="grid content-start gap-2.5 text-sm">
+        <nav aria-label="Product" className="grid grid-cols-1 content-start gap-2.5 text-sm">
           <p className="font-semibold">Product</p>
           <a href="/#how-it-works" className="text-ink-2 hover:text-ink">
             How it works
@@ -31,7 +31,7 @@ export function Footer() {
             Sign in
           </Link>
         </nav>
-        <nav aria-label="Project" className="grid content-start gap-2.5 text-sm">
+        <nav aria-label="Project" className="grid grid-cols-1 content-start gap-2.5 text-sm">
           <p className="font-semibold">Project</p>
           <a
             href="https://github.com/SriramWorkSpace/MedSpace-Healthcare"

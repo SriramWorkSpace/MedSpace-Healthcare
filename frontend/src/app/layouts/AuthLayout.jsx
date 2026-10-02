@@ -11,7 +11,7 @@ export default function AuthLayout() {
   if (user) return <Navigate to={params.get("next") || "/app"} replace />;
 
   return (
-    <div className="grid min-h-[100dvh] lg:grid-cols-[1fr_1fr]">
+    <div className="grid grid-cols-1 min-h-[100dvh] lg:grid-cols-[1fr_1fr]">
       <div className="flex flex-col px-4 py-6 sm:px-10">
         <div className="flex items-center justify-between">
           <Link to="/" className="rounded-lg" aria-label="MedSpace home">
@@ -21,7 +21,7 @@ export default function AuthLayout() {
         </div>
         <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-12">
           {isLoading ? (
-            <div className="grid gap-4" aria-hidden>
+            <div className="grid grid-cols-1 gap-4" aria-hidden>
               <Skeleton className="h-8 w-2/3" />
               <Skeleton className="h-4 w-full" />
               <Skeleton className="mt-6 h-11 w-full" />

@@ -30,7 +30,7 @@ export function ThemeToggle() {
           animate={{ opacity: 1, rotate: 0, scale: 1 }}
           exit={{ opacity: 0, rotate: 40, scale: 0.8 }}
           transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-          className="grid place-items-center"
+          className="grid grid-cols-1 place-items-center"
         >
           {isDark ? <Moon size={17} weight="bold" /> : <Sun size={17} weight="bold" />}
         </motion.span>

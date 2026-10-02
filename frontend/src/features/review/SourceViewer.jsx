@@ -81,7 +81,12 @@ export function SourceViewer({ doc, page, onPageChange, highlight }) {
           {zoomed ? <ArrowsIn size={15} weight="bold" /> : <ArrowsOut size={15} weight="bold" />}
         </Button>
       </div>
-      <div className="flex-1 overflow-auto bg-surface-2 p-4">
+      <div
+        className="flex-1 overflow-auto bg-surface-2 p-4"
+        tabIndex={0}
+        role="region"
+        aria-label={`Source document, page ${page}`}
+      >
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={page}

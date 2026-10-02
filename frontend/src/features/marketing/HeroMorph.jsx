@@ -65,7 +65,7 @@ export function HeroMorph() {
         <p className="font-mono text-[11px] uppercase tracking-wider text-ink-3">
           Rx · Mar 4, 2026
         </p>
-        <ul className="mt-3 grid gap-2.5 font-mono text-[13px] text-ink-2">
+        <ul className="mt-3 grid grid-cols-1 gap-2.5 font-mono text-[13px] text-ink-2">
           {RX.map((r) => (
             <li key={r.name} className="flex flex-wrap gap-x-3">
               <span className="text-ink">
@@ -111,7 +111,7 @@ export function HeroMorph() {
           </Chip>
         </div>
 
-        <ul className="grid gap-1.5">
+        <ul className="grid grid-cols-1 gap-1.5">
           {RX.map((r, i) => (
             <li
               key={r.name}
@@ -145,7 +145,7 @@ export function HeroMorph() {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0, transition: { duration: 0.15 } }}
                   >
-                    <div className="grid flex-1 gap-2">
+                    <div className="grid grid-cols-1 flex-1 gap-2">
                       <div className="skeleton skeleton--text w-2/5" />
                       <div className="skeleton skeleton--text w-1/4" />
                     </div>

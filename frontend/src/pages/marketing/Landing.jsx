@@ -26,7 +26,7 @@ function Hero() {
 
   return (
     <section className="relative overflow-hidden">
-      <div className="mx-auto grid min-h-[calc(100dvh-var(--nav-h))] max-w-[1280px] items-center gap-14 px-4 pb-16 pt-10 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:gap-10 lg:pb-20 lg:pt-12">
+      <div className="mx-auto grid grid-cols-1 min-h-[calc(100dvh-var(--nav-h))] max-w-[1280px] items-center gap-14 px-4 pb-16 pt-10 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:gap-10 lg:pb-20 lg:pt-12">
         <div className="max-w-xl">
           <motion.h1
             {...rise(0)}

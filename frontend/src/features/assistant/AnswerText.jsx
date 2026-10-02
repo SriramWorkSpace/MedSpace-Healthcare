@@ -38,10 +38,10 @@ export function AnswerText({ text, onCite, streaming }) {
     });
 
   return (
-    <div className="grid gap-2 text-[15px] leading-relaxed">
+    <div className="grid grid-cols-1 gap-2 text-[15px] leading-relaxed">
       {blocks.map((b, bi) =>
         b.type === "ul" ? (
-          <ul key={b.key} className="grid gap-1.5 pl-1">
+          <ul key={b.key} className="grid grid-cols-1 gap-1.5 pl-1">
             {b.items.map((item, i) => (
               <li key={i} className="flex gap-2">
                 <span className="mt-[9px] size-1.5 shrink-0 rounded-full bg-accent" aria-hidden />
