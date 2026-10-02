@@ -44,6 +44,8 @@
   --shadow-md: 0 2px 4px oklch(0.3 0.03 165 / 0.04), 0 12px 32px -12px oklch(0.3 0.03 165 / 0.16);
   --shadow-lg: 0 4px 8px oklch(0.3 0.03 165 / 0.04), 0 28px 64px -24px oklch(0.3 0.03 165 / 0.24);
   --ring: 0 0 0 3px oklch(0.52 0.105 163 / 0.28);
+  --scrollbar-thumb: oklch(0.82 0.012 160);
+  --scrollbar-thumb-hover: oklch(0.68 0.02 160);
   --inner-highlight: inset 0 1px 0 oklch(1 0 0 / 0.65);
 
   /* Shape */
@@ -106,5 +108,7 @@
   --shadow-md: 0 2px 4px oklch(0 0 0 / 0.25), 0 12px 32px -12px oklch(0 0 0 / 0.5);
   --shadow-lg: 0 4px 8px oklch(0 0 0 / 0.25), 0 28px 64px -24px oklch(0 0 0 / 0.6);
   --ring: 0 0 0 3px oklch(0.76 0.125 163 / 0.32);
+  --scrollbar-thumb: oklch(0.36 0.016 168);
+  --scrollbar-thumb-hover: oklch(0.48 0.02 168);
   --inner-highlight: inset 0 1px 0 oklch(1 0 0 / 0.06);
 }
