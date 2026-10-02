@@ -373,8 +373,8 @@
   },
   "backend/scripts/init-db.sql": {
     "mtime": 1790877337.95084,
-    "seen": 1790880449.7582433,
-    "ast_hash": "",
+    "seen": 1790942943.6560965,
+    "ast_hash": "be163a57819854ff6da063b1189b0eb4",
     "semantic_hash": ""
   },
   "backend/tests/__init__.py": {
