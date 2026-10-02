@@ -42,12 +42,20 @@ test("dose history can be reviewed and filled in", async ({ page }) => {
   const days = page.getByRole("button", { name: /: \d+ of \d+ taken$/ });
   await days.nth(2).click();
   const panel = page.locator("section", { has: page.locator("#day-heading") });
-  const skipped = panel.getByRole("button", { name: "Skipped" }).first();
-  await skipped.click();
-  await expect(skipped).toHaveAttribute("aria-pressed", "true");
+  // Demo history is random per account: pick whichever mark this dose doesn't have yet.
+  const alreadySkipped =
+    (await panel.getByRole("button", { name: "Skipped" }).first().getAttribute("aria-pressed")) ===
+    "true";
+  const target = alreadySkipped ? "Taken" : "Skipped";
+  const button = panel.getByRole("button", { name: target }).first();
+  await Promise.all([
+    page.waitForResponse((r) => r.url().includes("/api/doses") && r.request().method() === "PUT"),
+    button.click(),
+  ]);
+  await expect(button).toHaveAttribute("aria-pressed", "true");
   await page.reload();
   await days.nth(2).click();
-  await expect(panel.getByRole("button", { name: "Skipped" }).first()).toHaveAttribute(
+  await expect(panel.getByRole("button", { name: target }).first()).toHaveAttribute(
     "aria-pressed",
     "true",
   );

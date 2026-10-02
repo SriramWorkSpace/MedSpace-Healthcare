@@ -41,7 +41,10 @@ function Source({ note }) {
   ].filter(Boolean);
   const href = `/app/documents/${note.document_id}${note.source_page ? `?page=${note.source_page}` : ""}`;
   return (
-    <Link to={href} className="truncate text-xs text-ink-3 hover:text-accent hover:underline">
+    <Link
+      to={href}
+      className="truncate text-xs text-ink-3 group-hover:text-ink-2 hover:text-accent hover:underline"
+    >
       {bits.join(" · ")}
       {note.source_page && ` · p.${note.source_page}`}
     </Link>
