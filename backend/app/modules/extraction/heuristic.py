@@ -60,12 +60,15 @@ _FREQ_RE = re.compile(
     r"(\d(?:\.\d+)?\s*-\s*\d(?:\.\d+)?\s*-\s*\d(?:\.\d+)?(?:\s*-\s*\d(?:\.\d+)?)?|"
     r"\b(?:sos|prn|stat|od|qd|bd|bid|tds|tid|qid|qds|hs|qhs|nocte)\b(?:,?\s*max\s+\w+)?|"
     r"q\s*\d{1,2}\s*h|every \d{1,2} hours?|once (?:daily|a day|a week|weekly)|twice (?:daily|a day)|"
-    r"(?:three|four|two) times (?:a|per) day|at (?:night|bedtime)|as needed|when required|"
+    r"(?:three|four|two|\d) times (?:a|per) day|at (?:night|bedtime)|as needed|when required|"
+    r"every (?:morning|evening|night)|once in the (?:morning|evening|night)|"
     r"alternate days|every other day|weekly|daily)",
     re.IGNORECASE,
 )
 _DUR_RE = re.compile(
     r"((?:x|for|×)\s*\d{1,3}\s*(?:days?|d|weeks?|wks?|months?)\b|\d{1,3}\s*/\s*(?:7|52|12)\b|"
+    r"for (?:a|an|one|two|three|four|five|six|seven|eight|nine|ten|twelve|fourteen)\s+"
+    r"(?:days?|weeks?|wks?|months?)\b|"
     r"\d{1,3}\s*(?:days?|weeks?|months?)\b|ongoing|continue)",
     re.IGNORECASE,
 )
@@ -73,7 +76,11 @@ _DATE_LINE = re.compile(
     r"\b(?:date|dated|issued|collected|reported)\s*[:\-]?\s*(?P<d>[^\n]+)", re.IGNORECASE
 )
 _FOLLOW_UP = re.compile(
-    r"\b(?:follow[\s-]?up|review|next visit)\b[:\s\-]*(?P<rest>[^\n]*)", re.IGNORECASE
+    # "Return if fever persists" is advice, not a visit: return/see me need "in"/"after".
+    r"\b(?:follow[\s-]?up|review|next visit|come back|revisit|(?:return|see me)(?= (?:in|after)))\b"
+    r"[:\s\-]*"
+    r"(?P<rest>[^\n]*)",
+    re.IGNORECASE,
 )
 _DOCTOR = re.compile(r"\bDr\.?\s+(?P<name>[A-Z][A-Za-z.'\-]+(?:\s+[A-Z][A-Za-z.'\-]+){0,3})")
 _CLINIC = re.compile(
@@ -83,7 +90,7 @@ _CLINIC = re.compile(
 )
 _LAB = re.compile(
     r"\b(cbc|complete blood count|lipid (?:panel|profile)|hba1c|blood (?:test|work|sugar)|"
-    r"x-?ray|ultrasound|ecg|ekg|urine (?:test|analysis)|thyroid|tsh|vitamin d|lft|kft|"
+    r"(?:chest )?x-?ray|ultrasound|ecg|ekg|urine (?:test|analysis)|thyroid|tsh|vitamin d|lft|kft|"
     r"liver function|kidney function|mri|ct scan)\b",
     re.IGNORECASE,
 )
@@ -222,46 +229,93 @@ def _diet_notes(line: str, page_no: int) -> list[ExtractedDietNote]:
     return notes
 
 
+_NUMERIC_DATE = re.compile(r"\b(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{2,4})\b")
+
+
+def ambiguous_date(text: str) -> bool:
+    """11/05/2026 can be 11 May or Nov 5; 25/05/2026 cannot."""
+    m = _NUMERIC_DATE.search(text or "")
+    return bool(m) and int(m.group(1)) <= 12 and int(m.group(2)) <= 12 and m.group(1) != m.group(2)
+
+
 def _parse_date(text: str) -> date | None:
+    """Numeric dates are read day-first, the convention of the shorthand this extractor reads
+    (1-0-1, OD, BD); ambiguous ones are flagged for review by the caller (ADR-024)."""
     text = text.strip().strip(".")
     if not text:
         return None
+    # Year-first ISO dates are unambiguous; dateutil would swap them under dayfirst.
+    if iso := re.search(r"\b(\d{4})-(\d{2})-(\d{2})\b", text):
+        try:
+            return date(*(int(x) for x in iso.groups()))
+        except ValueError:
+            return None
+    m = _NUMERIC_DATE.search(text)
+    dayfirst = not (m and int(m.group(1)) <= 12 < int(m.group(2)))
     try:
-        return dateparser.parse(text, fuzzy=True, dayfirst=False).date()
+        return dateparser.parse(text, fuzzy=True, dayfirst=dayfirst).date()
     except (ValueError, OverflowError):
         return None
 
 
+_SIG = re.compile(r"^\s*(?:sig|directions|dosage|dose|take)\s*[:.\-]\s*(?P<rest>.+)$", re.I)
+
+
+def _dosing(rest: str) -> dict:
+    """Frequency, duration and instructions from the text after a medicine's name/strength."""
+    freq = _FREQ_RE.search(rest)
+    dur = _DUR_RE.search(rest)
+    instr = _INSTRUCTION_RE.findall(rest)
+    frequency_raw = freq.group(0).strip() if freq else None
+    duration_raw = dur.group(0).strip() if dur else None
+    instructions = "; ".join(dict.fromkeys(i.strip() for i in instr)) or None
+    if instructions:
+        instructions = instructions.replace("p.c.", "after food").replace("a.c.", "before food")
+    return {
+        "frequency_raw": frequency_raw,
+        "duration_raw": duration_raw,
+        "duration_days": parse_duration_days(duration_raw),
+        "instructions": instructions,
+        "as_needed": normalize_frequency(frequency_raw).as_needed if frequency_raw else False,
+    }
+
+
+def _apply_sig(med: ExtractedMedication, rest: str) -> None:
+    dosing = _dosing(rest)
+    for key, value in dosing.items():
+        if value and not getattr(med, key):
+            setattr(med, key, value)
+    if med.frequency_raw:
+        med.uncertain_fields = [f for f in med.uncertain_fields if f != "frequency_raw"]
+        med.confidence = max(med.confidence, 0.85)
+
+
+_BRAND = re.compile(r"\s*\((?P<brand>[A-Za-z][A-Za-z\- ]{1,30})\)\s*")
+
+
 def _medication_from_line(line: str, page_no: int) -> ExtractedMedication | None:
+    # A bracketed brand after the generic name ("Paracetamol (Feverease) 650 mg") is dropped
+    # for parsing; the generic name is what schedules, search and labs key on.
+    line = _BRAND.sub(" ", line, count=1) if _BRAND.search(line) else line
     m = _MED_LINE.match(line)
     if not m:
         return None
     name = m.group("name").strip()
+    if name.isupper() and len(name) > 3:
+        name = name.title()
     if name.lower() in {"date", "patient", "age", "weight", "dr", "page", "follow", "review"}:
         return None
     rest = m.group("rest")
-    freq = _FREQ_RE.search(rest)
-    dur = _DUR_RE.search(rest)
-    instr = _INSTRUCTION_RE.findall(rest)
+    dosing = _dosing(rest)
     form = next(
         (v for k, v in _FORM_WORDS.items() if re.search(rf"\b{k}\b", line, re.IGNORECASE)), None
     )
-    frequency_raw = freq.group(0).strip() if freq else None
-    duration_raw = dur.group(0).strip() if dur else None
-    uncertain = [f for f, v in (("frequency_raw", frequency_raw),) if not v]
-    instructions = "; ".join(dict.fromkeys(i.strip() for i in instr)) or None
-    if instructions:
-        instructions = instructions.replace("p.c.", "after food").replace("a.c.", "before food")
-    as_needed = normalize_frequency(frequency_raw).as_needed if frequency_raw else False
+    uncertain = [] if dosing["frequency_raw"] else ["frequency_raw"]
     return ExtractedMedication(
         name=name[:1].upper() + name[1:],
         strength=re.sub(r"\s+", " ", m.group("strength")).strip(),
         form=form,
-        frequency_raw=frequency_raw,
-        duration_raw=duration_raw,
-        duration_days=parse_duration_days(duration_raw),
-        instructions=instructions,
-        as_needed=as_needed,
+        **dosing,
         source_page=page_no,
         confidence=0.9 if not uncertain else 0.62,
         uncertain_fields=uncertain,
@@ -278,6 +332,7 @@ def extract(pages: list[str]) -> ExtractionPayload:
     lab_lines_seen: set[str] = set()
     diet: list[ExtractedDietNote] = []
     results: list[ExtractedLabResult] = []
+    warnings: list[str] = []
     lab_mode = any(_LAB_HEADER.search(t) for t in pages)
 
     for page_no, text in enumerate(pages, start=1):
@@ -296,11 +351,20 @@ def extract(pages: list[str]) -> ExtractionPayload:
                 if s := _SPECIALTY_HINT.search(line):
                     prescriber.specialty = s.group(1).title()
                 continue
+            if (sig := _SIG.match(line)) and meds and not meds[-1].frequency_raw:
+                _apply_sig(meds[-1], sig.group("rest"))
+                continue
             if patient is None and line.lower().startswith("patient"):
                 patient = line.split(":", 1)[-1].strip() or None
                 continue
             if issued_on is None and (dm := _DATE_LINE.search(line)):
                 issued_on = _parse_date(dm.group("d"))
+                if issued_on and ambiguous_date(dm.group("d")):
+                    warnings.append(
+                        f"The date {_NUMERIC_DATE.search(dm.group('d')).group(0)} can be read two "
+                        f"ways. MedSpace read it as {issued_on:%B} {issued_on.day}, "
+                        f"{issued_on.year}; check it before confirming."
+                    )
                 continue
             if fm := _FOLLOW_UP.match(line):
                 rest = fm.group("rest").strip()
@@ -388,5 +452,6 @@ def extract(pages: list[str]) -> ExtractionPayload:
         diet_notes=diet,
         lab_results=results,
         summary=summary,
+        warnings=warnings,
         overall_confidence=round(sum(confidences) / len(confidences), 2),
     )

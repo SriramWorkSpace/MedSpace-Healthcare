@@ -112,6 +112,15 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 - [x] Multi-stage web image (nginx + /api proxy), deployment guide (docs/deployment.md), README screenshots
 - [x] Final graphify update and docs sync
 
+## Phase 14: Extraction evaluation
+
+- [x] Labelled corpus generator: six prescription layouts, shorthand, duration and date styles, follow-ups, investigations, diet, three lab layouts; rendered through real PDFs (ADR-024)
+- [x] Field-level scorer with per-metric, per-tag and failure reports; CLI `python -m app.eval` (JSON + Markdown)
+- [x] Regression set gated in CI (thresholds.json); held-out stress set; Groq provider supported
+- [x] Extractor fixes driven by the results: `Sig:` lines, day-first numeric dates with ambiguity warnings, ISO dates, chest X-ray, bracketed brands, ALL-CAPS names, word frequencies and durations, "come back after" follow-ups
+- [x] Held-out baseline 92.5% (regression set 96.2%) before fixes; both 100% after (see docs/evaluation.md for the caveat)
+- [x] Tests: 7 (corpus determinism, scorer, thresholds, each fix)
+
 ## Phase 13: Medication supply and refills
 
 - [x] `medication_supplies` table and `supply` module: count, refill, stop tracking (ADR-023)
@@ -166,6 +175,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 ---
 
 ## Change log
+
+- **2026-10-02**: Phase 14 shipped: extraction evaluation harness, CI gate, and the extractor fixes it surfaced (ADR-024, docs/evaluation.md).
 
 - **2026-10-02**: Phase 13 shipped: supply tracking and refill estimates (ADR-023).
 

@@ -39,6 +39,18 @@ jobs:
       - run: pip install -e ".[dev]"
       - run: ruff check . && ruff format --check .
       - run: pytest --cov=app --cov-report=term-missing:skip-covered
+      - name: Extraction evaluation (regression gate + held-out stress set)
+        run: |
+          python -m app.eval --check --out eval-report
+          python -m app.eval --stress --check --out eval-report-stress
+      - name: Upload evaluation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: extraction-eval
+          path: |
+            backend/eval-report/
+            backend/eval-report-stress/
 
   frontend:
     name: Frontend (lint + tests + build)

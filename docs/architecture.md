@@ -171,6 +171,10 @@ sequenceDiagram
 5. **Lab results** (ADR-020): value, unit and reference range are copied as printed. On confirm, `extraction/labs.py` parses the value and the printed range, flags the value only against that range, and maps the test name to an `analyte_key` ("LDL-C" and "LDL cholesterol" share `ldl-cholesterol`) so reports from different labs chart together. The offline extractor reads a page with a reference-range header as a lab report, in both one-line and split name/value/range layouts.
 6. **Draft**: stored as `extractions.payload` (JSONB, versioned). Nothing is "official" until the user confirms.
 
+### 4.2.1 Evaluation
+
+`app/eval` (not a domain module) generates a labelled corpus of synthetic documents, runs them through `extraction.service.extract_text_pages` and scores every field. CI runs the regression set and the held-out stress set with `--check`. Method and results: [evaluation.md](evaluation.md).
+
 ### 4.3 Data lifecycle
 
 ```

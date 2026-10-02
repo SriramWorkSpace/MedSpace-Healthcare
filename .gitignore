@@ -41,3 +41,6 @@ graphify-out/obsidian/
 
 # dated graphify snapshots
 graphify-out/20*/
+
+# extraction evaluation output
+backend/eval-report*/

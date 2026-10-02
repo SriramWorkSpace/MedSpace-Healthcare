@@ -170,11 +170,22 @@ _DUR_SLASH = re.compile(r"(?<!\d)(\d{1,3})\s*/\s*(7|52|12)(?!\d)")
 _DUR_WORDS = re.compile(r"(?:x|for|\*|×)?\s*(\d{1,3})\s*(d|days?|wks?|weeks?|w|mo|months?|m)\b")
 
 
+_NUMBER_WORDS = {
+    "a": 1, "an": 1, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
+    "seven": 7, "eight": 8, "nine": 9, "ten": 10, "twelve": 12, "fourteen": 14,
+}  # fmt: skip
+
+
 def parse_duration_days(raw: str | None) -> int | None:
     """'x 7 days' -> 7, '2/52' -> 14, '3/12' -> 90, '1 month' -> 30. Ongoing or unknown -> None."""
     if not raw:
         return None
     text = _clean(raw)
+    text = re.sub(
+        r"\b(a|an|one|two|three|four|five|six|seven|eight|nine|ten|twelve|fourteen)\b",
+        lambda m: str(_NUMBER_WORDS[m.group(1)]),
+        text,
+    )
     if re.search(
         r"\b(ongoing|continue|long term|indefinitely|until further notice|chronic)\b", text
     ):

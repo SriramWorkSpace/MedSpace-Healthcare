@@ -258,6 +258,22 @@ async def extract_document(
     return payload, method, model
 
 
+async def extract_text_pages(
+    pages: list[str], dose_times: dict[str, str], *, offline: bool = True
+) -> tuple[ExtractionPayload, str]:
+    """Text pages in, normalized payload out: the text path without a stored document.
+
+    Used by the evaluation harness so it measures exactly what uploads go through.
+    Returns (payload, method).
+    """
+    llm = None if offline else get_llm()
+    if llm is None:
+        payload, method = heuristic.extract(pages), "heuristic"
+    else:
+        payload, method = await _extract_text(llm, pages), "groq-text"
+    return post_process(payload, dose_times=dose_times, page_count=max(1, len(pages))), method
+
+
 # --------------------------------------------------------------------------- persistence
 
 

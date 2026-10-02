@@ -1,0 +1,25 @@
+{
+  "heuristic": {
+    "overall": 0.98,
+    "medication_recall": 0.97,
+    "medication_precision": 0.97,
+    "schedule": 0.95,
+    "duration_days": 0.95,
+    "issued_on": 0.95,
+    "follow_up": 0.93,
+    "lab_recall": 0.97,
+    "lab_value": 0.97,
+    "lab_flag": 0.97
+  },
+  "heuristic_stress": {
+    "overall": 0.95,
+    "medication_recall": 0.9,
+    "schedule": 0.85
+  },
+  "groq": {
+    "overall": 0.9
+  },
+  "groq_stress": {
+    "overall": 0.85
+  }
+}
