@@ -17,6 +17,7 @@ from app.modules.doses import service as doses_service
 from app.modules.identity.models import User
 from app.modules.records import service as records
 from app.modules.records.models import CareAction, Medication, Prescription
+from app.modules.supply import service as supply_service
 from app.modules.timeline.schemas import (
     AsNeededOut,
     DashboardOut,
@@ -260,8 +261,11 @@ async def dashboard(session: AsyncSession, user: User) -> DashboardOut:
         select(func.count()).select_from(Prescription).where(Prescription.user_id == uid)
     )
 
+    low = await supply_service.running_low(session, user)
+
     return DashboardOut(
         today=today,
+        running_low=low,
         doses_today=doses,
         as_needed=as_needed,
         upcoming=upcoming,

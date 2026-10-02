@@ -60,7 +60,7 @@ MedSpace/
 │   │   │   └── queue.py          # enqueue(): arq | inline
 │   │   └── modules/              # bounded contexts (see §3)
 │   │       ├── identity/  documents/  extraction/  records/
-│   │       ├── timeline/  search/  doses/  visits/  assistant/  integrations/  sharing/
+│   │       ├── timeline/  search/  doses/  visits/  supply/  assistant/  integrations/  sharing/
 │   │       └── audit/  demo/
 │   ├── migrations/               # Alembic
 │   └── tests/                    # pytest (unit + API integration against real Postgres)
@@ -103,6 +103,7 @@ modules/<name>/
 | `timeline` | (read model, no tables) | Chronological union over confirmed records, documents, appointments, follow-ups |
 | `doses` | `dose_logs` | Taken/skipped marks per scheduled dose, history and streaks computed from the schedule in the user's timezone; unmarked doses are "not logged", never "missed" (ADR-021) |
 | `visits` | `visit_preps` | Visit prep: the user's questions plus a live brief (current medicines, changes, dose marks, new lab results, open to-dos, appointments) since the last visit; factual prompts to raise; shareable (ADR-022) |
+| `supply` | `medication_supplies` | The user's count per medicine; estimated units left (scheduled doses since the count, skipped ones excluded) and a projected run-out date; feeds the dashboard, visit prompts and Ask MedSpace (ADR-023) |
 | `search` | (read model, no tables) | Global search: escaped `ILIKE` on names, prefix full-text with `ts_headline` snippets on document chunks, grouped deep-link hits |
 | `assistant` | `document_chunks`, `chat_threads`, `chat_messages` | Chunking, embeddings, hybrid retrieval (pgvector + full-text, RRF fusion), grounded answers with citations, SSE streaming |
 | `integrations` | `oauth_connections`, `sync_links` | Google OAuth (incremental consent), encrypted tokens, Calendar recurring events, Tasks, idempotent sync/unsync |
@@ -227,6 +228,7 @@ erDiagram
   extractions ||--o| prescriptions : "confirmed into"
   prescriptions ||--o{ medications : lists
   medications ||--o{ dose_logs : "marked in"
+  medications ||--o| medication_supplies : "counted in"
   prescriptions ||--o{ care_actions : requires
   documents ||--o{ diet_notes : "copied from"
   documents ||--o{ lab_results : "copied from"
@@ -261,6 +263,7 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 | Dashboard | `GET /dashboard` (today's doses, upcoming, needs-review queue, stats) |
 | Timeline | `GET /timeline?cursor=&types=` |
 | Doses | `PUT /doses` (mark taken or skipped) · `DELETE /doses?medication_id=&date=&time=` · `GET /adherence?days=` · `GET /adherence/{medication_id}?days=` |
+| Supply | `GET /supply` · `PUT /supply/{medication_id}` (count on hand) · `POST /supply/{medication_id}/refill` · `DELETE /supply/{medication_id}` |
 | Visits | `POST /visits` · `GET /visits` · `GET /visits/{id}` · `PATCH /visits/{id}` (details, questions) · `DELETE /visits/{id}` · `GET /visits/{id}/brief` |
 | Search | `GET /search?q=` (grouped hits with deep links and highlighted snippets) |
 | Assistant | `POST /assistant/threads` · `GET /assistant/threads` · `POST /assistant/threads/{id}/messages` (SSE) |

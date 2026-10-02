@@ -25,6 +25,9 @@ import { formatClock, formatDate } from "@/lib/format";
 import { scheduleLabel } from "@/features/review/mapping";
 import { useAdherence } from "@/features/doses/api";
 import { AdherenceLine } from "@/features/doses/AdherenceLine";
+import { useSupplies } from "@/features/supply/api";
+import { SupplyDialog } from "@/features/supply/SupplyDialog";
+import { SupplyLine } from "@/features/supply/SupplyLine";
 
 const TABS = [
   { key: "active", label: "Active" },
@@ -133,7 +136,7 @@ function CourseProgress({ med }) {
   );
 }
 
-function MedicationCard({ med, onEdit, index, focused, history, window }) {
+function MedicationCard({ med, onEdit, index, focused, history, window, supply, onSupply }) {
   const update = useUpdateMedication();
   const stopped = med.status === "stopped";
   return (
@@ -181,6 +184,13 @@ function MedicationCard({ med, onEdit, index, focused, history, window }) {
       {med.instructions && <p className="mt-3 text-sm text-ink-2">{med.instructions}</p>}
       <CourseProgress med={med} />
       {history && <AdherenceLine history={history} window={window} />}
+      {(med.status === "active" || med.status === "upcoming") && (
+        <SupplyLine
+          supply={supply}
+          onCount={() => onSupply(med, "count")}
+          onRefill={() => onSupply(med, "refill")}
+        />
+      )}
       {med.status === "upcoming" && (
         <p className="mt-3 text-xs text-ink-3">Starts {formatDate(med.start_date)}</p>
       )}
@@ -229,6 +239,12 @@ export default function Medications() {
   const [editing, setEditing] = useState(null);
   const { data, isPending } = useMedications();
   const adherence = useAdherence(14);
+  const supplies = useSupplies();
+  const [supplying, setSupplying] = useState(null); // { med, mode }
+  const supplyById = useMemo(
+    () => new Map((supplies.data ?? []).map((s) => [s.medication_id, s])),
+    [supplies.data],
+  );
   const historyById = useMemo(
     () => new Map((adherence.data?.medications ?? []).map((h) => [h.medication_id, h])),
     [adherence.data],
@@ -302,12 +318,25 @@ export default function Medications() {
                     focused={m.id === focusMed?.id && chosenTab === null}
                     history={historyById.get(m.id)}
                     window={adherence.data}
+                    supply={supplyById.get(m.id)}
+                    onSupply={(med, mode) => setSupplying({ med, mode })}
                   />
                 ))}
               </AnimatePresence>
             </ul>
           )}
         </>
+      )}
+      {supplying && (
+        <SupplyDialog
+          key={`${supplying.med.id}-${supplying.mode}`}
+          med={supplying.med}
+          supply={supplyById.get(supplying.med.id)}
+          mode={
+            supplying.mode === "refill" && supplyById.get(supplying.med.id) ? "refill" : "count"
+          }
+          onClose={() => setSupplying(null)}
+        />
       )}
       {editing && (
         <EditTimesDialog key={editing.id} med={editing} onClose={() => setEditing(null)} />

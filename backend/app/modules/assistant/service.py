@@ -83,6 +83,12 @@ DOSES = re.compile(
     r"missed|skipped))\b",
     re.IGNORECASE,
 )
+SUPPLY = re.compile(
+    r"\b(refills?|run(?:ning)? out|runs? out|running low|supply|supplies|"
+    r"(?:pills|tablets|capsules|doses|medicine|medication) (?:left|remaining)|"
+    r"how many (?:pills|tablets|capsules|doses)|enough (?:pills|tablets|capsules|medicine))\b",
+    re.IGNORECASE,
+)
 _LAB_ALIASES = {"a1c": "hba1c", "sugar": "glucose", "lipid": "cholesterol", "lipids": "cholesterol"}
 _LAB_GENERIC = {"total", "fasting", "serum", "random", "level"}
 
@@ -321,6 +327,38 @@ async def gather_sources(
                     document_id=str(food.document_id) if food.document_id else None,
                     confirmed=True,
                     text=f"Take {label} {food.text.lower()}.",
+                )
+            )
+
+    # Supply questions: the user's own counts and the estimate derived from them.
+    if SUPPLY.search(question):
+        from app.modules.identity.models import User
+        from app.modules.supply import service as supply
+
+        owner = await session.get(User, user_id)
+        for item in (await supply.list_supplies(session, owner) if owner else [])[:8]:
+            label = f"{item.name} {item.strength}".strip() if item.strength else item.name
+            left = f"{item.estimated_left:g} {item.unit}"
+            if item.runs_out_on:
+                when = f"runs out around {item.runs_out_on:%b} {item.runs_out_on.day}"
+            elif item.status == "course_covered":
+                when = "covers the rest of the course"
+            else:
+                when = "no run-out date (taken as needed)"
+            line = (
+                f"{label}: about {left} left by your count of {item.counted:g} on "
+                f"{item.counted_at:%b} {item.counted_at.day}; {when} (estimate)."
+            )
+            sources.append(
+                Source(
+                    n=len(sources) + 1,
+                    kind="record",
+                    title=f"{item.name} supply",
+                    page_no=None,
+                    snippet=line,
+                    document_id=None,
+                    confirmed=True,
+                    text=f"{line} Source: your supply count.",
                 )
             )
 

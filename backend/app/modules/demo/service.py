@@ -25,6 +25,7 @@ from app.modules.identity import service as identity
 from app.modules.identity.models import User
 from app.modules.identity.schemas import SignupIn
 from app.modules.records.models import CareAction, Prescription
+from app.modules.supply import service as supply
 from app.modules.visits import service as visits
 from app.modules.visits.schemas import VisitCreate
 
@@ -91,6 +92,9 @@ async def seed(session: AsyncSession, user: User) -> None:
     await session.flush()
 
     await doses.seed_history(session, user)
+
+    # Supply counts for the long-term medicines: one runs low soon, one has plenty.
+    await supply.seed_demo(session, user)
 
     # A visit prep for the next follow-up, with two questions already written.
     follow_up = (

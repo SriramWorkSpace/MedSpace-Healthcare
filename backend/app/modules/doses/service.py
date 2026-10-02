@@ -115,6 +115,21 @@ async def clear_dose(
     await session.flush()
 
 
+async def skipped_since(
+    session: AsyncSession, user_id: uuid.UUID, medication_id: uuid.UUID, since: date
+) -> set[tuple[date, str]]:
+    """(date, time) of doses marked skipped on or after `since`, for supply estimates."""
+    rows = await session.execute(
+        select(DoseLog.due_date, DoseLog.due_time).where(
+            DoseLog.user_id == user_id,
+            DoseLog.medication_id == medication_id,
+            DoseLog.due_date >= since,
+            DoseLog.status == "skipped",
+        )
+    )
+    return {(d, t) for d, t in rows.all()}
+
+
 async def statuses_on(
     session: AsyncSession, user_id: uuid.UUID, day: date
 ) -> dict[tuple[uuid.UUID, str], str]:

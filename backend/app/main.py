@@ -31,6 +31,7 @@ from app.modules.records.router import router as records_router
 from app.modules.search.router import router as search_router
 from app.modules.sharing.router import public_router as public_share_router
 from app.modules.sharing.router import router as sharing_router
+from app.modules.supply.router import router as supply_router
 from app.modules.timeline.router import router as timeline_router
 from app.modules.visits.router import router as visits_router
 from app.shared.embeddings import warm_up
@@ -83,6 +84,7 @@ def create_app() -> FastAPI:
     api.include_router(search_router)
     api.include_router(doses_router)
     api.include_router(visits_router)
+    api.include_router(supply_router)
     api.include_router(assistant_router)
     api.include_router(integrations_router)
     api.include_router(google_auth_router)

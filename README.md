@@ -30,6 +30,7 @@ then into calendar reminders, to-dos, a health timeline and answers you can trac
 | ![Side-by-side review of an extracted prescription](docs/screenshots/review.png) | ![Source-grounded answers with citations](docs/screenshots/ask.png) |
 | **Dashboard (dark)** | **Printable report** |
 | ![Today's doses, review queue and upcoming items](docs/screenshots/dashboard-dark.png) | ![Prescription summary report](docs/screenshots/report.png) |
+| **Supply and refills** | Count what you have and MedSpace estimates what's left from your schedule, when it runs out, and warns you on the dashboard before it does. One tap adds a refill. |
 | **Visit prep** | Before an appointment, collect your questions and get a one-page brief of what changed since last time: medicines, doses, new lab results, open to-dos. Print it or share it with a secure link. |
 | **Dose tracking** | Tick doses off on the dashboard and they sync to every device. Each medicine gets a 14-day strip and a history calendar where you can fill in or correct past days. Unmarked doses stay "not logged": MedSpace never assumes a miss. |
 | **Visit prep** | **Dashboard** |

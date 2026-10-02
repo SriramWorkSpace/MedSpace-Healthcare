@@ -18,6 +18,7 @@ from app.modules.documents import service as documents
 from app.modules.doses import service as doses
 from app.modules.identity.models import User
 from app.modules.records import service as records
+from app.modules.supply import service as supply_service
 from app.modules.timeline import service as timeline
 from app.modules.visits.models import VisitPrep
 from app.modules.visits.schemas import (
@@ -258,8 +259,28 @@ async def brief(session: AsyncSession, user: User, prep: VisitPrep) -> VisitBrie
         appointments=appointments,
         diet_notes=[n.text for n in diet.notes][:10],
         documents=new_docs,
-        prompts=_prompts(prep, since, today, medications, dose_rows, labs, todos),
+        prompts=_prompts(prep, since, today, medications, dose_rows, labs, todos)
+        + await _supply_prompts(session, user, prep, today),
     )
+
+
+async def _supply_prompts(
+    session: AsyncSession, user: User, prep: VisitPrep, today: date
+) -> list[Prompt]:
+    horizon = (prep.visit_date or today) + timedelta(days=14)
+    out = []
+    for s in await supply_service.list_supplies(session, user):
+        if s.status == "out":
+            text = f"Your estimated {_label(s.name, s.strength)} supply has run out."
+        elif s.runs_out_on and s.runs_out_on <= horizon:
+            text = (
+                f"Your {_label(s.name, s.strength)} supply is estimated to run out around "
+                f"{_day(s.runs_out_on)}."
+            )
+        else:
+            continue
+        out.append(Prompt(key=f"supply:{s.medication_id}:{s.counted_at:%Y%m%d%H%M}", text=text))
+    return out
 
 
 def _prompts(

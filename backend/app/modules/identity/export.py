@@ -21,6 +21,7 @@ from app.modules.identity.schemas import UserOut
 from app.modules.records import service as records
 from app.modules.records.schemas import CareActionOut
 from app.modules.sharing import service as sharing
+from app.modules.supply import service as supply
 
 
 async def build_export(session: AsyncSession, user: User) -> dict:
@@ -76,6 +77,7 @@ async def build_export(session: AsyncSession, user: User) -> dict:
             "diet_notes": (await records.list_diet_notes(session, user.id)).notes,
             "lab_results": await records.list_lab_results(session, user.id),
             "dose_log": await doses.list_logs(session, user.id),
+            "supplies": await supply.list_supplies(session, user),
             "conversations": threads,
             "share_links": shares,
             "activity": activity,

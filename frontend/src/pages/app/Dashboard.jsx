@@ -18,6 +18,7 @@ import { firstName, greeting } from "@/lib/format";
 import { EMPTY_QUIPS } from "@/easter-eggs/puns";
 import { useDashboard, useDietNotes } from "@/features/records/api";
 import { TodaySchedule } from "@/features/dashboard/TodaySchedule";
+import { RunningLow } from "@/features/supply/RunningLow";
 import {
   AsNeededList,
   ComingUp,
@@ -104,6 +105,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] lg:items-start">
           <motion.div {...stagger(1)} className="grid grid-cols-1 min-w-0 gap-4">
             <NeedsReview items={data.needs_review} processing={data.processing} />
+            <RunningLow items={data.running_low} />
             <Panel
               title="Today's doses"
               action={

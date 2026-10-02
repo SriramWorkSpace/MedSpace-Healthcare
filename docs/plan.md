@@ -112,6 +112,16 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 - [x] Multi-stage web image (nginx + /api proxy), deployment guide (docs/deployment.md), README screenshots
 - [x] Final graphify update and docs sync
 
+## Phase 13: Medication supply and refills
+
+- [x] `medication_supplies` table and `supply` module: count, refill, stop tracking (ADR-023)
+- [x] Deterministic estimate: units left from the count, schedule and skipped marks; run-out date or "covers the course"; statuses for low/out
+- [x] Medication cards: supply line with Update count / Refill, or Track supply; one dialog for both
+- [x] Dashboard "Running low" card with one-tap refill
+- [x] Visit prep prompts and Ask MedSpace answers state supply estimates; export includes supplies
+- [x] Demo: Metformin running low, Atorvastatin with a date, Amoxicillin covering its course
+- [x] Tests: 8 backend (pure estimate cases, API, privacy, integrations), 2 e2e (with axe)
+
 ## Phase 12: Visit prep
 
 - [x] `visit_preps` table and `visits` module: create, edit details and questions, delete (ADR-022)
@@ -156,6 +166,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 ---
 
 ## Change log
+
+- **2026-10-02**: Phase 13 shipped: supply tracking and refill estimates (ADR-023).
 
 - **2026-10-02**: Phase 12 shipped: visit prep with a live, shareable brief (ADR-022).
 

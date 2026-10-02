@@ -6,6 +6,8 @@ from typing import Literal
 
 from pydantic import BaseModel
 
+from app.modules.supply.schemas import SupplyOut
+
 EventType = Literal[
     "prescription", "medication_start", "medication_end", "appointment", "task", "document"
 ]
@@ -67,3 +69,4 @@ class DashboardOut(BaseModel):
     processing: int
     week: list[DayLoad]
     stats: dict[str, int]
+    running_low: list[SupplyOut] = []
