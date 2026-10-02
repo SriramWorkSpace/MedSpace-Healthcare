@@ -179,7 +179,7 @@ function ThreadList({ activeId, onSelect, onNew, onDelete }) {
                   type="button"
                   aria-label={`Delete conversation ${t.title}`}
                   onClick={() => onDelete(t.id)}
-                  className="absolute right-2 top-1/2 grid grid-cols-1 size-7 -translate-y-1/2 place-items-center rounded-lg text-ink-3 opacity-0 transition-opacity hover:bg-surface-3 hover:text-danger-ink focus-visible:opacity-100 group-hover:opacity-100"
+                  className="absolute right-2 top-1/2 grid grid-cols-1 size-7 -translate-y-1/2 place-items-center rounded-lg text-ink-3 transition-opacity hover:bg-surface-3 hover:text-danger-ink pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:focus-visible:opacity-100"
                 >
                   <Trash size={14} />
                 </button>

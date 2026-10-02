@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { startDemo } from "./helpers";
+import { expectAccessible, startDemo } from "./helpers";
 
 test("mobile navigation uses the top drawer", async ({ page }) => {
   await startDemo(page);
@@ -49,4 +49,19 @@ test("the app bar fits tablets and small laptops", async ({ page }) => {
     }));
     expect(scrollWidth, `the app bar overflows at ${width}px`).toBeLessThanOrEqual(clientWidth);
   }
+});
+
+test("touch screens can reach controls that desktops reveal on hover", async ({ page }) => {
+  await startDemo(page);
+  const skip = page.getByRole("button", { name: /^Skip:/ }).first();
+  await expect(skip).toBeVisible();
+  expect(await skip.evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
+});
+
+test("the prescription report is accessible on a phone", async ({ page }) => {
+  await startDemo(page);
+  await page.goto("/app/timeline");
+  await page.locator('a[href^="/app/prescriptions/"]').first().click();
+  await expect(page.getByRole("region", { name: "Medications table" })).toBeVisible();
+  await expectAccessible(page);
 });

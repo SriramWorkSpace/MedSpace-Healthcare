@@ -41,7 +41,12 @@ export function ReportBody({ rx, compact = false }) {
 
       <section className="px-6 py-6 sm:px-8">
         <h2 className="mb-3 text-sm font-semibold">Medications</h2>
-        <div className="overflow-x-auto">
+        <div
+          className="relative overflow-x-auto"
+          tabIndex={0}
+          role="region"
+          aria-label="Medications table"
+        >
           <table className="w-full min-w-[560px] text-left text-sm">
             <thead>
               <tr className="border-b border-line text-xs text-ink-3">

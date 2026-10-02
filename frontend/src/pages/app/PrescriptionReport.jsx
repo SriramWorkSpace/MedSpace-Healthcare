@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import {
   ArrowLeft,
   ArrowSquareOut,
@@ -17,6 +17,7 @@ import { SyncDialog } from "@/features/integrations/SyncDialog";
 
 export default function PrescriptionReport() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { data: rx, isPending, isError } = usePrescription(id);
   const [syncOpen, setSyncOpen] = useState(false);
 
@@ -46,15 +47,30 @@ export default function PrescriptionReport() {
     );
   }
 
+  // React Router records the in-app history index; 0 means this tab started on this page.
+  const canGoBack = (window.history.state?.idx ?? 0) > 0;
+
   return (
     <div className="mx-auto max-w-4xl">
       <div className="no-print mb-6 flex flex-wrap items-center justify-between gap-3">
-        <Link
-          to="/app/timeline"
-          className="inline-flex items-center gap-1.5 text-sm text-ink-2 hover:text-ink"
-        >
-          <ArrowLeft size={14} weight="bold" /> Timeline
-        </Link>
+        {/* Reports open from the dashboard, search, medications and the timeline: go back to
+            wherever the user came from, or to the timeline on a fresh visit. */}
+        {canGoBack ? (
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-1.5 rounded-lg text-sm text-ink-2 hover:text-ink"
+          >
+            <ArrowLeft size={14} weight="bold" /> Back
+          </button>
+        ) : (
+          <Link
+            to="/app/timeline"
+            className="inline-flex items-center gap-1.5 rounded-lg text-sm text-ink-2 hover:text-ink"
+          >
+            <ArrowLeft size={14} weight="bold" /> Timeline
+          </Link>
+        )}
         <div className="flex flex-wrap gap-1.5">
           <Button as={Link} to={`/app/documents/${rx.document_id}`} variant="ghost" size="sm">
             <ArrowSquareOut size={15} /> Source document

@@ -45,9 +45,12 @@ export default function AppLayout() {
       </a>
       <AppNav />
       {user.is_demo && (
-        <div className="border-b border-line bg-accent-soft/60 px-4 py-2 text-center text-[13px] text-accent-soft-ink">
+        <aside
+          aria-label="Demo account"
+          className="border-b border-line bg-accent-soft/60 px-4 py-2 text-center text-[13px] text-accent-soft-ink"
+        >
           You're exploring a demo account with synthetic records. It resets in 24 hours.
-        </div>
+        </aside>
       )}
       <main id="main" className="mx-auto max-w-[1280px] px-4 pb-24 pt-8 sm:px-6 sm:pt-10">
         <Suspense fallback={<PageSkeleton />}>

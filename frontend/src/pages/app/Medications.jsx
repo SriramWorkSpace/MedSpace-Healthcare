@@ -153,7 +153,7 @@ function MedicationCard({ med, onEdit, index, focused, history, window }) {
             <Pill size={19} weight="duotone" />
           </span>
           <div className="min-w-0">
-            <p className="truncate font-semibold">
+            <p className="line-clamp-2 font-semibold break-words">
               {med.name}{" "}
               {med.strength && <span className="font-normal text-ink-3">{med.strength}</span>}
             </p>

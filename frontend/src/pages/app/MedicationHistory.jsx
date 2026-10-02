@@ -297,7 +297,7 @@ export default function MedicationHistory() {
         <section className="card p-4 sm:p-5" aria-labelledby="calendar-heading">
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
             <h2 id="calendar-heading" className="font-semibold">
-              {formatDate(data.start, "MMM d")} to {formatDate(data.end, "MMM d")}
+              {formatDate(days[0]?.date ?? data.start, "MMM d")} to {formatDate(data.end, "MMM d")}
             </h2>
             <ul className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink-3">
               {["taken", "skipped", "unlogged"].map((s) => (

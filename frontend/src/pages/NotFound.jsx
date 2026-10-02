@@ -37,9 +37,11 @@ export default function NotFound() {
 
   return (
     <div className="flex min-h-[100dvh] flex-col px-4 py-6 sm:px-10">
-      <Link to="/" className="w-fit rounded-lg" aria-label="MedSpace home">
-        <Logo />
-      </Link>
+      <header>
+        <Link to="/" className="block w-fit rounded-lg" aria-label="MedSpace home">
+          <Logo />
+        </Link>
+      </header>
       <main className="mx-auto flex max-w-xl flex-1 flex-col items-center justify-center text-center">
         <Flatline />
         <p className="mt-8 font-mono text-sm text-ink-3">Error 404</p>

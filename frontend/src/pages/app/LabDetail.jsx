@@ -181,7 +181,7 @@ export default function LabDetail() {
           className="relative overflow-x-auto"
           tabIndex={0}
           role="region"
-          aria-label="Every result"
+          aria-label="Results table"
         >
           <table className="w-full min-w-[560px] text-left text-sm">
             <thead>

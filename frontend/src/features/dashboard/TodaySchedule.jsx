@@ -125,7 +125,7 @@ export function TodaySchedule({ doses, dateKey }) {
                       <span className="min-w-0 flex-1">
                         <span
                           className={cn(
-                            "block truncate text-[15px] font-medium transition-colors",
+                            "line-clamp-2 text-[15px] font-medium break-words transition-colors sm:line-clamp-1",
                             isTaken && "text-ink-3 line-through",
                             isSkipped && "text-ink-3",
                           )}
@@ -175,7 +175,7 @@ export function TodaySchedule({ doses, dateKey }) {
                         type="button"
                         onClick={() => mark(d, isSkipped ? null : "skipped")}
                         aria-label={`${isSkipped ? "Undo skip" : "Skip"}: ${label}`}
-                        className="rounded-full px-2.5 py-1.5 text-xs font-medium text-ink-3 transition-[opacity,color] hover:bg-surface hover:text-ink-2 focus-visible:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                        className="rounded-full px-2.5 py-1.5 text-xs font-medium text-ink-3 transition-[opacity,color] hover:bg-surface hover:text-ink-2 focus-visible:opacity-100 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:focus-visible:opacity-100"
                       >
                         {isSkipped ? "Undo" : "Skip"}
                       </button>

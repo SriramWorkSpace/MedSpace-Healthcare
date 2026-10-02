@@ -19,7 +19,7 @@ test("lab results are charted over time with the printed range", async ({ page }
   await ldl.click();
   await expect(page).toHaveURL(/\/app\/labs\/ldl-cholesterol$/);
   await expect(page.getByRole("img", { name: /LDL cholesterol: 3 results/ })).toBeVisible();
-  const rows = page.getByRole("region", { name: "Every result" }).locator("tbody tr");
+  const rows = page.getByRole("region", { name: "Results table" }).locator("tbody tr");
   await expect(rows).toHaveCount(3);
   await expect(rows.first()).toContainText("138 mg/dL");
   await expectAccessible(page);

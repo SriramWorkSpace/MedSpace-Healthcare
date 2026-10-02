@@ -134,33 +134,36 @@ export default function Timeline() {
         title="Timeline"
         description="Prescriptions, medications, appointments and reports, in the order they happened."
       />
-      <div className="mb-8 flex flex-wrap gap-2" role="group" aria-label="Filter events">
-        {Object.entries(TYPES).map(([key, { label, icon: Icon }]) => {
-          const on = active.has(key);
-          return (
-            <button
-              key={key}
-              type="button"
-              aria-pressed={on}
-              onClick={() => toggle(key)}
-              className={cn(
-                "inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[13px] font-medium transition-colors duration-150 active:scale-[0.97]",
-                on
-                  ? "border-transparent bg-accent text-accent-ink"
-                  : "border-line bg-surface text-ink-2 hover:border-line-strong hover:text-ink",
-              )}
-            >
-              <Icon size={14} weight={on ? "bold" : "regular"} />
-              {label}
-            </button>
-          );
-        })}
-        {active.size > 0 && (
-          <Button variant="ghost" size="sm" onClick={() => setActive(new Set())}>
-            Clear
-          </Button>
-        )}
-      </div>
+      {/* Filters only make sense once there is something to filter. */}
+      {!(empty && active.size === 0) && (
+        <div className="mb-8 flex flex-wrap gap-2" role="group" aria-label="Filter events">
+          {Object.entries(TYPES).map(([key, { label, icon: Icon }]) => {
+            const on = active.has(key);
+            return (
+              <button
+                key={key}
+                type="button"
+                aria-pressed={on}
+                onClick={() => toggle(key)}
+                className={cn(
+                  "inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[13px] font-medium transition-colors duration-150 active:scale-[0.97]",
+                  on
+                    ? "border-transparent bg-accent text-accent-ink"
+                    : "border-line bg-surface text-ink-2 hover:border-line-strong hover:text-ink",
+                )}
+              >
+                <Icon size={14} weight={on ? "bold" : "regular"} />
+                {label}
+              </button>
+            );
+          })}
+          {active.size > 0 && (
+            <Button variant="ghost" size="sm" onClick={() => setActive(new Set())}>
+              Clear
+            </Button>
+          )}
+        </div>
+      )}
 
       {isPending ? (
         <LoadingRegion label="Loading timeline" className="grid grid-cols-1 max-w-3xl gap-8">
@@ -181,13 +184,20 @@ export default function Timeline() {
       ) : empty ? (
         <EmptyState
           icon={ClockCounterClockwise}
-          title="Your timeline is empty"
+          title={active.size ? "No matching events" : "Your timeline is empty"}
           description={
             active.size
-              ? "Nothing matches these filters."
+              ? "Nothing in your records matches these filters."
               : "Confirmed records appear here automatically."
           }
-          quip={EMPTY_QUIPS.timeline}
+          action={
+            active.size ? (
+              <Button variant="secondary" onClick={() => setActive(new Set())}>
+                Clear filters
+              </Button>
+            ) : undefined
+          }
+          quip={active.size ? undefined : EMPTY_QUIPS.timeline}
         />
       ) : (
         <div className="grid grid-cols-1 max-w-3xl gap-10">

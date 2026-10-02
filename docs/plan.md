@@ -146,6 +146,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 
 ## Change log
 
+- **2026-10-02**: QA pass across 19 pages x 4 viewports x 2 themes (console errors, failed requests, overflow, full axe incl. best practices, focus visibility). Fixed: Skip and delete-conversation controls were hover-only and unreachable on touch screens; dose and medication names truncated on phones; report and shared-view tables were not keyboard-scrollable; demo banner and 404 header outside landmarks; duplicate landmark label on the lab page; dose history heading started before the medicine did; report back link always pointed to the timeline; timeline filters showed on an empty timeline and "no match" read as "empty". Regression tests added for touch controls and the phone report.
+
 - **2026-10-02**: Phase 11 shipped: dose tracking moved from the browser to the account, with history and backfilling (ADR-021). Also registered `LabResult` in `app/models.py`, which Phase 10 had missed.
 
 - **2026-10-02**: Phase 10 shipped: structured lab results with trends (ADR-020). Demo documents grew from 5 to 9. Document search hits now show their date, since several reports can share a title.
