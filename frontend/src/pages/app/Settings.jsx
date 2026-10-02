@@ -7,6 +7,7 @@ import {
   ArrowsClockwise,
   DownloadSimple,
   Egg,
+  DeviceMobile,
   GoogleLogo,
   LockSimple,
   ShieldCheck,
@@ -33,10 +34,12 @@ import {
   usePullTasks,
 } from "@/features/integrations/api";
 import { describeAudit, deviceFrom, useAuditLog } from "@/features/settings/audit";
+import { DeviceSettings } from "@/features/offline/DeviceSettings";
 
 const SECTIONS = [
   { id: "profile", label: "Profile", icon: User },
   { id: "integrations", label: "Integrations", icon: GoogleLogo },
+  { id: "device", label: "This device", icon: DeviceMobile },
   { id: "activity", label: "Activity", icon: ShieldCheck },
   { id: "eggs", label: "Easter eggs", icon: Egg },
   { id: "danger", label: "Account", icon: LockSimple },
@@ -384,6 +387,12 @@ function DangerZone() {
 export default function Settings() {
   const [params, setParams] = useSearchParams();
 
+  // Arriving with #device (from the offline banner) or another section anchor.
+  useEffect(() => {
+    const id = window.location.hash.slice(1);
+    if (id) document.getElementById(id)?.scrollIntoView({ block: "start" });
+  }, []);
+
   // Result of the Google OAuth round trip.
   useEffect(() => {
     const result = params.get("google");
@@ -435,6 +444,13 @@ export default function Settings() {
             description="Optional. Only confirmed records are ever synced."
           >
             <GoogleCard />
+          </Section>
+          <Section
+            id="device"
+            title="This device"
+            description="Install the app and choose whether this browser keeps an offline copy."
+          >
+            <DeviceSettings />
           </Section>
           <Section
             id="activity"

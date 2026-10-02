@@ -330,6 +330,8 @@ Route map:
 *                       404 (with a pun)
 ```
 
+**Installable and offline (ADR-025).** `vite.config.js` emits a versioned `sw.js` (template in `src/pwa/`) that precaches the built app and serves the shell offline; it never caches `/api`. `src/lib/offline.js` keeps an opt-in IndexedDB snapshot of record queries and paused dose ticks, restored in `main.jsx` before render and cleared on sign-out. `src/lib/install.js` captures the install prompt for Settings.
+
 Navigation is a **top bar on every screen size**; below `lg` it collapses into a compact top drawer, and the search pill shows its label from `xl`.
 
 ## 9. Testing

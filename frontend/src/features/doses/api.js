@@ -68,12 +68,7 @@ function patchHistory(qc, { medication_id, date, time }, state) {
 export function useSetDose() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ medication_id, date, time, status }) =>
-      status
-        ? api.put("/api/doses", { medication_id, date, time, status })
-        : api.delete(
-            `/api/doses?medication_id=${medication_id}&date=${date}&time=${encodeURIComponent(time)}`,
-          ),
+    mutationKey: ["dose"], // request comes from the defaults in lib/queryClient
     onMutate: async (vars) => {
       await qc.cancelQueries({ queryKey: ["dashboard"] });
       await qc.cancelQueries({ queryKey: doseKeys.all });

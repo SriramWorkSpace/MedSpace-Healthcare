@@ -112,6 +112,16 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 - [x] Multi-stage web image (nginx + /api proxy), deployment guide (docs/deployment.md), README screenshots
 - [x] Final graphify update and docs sync
 
+## Phase 15: Installable app and offline access
+
+- [x] Web app manifest, icons (any + maskable, generated from the favicon by `scripts/icons.mjs`), shortcuts (ADR-025)
+- [x] Build-time service worker: versioned precache of every built asset, network-first navigations with an offline app shell, never touches `/api`
+- [x] Opt-in offline copy per device (Settings, This device): IndexedDB snapshot via `dehydrate`, restored before render, 7-day expiry, per user, cleared on sign-out and session expiry
+- [x] Dose ticks made offline persist and sync on reconnect; offline banner with saved time and pending ticks; offline screen instead of a login redirect
+- [x] Install button from the browser's install prompt; standalone detection
+- [x] Fixed on the way: `formatDate` crashed on epoch timestamps; the app started "online" when loaded offline
+- [x] Tests: 1 unit, 1 e2e against the production build (offline reload, queued tick across reload, sync, sign-out clears the copy)
+
 ## Phase 14: Extraction evaluation
 
 - [x] Labelled corpus generator: six prescription layouts, shorthand, duration and date styles, follow-ups, investigations, diet, three lab layouts; rendered through real PDFs (ADR-024)
@@ -175,6 +185,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 ---
 
 ## Change log
+
+- **2026-10-03**: Phase 15 shipped: installable app with opt-in offline access (ADR-025).
 
 - **2026-10-02**: Phase 14 shipped: extraction evaluation harness, CI gate, and the extractor fixes it surfaced (ADR-024, docs/evaluation.md).
 

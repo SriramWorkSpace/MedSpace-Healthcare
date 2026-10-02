@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, readCookie, refreshSession, setSessionExpiredHandler } from "./api";
+import { clearOfflineCopy } from "./offline";
 
 const AuthContext = createContext(null);
 export const meKey = ["auth", "me"];
@@ -28,6 +29,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     setSessionExpiredHandler(() => {
+      clearOfflineCopy();
       qc.setQueryData(meKey, null);
     });
   }, [qc]);
@@ -35,6 +37,7 @@ export function AuthProvider({ children }) {
   const logout = useMutation({
     mutationFn: () => api.post("/api/auth/logout"),
     onSettled: () => {
+      clearOfflineCopy();
       qc.clear();
       qc.setQueryData(meKey, null);
     },

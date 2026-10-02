@@ -7,7 +7,9 @@ import {
   parseISO,
 } from "date-fns";
 
-const toDate = (value) => (value instanceof Date ? value : parseISO(value));
+// ISO strings from the API, Date objects, or epoch milliseconds (e.g. Date.now()).
+const toDate = (value) =>
+  value instanceof Date ? value : typeof value === "number" ? new Date(value) : parseISO(value);
 
 export function formatDate(value, pattern = "MMM d, yyyy") {
   if (!value) return "";

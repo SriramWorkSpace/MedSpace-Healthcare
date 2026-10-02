@@ -6,6 +6,10 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { PageSkeleton } from "@/components/layout/PageSkeleton";
 import { useGoogleWelcome } from "@/features/auth/useGoogleWelcome";
 import { SearchProvider } from "@/features/search/SearchProvider";
+import { OfflineBanner } from "@/features/offline/OfflineBanner";
+import { useOnline } from "@/features/offline/hooks";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { CloudSlash } from "@phosphor-icons/react";
 
 function ShellSkeleton() {
   return (
@@ -27,9 +31,22 @@ function ShellSkeleton() {
 export default function AppLayout() {
   const { user, isLoading } = useAuth();
   const location = useLocation();
+  const online = useOnline();
   useGoogleWelcome();
 
   if (isLoading) return <ShellSkeleton />;
+  if (!user && !online) {
+    // Signing in needs a connection; don't bounce to a login page that can't work.
+    return (
+      <main id="main" className="mx-auto max-w-[1280px] px-4 pt-16 sm:px-6">
+        <EmptyState
+          icon={CloudSlash}
+          title="You're offline"
+          description="Reconnect to open MedSpace. To read your records without a connection next time, turn on offline access in Settings."
+        />
+      </main>
+    );
+  }
   if (!user) {
     const next = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/login?next=${next}`} replace />;
@@ -44,6 +61,7 @@ export default function AppLayout() {
         Skip to content
       </a>
       <AppNav />
+      <OfflineBanner />
       {user.is_demo && (
         <aside
           aria-label="Demo account"

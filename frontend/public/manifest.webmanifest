@@ -1,0 +1,22 @@
+{
+  "name": "MedSpace",
+  "short_name": "MedSpace",
+  "description": "Your health, all in one space: prescriptions, schedules, lab results and answers you can trace to the source.",
+  "id": "/app",
+  "start_url": "/app",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f6f8f6",
+  "theme_color": "#1f7a5c",
+  "categories": ["health", "medical", "lifestyle"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Today's doses", "url": "/app" },
+    { "name": "Upload a document", "url": "/app/documents?upload=1" },
+    { "name": "Ask MedSpace", "url": "/app/ask" }
+  ]
+}
