@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, Request, Response, status
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from app.core.deps import CurrentUser, DbSession
@@ -100,6 +103,22 @@ async def update_profile(data: ProfileUpdate, user: CurrentUser, session: DbSess
     await service.update_profile(session, user, data)
     await session.commit()
     return user
+
+
+@profile_router.get("/export")
+async def export_data(user: CurrentUser, session: DbSession):
+    """Everything this account holds, as one JSON file (tokens and secrets excluded)."""
+    from app.modules.identity.export import build_export
+
+    payload = await build_export(session, user)
+    filename = f"medspace-export-{datetime.now(UTC):%Y%m%d}.json"
+    return JSONResponse(
+        payload,
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Cache-Control": "no-store",
+        },
+    )
 
 
 @profile_router.delete("", status_code=status.HTTP_204_NO_CONTENT)

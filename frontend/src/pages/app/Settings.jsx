@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   ArrowsClockwise,
+  DownloadSimple,
   Egg,
   GoogleLogo,
   LockSimple,
@@ -339,15 +340,21 @@ function DangerZone() {
   return (
     <div className="card card--flat flex flex-col gap-4 border-danger/30 p-5 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <p className="font-semibold">Delete account</p>
+        <p className="font-semibold">Your data</p>
         <p className="text-sm text-ink-2">
-          Removes your documents, records, conversations, share links and Google connection.
+          Export everything as JSON, or delete your documents, records, conversations, share links
+          and Google connection for good.
           {user.is_demo && " Demo accounts are also removed automatically after 24 hours."}
         </p>
       </div>
-      <Button variant="danger" onClick={() => setOpen(true)}>
-        <Trash size={15} /> Delete account
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button as="a" href="/api/me/export" variant="secondary">
+          <DownloadSimple size={15} /> Download my data
+        </Button>
+        <Button variant="danger" onClick={() => setOpen(true)}>
+          <Trash size={15} /> Delete account
+        </Button>
+      </div>
       <ConfirmDialog
         open={open}
         onClose={() => setOpen(false)}

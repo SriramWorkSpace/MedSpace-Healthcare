@@ -108,7 +108,7 @@ jobs:
           npx playwright install --with-deps chromium
           npm run build
           nohup npx vite preview --port 4173 > ../web.log 2>&1 &
-          npx --yes wait-on -t 60000 http://localhost:8000/api/health http://localhost:4173
+          npx --yes wait-on -t 90000 http-get://localhost:8000/api/health http-get://localhost:4173
       - name: Run Playwright
         working-directory: frontend
         run: npx playwright test

@@ -149,3 +149,7 @@ async def test_session_endpoint_is_quiet_for_anonymous(client: httpx.AsyncClient
     assert resp.json() == {"user": None}
     await signup(client)
     assert (await client.get("/api/auth/session")).json()["user"]["email"] == "ada@example.com"
+
+
+async def test_health_supports_head(client: httpx.AsyncClient):
+    assert (await client.head("/api/health")).status_code == 200

@@ -307,10 +307,21 @@ Route map:
 
 Navigation is a **top bar on every screen size**; below `md` it collapses into a compact top drawer.
 
-## 9. Deployment
+## 9. Testing
+
+| Layer | Tooling | What it covers |
+|---|---|---|
+| Backend | pytest + httpx ASGI client, real Postgres (pgvector) | Auth flows and token rotation, CSRF, rate limits, upload validation, cross-user isolation, extraction and normalizer tables, confirm/discard/versioning, timeline paging, RAG retrieval and guardrails, Google sync idempotency, share-link expiry/revocation/view limits |
+| Frontend unit | Vitest + Testing Library | API client (CSRF, refresh), review form mapping, formatters, easter eggs |
+| End to end | Playwright (desktop + Pixel 7) + axe-core | Core journeys, WCAG 2.1 AA scans, phone overflow guard |
+| CI | GitHub Actions | Ruff, ESLint, all suites above, Docker image builds (dev + prod targets) |
+
+Fakes (`LLM_PROVIDER=fake`, `EMBEDDING_PROVIDER=hash`, `GOOGLE_PROVIDER=fake`, local storage, inline queue) make every suite deterministic and keyless.
+
+## 10. Deployment
 
 | Environment | Topology |
 |---|---|
 | Local | `docker compose up` → `postgres (pgvector/pgvector:pg17)`, `redis`, `s3 (SeaweedFS)`, `api`, `worker`, `web` |
 | CI | GitHub Actions: ruff + pytest (Postgres service container), ESLint + Vitest + build, Docker image build |
-| Demo (suggested) | Web on Vercel/Netlify · API on Render/Fly (`QUEUE_MODE=inline` for a single free instance) · Postgres on Neon (pgvector) · Storage on Cloudflare R2 |
+| Demo (suggested) | Web on Vercel/Netlify with an `/api` rewrite · API on Render/Fly (`QUEUE_MODE=inline` for a single free instance) · Postgres on Neon (pgvector) · Storage on Cloudflare R2. Step by step: [deployment.md](deployment.md) |

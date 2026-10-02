@@ -81,11 +81,11 @@ def create_app() -> FastAPI:
     api.include_router(sharing_router)
     api.include_router(public_share_router)
 
-    @api.get("/health", tags=["ops"])
+    @api.api_route("/health", methods=["GET", "HEAD"], tags=["ops"])
     async def health() -> dict[str, str]:
         return {"status": "ok"}
 
-    @api.get("/ready", tags=["ops"])
+    @api.api_route("/ready", methods=["GET", "HEAD"], tags=["ops"])
     async def ready() -> dict[str, str]:
         try:
             async with engine.connect() as conn:

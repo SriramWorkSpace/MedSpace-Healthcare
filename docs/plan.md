@@ -13,7 +13,7 @@ Goal: repo, docs, tooling and local infrastructure that every later phase builds
 - [x] Plan review, critical changes identified (see ADR-002 to ADR-010)
 - [x] `CLAUDE.md`, `README.md`, `docs/architecture.md`, `docs/decisions.md`, `docs/plan.md`
 - [x] Monorepo layout: `backend/`, `frontend/`, `docs/`
-- [x] `docker-compose.yml`: postgres (pgvector), redis, minio (+ bucket init), api, worker, web
+- [x] `docker-compose.yml`: postgres (pgvector), redis, s3 (SeaweedFS, replaced MinIO per ADR-016), api, worker, web
 - [x] `.env.example` with every setting documented
 - [x] Backend tooling: `pyproject.toml`, ruff, pytest config
 - [x] Frontend tooling: Vite, ESLint, Prettier, Vitest
@@ -105,16 +105,18 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 
 ## Phase 8: Hardening + launch
 
-- [ ] Playwright e2e: demo login → upload → review → confirm → ask → share
-- [ ] Accessibility pass (axe), Lighthouse ≥ 90 across categories on landing + dashboard
-- [ ] Error boundaries, offline/slow-network states, toasts for transient failures
-- [ ] Account data export + delete account
-- [ ] Production Dockerfiles (multi-stage), deployment guide, screenshots/GIF in README
-- [ ] Final graphify update and docs sync
+- [x] Playwright e2e: demo login → upload → review → confirm → ask → share (12 tests, desktop + mobile, in CI)
+- [x] Accessibility pass: axe WCAG 2.1 AA in e2e (landing, login dark, review, dashboard); token contrast fixed. [~] Lighthouse run not yet recorded
+- [x] Route error boundary, retry states on every data view, toasts for transient failures, storage outages as 503
+- [x] Account data export (`GET /api/me/export`, secrets excluded) and delete account with file purge
+- [x] Multi-stage web image (nginx + /api proxy), deployment guide (docs/deployment.md), README screenshots
+- [x] Final graphify update and docs sync
 
 ---
 
 ## Change log
+
+- **2026-10-02**: Phase 8 shipped. Full Docker stack verified end to end (worker queue, SeaweedFS S3, fastembed). Accessibility and phone-overflow regressions are now caught by CI. Data export added. Remaining nice-to-haves: recorded Lighthouse scores, structured lab results, real-Groq evaluation set.
 
 - **2026-10-02**: Phases 6-7 shipped. Google runs in simulation mode by default (`GOOGLE_PROVIDER=fake`) so every demo visitor can exercise sync end to end. Share tokens are shown exactly once; the list shows only a 6-character hint. Added `tzdata` so `zoneinfo` works on Windows hosts.
 

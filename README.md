@@ -21,6 +21,22 @@ then into calendar reminders, to-dos, a health timeline and answers you can trac
 > [!IMPORTANT]
 > MedSpace is a portfolio project that runs on **synthetic healthcare data only**. It organizes and explains what is written in your documents. It does **not** diagnose conditions, recommend treatment, or change doses, and it is **not** HIPAA compliant.
 
+<p align="center">
+  <img src="docs/screenshots/landing-light.png" alt="MedSpace landing page" width="100%" />
+</p>
+
+| Review workspace | Ask MedSpace |
+|---|---|
+| ![Side-by-side review of an extracted prescription](docs/screenshots/review.png) | ![Source-grounded answers with citations](docs/screenshots/ask.png) |
+| **Dashboard (dark)** | **Printable report** |
+| ![Today's doses, review queue and upcoming items](docs/screenshots/dashboard-dark.png) | ![Prescription summary report](docs/screenshots/report.png) |
+
+<p align="center">
+  <img src="docs/screenshots/mobile-landing.png" alt="Mobile landing" width="24%" />
+  <img src="docs/screenshots/mobile-dashboard.png" alt="Mobile dashboard" width="24%" />
+  <img src="docs/screenshots/mobile-menu.png" alt="Mobile navigation drawer" width="24%" />
+</p>
+
 ---
 
 ## Features
@@ -62,7 +78,8 @@ Deep dive: [docs/architecture.md](docs/architecture.md) · Decisions and trade-o
 - **Hybrid RAG on pgvector:** HNSW cosine search plus Postgres full-text, fused with Reciprocal Rank Fusion, always scoped by `user_id` in SQL. Answers stream over SSE with citations.
 - **Security by default:** Argon2id, httpOnly JWT cookies, rotating refresh tokens with reuse detection, CSRF double-submit, rate limiting, encrypted OAuth tokens, hashed share tokens, append-only audit log.
 - **Durable background jobs:** ARQ + Redis with an inline mode for single-instance deploys.
-- **Tested:** pytest against real Postgres in CI, Vitest + Testing Library on the frontend, Playwright end-to-end smoke tests.
+- **Tested end to end:** 95 pytest tests against real Postgres (auth, privacy isolation, extraction, RAG guardrails, sync, sharing), Vitest unit tests, and a Playwright suite with **axe WCAG 2.1 AA** scans and a phone-width overflow guard, all in CI.
+- **Accessible and responsive:** keyboard-reachable everything, focus traps in dialogs, reduced-motion support, AA contrast verified in both themes, top navigation with a compact drawer on phones.
 
 ## Tech stack
 
@@ -97,7 +114,18 @@ docker compose up --build
 | API docs (OpenAPI) | http://localhost:8000/docs |
 | S3 API (SeaweedFS) | http://localhost:8333 |
 
-Click **Try the demo** on the login page to explore a pre-seeded synthetic account.
+Click **Try the demo** on the login page to explore a pre-seeded synthetic account. Each demo is an isolated account with three prescriptions, a lab report and a fresh upload waiting for review; it is deleted after 24 hours.
+
+Sample files to upload yourself live in [`samples/`](samples/) (text PDFs, a lab report and a "phone photo" scan).
+
+### What works without any API keys
+
+| Capability | No keys (default) | With keys |
+|---|---|---|
+| Extraction | Rule-based reader for typed prescriptions | Groq text + vision models (`LLM_PROVIDER=groq`) |
+| Ask MedSpace | Extractive answers with citations | Groq-written answers with citations |
+| Embeddings | Local `bge-small` in Docker, hashing in tests | Same |
+| Google Calendar & Tasks | Full simulation inside MedSpace | Real Google account (`GOOGLE_PROVIDER=google`) |
 
 ### Enable real AI extraction (optional)
 
@@ -120,17 +148,29 @@ GROQ_API_KEY=gsk_...
 ### Run tests
 
 ```bash
+# Backend: unit + API integration tests against real Postgres
 docker compose up -d postgres redis
 cd backend && pip install -e ".[dev]" && pytest
+
+# Frontend: unit tests
 cd ../frontend && npm install && npm test
+
+# End to end + accessibility (with the stack running on :5173)
+npx playwright install chromium && npm run e2e
 ```
+
+### Deploy
+
+See [docs/deployment.md](docs/deployment.md) for a free-tier setup (static web host with an `/api` rewrite, a single API instance, Neon Postgres with pgvector, Cloudflare R2).
 
 ## Project structure
 
 ```
 backend/    FastAPI app (modules/, shared/ ports, migrations/, tests/)
 frontend/   React SPA (pages/, features/, components/ui/, styles/)
-docs/       architecture.md · decisions.md · plan.md
+docs/       architecture.md · decisions.md · plan.md · deployment.md
+samples/    synthetic prescriptions and a lab report for trying uploads
+graphify-out/  knowledge graph of the codebase (GRAPH_REPORT.md, graph.html)
 ```
 
 ## Roadmap

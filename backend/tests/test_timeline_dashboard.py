@@ -76,3 +76,19 @@ async def test_deleting_account_removes_files(client: httpx.AsyncClient):
     resp = await client.delete("/api/me", headers=csrf(client))
     assert resp.status_code == 204
     assert not user_dir.exists()
+
+
+async def test_export_contains_records_but_no_secrets(client: httpx.AsyncClient):
+    await demo(client)
+    resp = await client.get("/api/me/export")
+    assert resp.status_code == 200
+    assert "attachment" in resp.headers["content-disposition"]
+    data = resp.json()
+    assert data["format"] == "medspace-export/v1"
+    assert len(data["documents"]) == 5
+    assert len(data["prescriptions"]) == 3
+    assert data["prescriptions"][0]["medications"]
+    assert "auth.demo_login" in {a["action"] for a in data["activity"]}
+    raw = resp.text
+    for secret in ("password_hash", "token_hash", "refresh_token", "access_token_enc"):
+        assert secret not in raw
