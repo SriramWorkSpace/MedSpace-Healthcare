@@ -7,6 +7,7 @@ import {
   FileText,
   ForkKnife,
   List,
+  MagnifyingGlass,
   Pill,
   ShareNetwork,
   SquaresFour,
@@ -21,6 +22,9 @@ import { MobileDrawer } from "./MobileDrawer";
 import { useScrolled } from "./useScrolled";
 import { useEasterEggs, useRapidClicks } from "@/easter-eggs/EasterEggs";
 import { cn } from "@/lib/cn";
+import { useSearchPalette } from "@/features/search/searchContext";
+
+const IS_MAC = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
 
 const APP_LINKS = [
   { to: "/app", label: "Dashboard", icon: SquaresFour, end: true },
@@ -37,6 +41,7 @@ export function AppNav() {
   const reduce = useReducedMotion();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const { openSearch } = useSearchPalette();
   const { discover } = useEasterEggs();
   const onLogoSpree = useCallback(() => discover("logo"), [discover]);
   const countLogoClick = useRapidClicks(5, 2500, onLogoSpree);
@@ -82,6 +87,17 @@ export function AppNav() {
         </ul>
 
         <div className="ml-auto flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={openSearch}
+            aria-label="Search your records"
+            aria-keyshortcuts={IS_MAC ? "Meta+K" : "Control+K"}
+            className="searchpill"
+          >
+            <MagnifyingGlass size={16} weight="bold" />
+            <span className="hidden lg:inline">Search…</span>
+            <kbd className="kbd hidden lg:inline">{IS_MAC ? "⌘K" : "Ctrl K"}</kbd>
+          </button>
           <Button
             size="sm"
             className="hidden sm:inline-flex"

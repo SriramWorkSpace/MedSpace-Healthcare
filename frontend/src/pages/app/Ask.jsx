@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -255,6 +255,18 @@ export default function Ask() {
       inputRef.current?.focus();
     }
   }
+
+  // Global search hands questions over as ?q=; ask it once, in a fresh conversation.
+  const askFromSearch = useEffectEvent((question) => send(question));
+  const handedOver = params.get("q");
+  const handledRef = useRef(null);
+  useEffect(() => {
+    if (handledRef.current === handedOver) return; // StrictMode re-runs effects
+    handledRef.current = handedOver;
+    if (!handedOver) return;
+    setParams({}, { replace: true });
+    queueMicrotask(() => askFromSearch(handedOver));
+  }, [handedOver, setParams]);
 
   const threadList = (
     <ThreadList

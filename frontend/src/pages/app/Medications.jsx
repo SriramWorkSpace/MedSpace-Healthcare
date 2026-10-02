@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { toast } from "sonner";
 import {
@@ -131,7 +131,7 @@ function CourseProgress({ med }) {
   );
 }
 
-function MedicationCard({ med, onEdit, index }) {
+function MedicationCard({ med, onEdit, index, focused }) {
   const update = useUpdateMedication();
   const stopped = med.status === "stopped";
   return (
@@ -141,6 +141,8 @@ function MedicationCard({ med, onEdit, index }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ duration: 0.3, delay: Math.min(index, 8) * 0.035, ease: [0.23, 1, 0.32, 1] }}
+      data-med-id={med.id}
+      data-focused={focused || undefined}
       className="card flex flex-col p-5"
     >
       <div className="flex items-start justify-between gap-3">
@@ -218,9 +220,21 @@ function MedicationCard({ med, onEdit, index }) {
 }
 
 export default function Medications() {
-  const [tab, setTab] = useState("active");
+  const [params] = useSearchParams();
+  const focusId = params.get("focus");
+  const [chosenTab, setTab] = useState(null);
   const [editing, setEditing] = useState(null);
   const { data, isPending } = useMedications();
+  // Search links here with ?focus={id}: open that medicine's tab and bring its card into view.
+  const focusMed = focusId ? data?.find((m) => m.id === focusId) : undefined;
+  const tab = chosenTab ?? focusMed?.status ?? "active";
+
+  useEffect(() => {
+    if (!focusMed) return;
+    document
+      .querySelector(`[data-med-id="${focusMed.id}"]`)
+      ?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [focusMed]);
 
   const tabs = useMemo(
     () => TABS.map((t) => ({ ...t, count: data?.filter((m) => m.status === t.key).length ?? 0 })),
@@ -272,7 +286,13 @@ export default function Medications() {
             <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
               <AnimatePresence mode="popLayout">
                 {visible.map((m, i) => (
-                  <MedicationCard key={m.id} med={m} index={i} onEdit={setEditing} />
+                  <MedicationCard
+                    key={m.id}
+                    med={m}
+                    index={i}
+                    onEdit={setEditing}
+                    focused={m.id === focusMed?.id && chosenTab === null}
+                  />
                 ))}
               </AnimatePresence>
             </ul>

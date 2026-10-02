@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { PageSkeleton } from "@/components/layout/PageSkeleton";
 import { useGoogleWelcome } from "@/features/auth/useGoogleWelcome";
+import { SearchProvider } from "@/features/search/SearchProvider";
 
 function ShellSkeleton() {
   return (
@@ -35,7 +36,7 @@ export default function AppLayout() {
   }
 
   return (
-    <>
+    <SearchProvider>
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-[100] focus:rounded-lg focus:bg-surface focus:px-3 focus:py-2"
@@ -53,6 +54,6 @@ export default function AppLayout() {
           <Outlet />
         </Suspense>
       </main>
-    </>
+    </SearchProvider>
   );
 }

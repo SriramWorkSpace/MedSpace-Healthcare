@@ -60,7 +60,7 @@ MedSpace/
 │   │   │   └── queue.py          # enqueue(): arq | inline
 │   │   └── modules/              # bounded contexts (see §3)
 │   │       ├── identity/  documents/  extraction/  records/
-│   │       ├── timeline/  assistant/  integrations/  sharing/
+│   │       ├── timeline/  search/  assistant/  integrations/  sharing/
 │   │       └── audit/  demo/
 │   ├── migrations/               # Alembic
 │   └── tests/                    # pytest (unit + API integration against real Postgres)
@@ -101,6 +101,7 @@ modules/<name>/
 | `extraction` | `extractions` | Pipeline: text-layer vs. scanned detection → Groq extraction → Pydantic validation → frequency normalization → draft extraction with per-field confidence + source page |
 | `records` | `prescriptions`, `medications`, `care_actions`, `diet_notes` | Confirm drafts into official records, medication schedules, prescription reports, diet notes copied from documents (ADR-018) |
 | `timeline` | (read model, no tables) | Chronological union over confirmed records, documents, appointments, follow-ups |
+| `search` | (read model, no tables) | Global search: escaped `ILIKE` on names, prefix full-text with `ts_headline` snippets on document chunks, grouped deep-link hits |
 | `assistant` | `document_chunks`, `chat_threads`, `chat_messages` | Chunking, embeddings, hybrid retrieval (pgvector + full-text, RRF fusion), grounded answers with citations, SSE streaming |
 | `integrations` | `oauth_connections`, `sync_links` | Google OAuth (incremental consent), encrypted tokens, Calendar recurring events, Tasks, idempotent sync/unsync |
 | `sharing` | `share_links`, `share_link_items` | Scoped temporary links, hashed tokens, expiry, revocation, view limits, public read endpoints |
@@ -251,6 +252,7 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 | Records | `GET /prescriptions` · `GET /prescriptions/{id}` · `GET /medications?status=` · `PATCH /medications/{id}` · `GET /care-actions` · `PATCH /care-actions/{id}` · `GET /diet-notes` · `DELETE /diet-notes/{id}` |
 | Dashboard | `GET /dashboard` (today's doses, upcoming, needs-review queue, stats) |
 | Timeline | `GET /timeline?cursor=&types=` |
+| Search | `GET /search?q=` (grouped hits with deep links and highlighted snippets) |
 | Assistant | `POST /assistant/threads` · `GET /assistant/threads` · `POST /assistant/threads/{id}/messages` (SSE) |
 | Integrations | `GET /integrations/google/status` · `GET /integrations/google/connect` · `GET /integrations/google/callback` · `POST /integrations/google/sync` · `DELETE /integrations/google/sync/{link_id}` · `DELETE /integrations/google` |
 | Sharing | `POST /shares` · `GET /shares` · `DELETE /shares/{id}` (revoke) · `GET /public/shares/{token}` · `GET /public/shares/{token}/documents/{doc_id}/file` |
@@ -312,7 +314,7 @@ Navigation is a **top bar on every screen size**; below `md` it collapses into a
 
 | Layer | Tooling | What it covers |
 |---|---|---|
-| Backend | pytest + httpx ASGI client, real Postgres (pgvector) | Auth flows and token rotation, CSRF, rate limits, upload validation, cross-user isolation, extraction and normalizer tables, confirm/discard/versioning, timeline paging, RAG retrieval and guardrails, Google sync idempotency, share-link expiry/revocation/view limits |
+| Backend | pytest + httpx ASGI client, real Postgres (pgvector) | Auth flows and token rotation, CSRF, rate limits, upload validation, cross-user isolation, extraction and normalizer tables, confirm/discard/versioning, timeline paging, search scoping and wildcard escaping, RAG retrieval and guardrails, Google sync idempotency, share-link expiry/revocation/view limits |
 | Frontend unit | Vitest + Testing Library | API client (CSRF, refresh), review form mapping, formatters, easter eggs |
 | End to end | Playwright (desktop + Pixel 7) + axe-core | Core journeys, WCAG 2.1 AA scans, phone overflow guard |
 | CI | GitHub Actions | Ruff, ESLint, all suites above, Docker image builds (dev + prod targets) |

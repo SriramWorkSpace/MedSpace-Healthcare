@@ -112,9 +112,19 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 - [x] Multi-stage web image (nginx + /api proxy), deployment guide (docs/deployment.md), README screenshots
 - [x] Final graphify update and docs sync
 
+## Phase 9: Global search
+
+- [x] `GET /api/search?q=`: medications and strengths, prescribers and clinics, document titles, text inside documents (prefix full-text with highlighted snippets), to-dos and diet notes, 5 per group, always scoped by `user_id` (ADR-019)
+- [x] Command palette: Ctrl/Cmd+K anywhere, `/` outside inputs, a nav button; grouped results, combobox keyboard control, quick links when empty
+- [x] Results deep-link: `/app/medications?focus=` opens the right tab and rings the card; document hits open on the matching page
+- [x] "Ask MedSpace about …" hands the query to the assistant (`/app/ask?q=`), asked once in a new conversation
+- [x] Tests: 7 backend (partial names, snippets, wildcard escaping, privacy, auth), 2 e2e (keyboard flow with axe scan, hand-over to Ask)
+
 ---
 
 ## Change log
+
+- **2026-10-02**: Phase 9 shipped: global search with a Ctrl+K command palette (ADR-019). The palette opens instantly with no animation because it is summoned from the keyboard.
 
 - **2026-10-02**: Added Diet notes (ADR-018) instead of generated nutrition advice: extraction (heuristic + LLM schema), review section, `diet_notes` table, Diet page, dashboard card, report and share sections, Ask MedSpace sources. Thin themed scrollbars replace the OS default.
 
