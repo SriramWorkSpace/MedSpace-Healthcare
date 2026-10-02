@@ -38,6 +38,7 @@ export const EMPTY_QUIPS = {
   shares: "No links out in the wild. Privacy, prescribed.",
   chat: "Ask away. Unlike a waiting room, there's no queue.",
   review: "Inbox zero, clinically speaking.",
+  diet: "No diet notes yet. An apple a day remains a solid default.",
 };
 
 export const NOT_FOUND_LINES = [

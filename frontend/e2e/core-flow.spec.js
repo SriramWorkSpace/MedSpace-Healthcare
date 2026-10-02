@@ -101,3 +101,16 @@ test("Continue with Google signs in and connects reminders (simulated)", async (
   await expect(page.getByText("Connected", { exact: true })).toBeVisible();
   await expect(page.getByText("Email and password")).toHaveCount(0);
 });
+
+test("diet notes from the care team are grouped with their sources", async ({ page }) => {
+  await startDemo(page);
+  await page.goto("/app/diet");
+  await expect(page.getByRole("heading", { name: "Diet notes" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Avoid/ })).toBeVisible();
+  await expect(page.getByText("Avoid alcohol while on antibiotics.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "With your medicines" })).toBeVisible();
+  await expectAccessible(page);
+
+  await page.getByRole("button", { name: "Remove note: Avoid sugary drinks." }).click();
+  await expect(page.getByText("Avoid sugary drinks.")).toHaveCount(0);
+});

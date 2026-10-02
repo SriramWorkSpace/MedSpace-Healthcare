@@ -9,6 +9,7 @@ from app.modules.records import service
 from app.modules.records.schemas import (
     CareActionOut,
     CareActionUpdate,
+    DietNotesOut,
     MedicationOut,
     MedicationUpdate,
     PrescriptionOut,
@@ -44,6 +45,17 @@ async def update_medication(
     med = await service.update_medication(session, user.id, med_id, data)
     await session.commit()
     return service.to_medication_out(med)
+
+
+@router.get("/diet-notes", response_model=DietNotesOut)
+async def list_diet_notes(user: CurrentUser, session: DbSession):
+    return await service.list_diet_notes(session, user.id)
+
+
+@router.delete("/diet-notes/{note_id}", status_code=204)
+async def delete_diet_note(note_id: uuid.UUID, user: CurrentUser, session: DbSession):
+    await service.delete_diet_note(session, user.id, note_id)
+    await session.commit()
 
 
 @router.get("/care-actions", response_model=list[CareActionOut])

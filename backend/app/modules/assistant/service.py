@@ -61,6 +61,13 @@ MEDS_LIST = re.compile(
     re.IGNORECASE,
 )
 
+DIET = re.compile(
+    r"\b(diet|food|foods|eat|eating|drink|drinks|drinking|salt|sodium|sugar|sugary|alcohol|"
+    r"caffeine|coffee|meal|meals|dairy|milk|grapefruit|fluids?|water|potassium|protein|"
+    r"nutrition|nutrients?|snack|snacks|fried|fatty)\b",
+    re.IGNORECASE,
+)
+
 ADVICE_REPLY = (
     "I can't give medical advice, diagnose, or suggest changing a medication or dose. "
     "That's a conversation for your prescriber or pharmacist. "
@@ -264,6 +271,40 @@ async def gather_sources(
                 medication=m,
             )
         )
+
+    # Diet questions: the care team's written diet notes and food rules on current medicines.
+    if DIET.search(question):
+        from app.modules.records import service as records
+
+        diet = await records.list_diet_notes(session, user_id)
+        for note in diet.notes[:10]:
+            where = f"{note.document_title} page {note.source_page or 1}"
+            sources.append(
+                Source(
+                    n=len(sources) + 1,
+                    kind="record",
+                    title=f"Diet note: {note.document_title}",
+                    page_no=note.source_page,
+                    snippet=note.text,
+                    document_id=str(note.document_id),
+                    confirmed=True,
+                    text=f"{note.text} Source: {where}.",
+                )
+            )
+        for food in diet.medication_notes[:8]:
+            label = f"{food.name} {food.strength}".strip() if food.strength else food.name
+            sources.append(
+                Source(
+                    n=len(sources) + 1,
+                    kind="record",
+                    title=f"{food.name} instructions",
+                    page_no=food.source_page,
+                    snippet=f"{label}: {food.text.lower()}",
+                    document_id=str(food.document_id) if food.document_id else None,
+                    confirmed=True,
+                    text=f"Take {label} {food.text.lower()}.",
+                )
+            )
 
     if chunk_ids:
         chunk_rows = (

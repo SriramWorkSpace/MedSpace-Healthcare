@@ -34,6 +34,7 @@ const SUGGESTIONS = [
   "How often do I take Amoxicillin?",
   "When is my next follow-up?",
   "What did my lipid panel show?",
+  "What did my doctors say about food?",
   "Summarize my latest prescription",
 ];
 

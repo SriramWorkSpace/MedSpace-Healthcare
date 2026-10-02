@@ -41,6 +41,7 @@ const payload = {
   care_actions: [
     { kind: "lab_test", title: "Get CBC test", due_on: null, notes: null, source_page: 1 },
   ],
+  diet_notes: [{ text: "Avoid alcohol.", category: "avoid", source_page: 1, confidence: 0.9 }],
 };
 
 describe("review mapping", () => {
@@ -64,6 +65,9 @@ describe("review mapping", () => {
       period: "as_needed",
     });
     expect(body.care_actions[0].due_on).toBeNull();
+    expect(body.diet_notes).toEqual([
+      { text: "Avoid alcohol.", category: "avoid", source_page: 1 },
+    ]);
   });
 
   it("nulls out an empty prescriber and follow-up", () => {

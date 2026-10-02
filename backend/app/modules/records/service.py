@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import uuid
 from datetime import date, timedelta
 
@@ -12,10 +13,13 @@ from app.core.db import utcnow
 from app.core.errors import NotFound
 from app.modules.documents.models import Document
 from app.modules.extraction.schemas import ConfirmIn
-from app.modules.records.models import CareAction, Medication, Prescription
+from app.modules.records.models import CareAction, DietNote, Medication, Prescription
 from app.modules.records.schemas import (
     CareActionOut,
     CareActionUpdate,
+    DietNoteOut,
+    DietNotesOut,
+    MedicationFoodNote,
     MedicationOut,
     MedicationUpdate,
     PrescriptionOut,
@@ -69,7 +73,26 @@ async def replace_for_document(
             Prescription.document_id == document.id, Prescription.user_id == user_id
         )
     )
+    await session.execute(
+        delete(DietNote).where(DietNote.document_id == document.id, DietNote.user_id == user_id)
+    )
+
+    def add_diet_notes(prescription_id: uuid.UUID | None) -> None:
+        for n in data.diet_notes:
+            session.add(
+                DietNote(
+                    user_id=user_id,
+                    document_id=document.id,
+                    prescription_id=prescription_id,
+                    text=n.text.strip(),
+                    category=n.category,
+                    source_page=n.source_page,
+                )
+            )
+
     if data.document_kind != "prescription" and not data.medications and not data.care_actions:
+        add_diet_notes(None)
+        await session.flush()
         return None
     p = data.prescriber
     fu = data.follow_up
@@ -125,6 +148,8 @@ async def replace_for_document(
         )
     session.add(prescription)
     await session.flush()
+    add_diet_notes(prescription.id)
+    await session.flush()
     return prescription
 
 
@@ -173,6 +198,10 @@ async def get_prescription(
             for m in p.medications
         ],
         care_actions=[CareActionOut.model_validate(a) for a in p.care_actions],
+        diet_notes=[
+            _diet_out(n, title, p.prescriber_name, p.issued_on)
+            for n in await _notes_for_document(session, user_id, p.document_id)
+        ],
     )
 
 
@@ -257,6 +286,82 @@ async def update_care_action(
         action.title = data.title.strip()
     await session.flush()
     return action
+
+
+# ---- Diet notes -----------------------------------------------------------------------------
+
+_FOOD = re.compile(
+    r"(after (?:food|meals?|breakfast|lunch|dinner)|before (?:food|meals?|breakfast|bed)|"
+    r"with (?:food|meals?|milk|water)|on an empty stomach|empty stomach|avoid [a-z ]+|"
+    r"no alcohol|without food)",
+    re.IGNORECASE,
+)
+
+
+def _diet_out(n: DietNote, title, prescriber, issued_on) -> DietNoteOut:
+    out = DietNoteOut.model_validate(n)
+    out.document_title, out.prescriber_name, out.issued_on = title, prescriber, issued_on
+    return out
+
+
+async def _notes_for_document(session: AsyncSession, user_id: uuid.UUID, document_id: uuid.UUID):
+    return (
+        await session.scalars(
+            select(DietNote)
+            .where(DietNote.user_id == user_id, DietNote.document_id == document_id)
+            .order_by(DietNote.created_at)
+        )
+    ).all()
+
+
+def medication_food_notes(meds_with_doc: list[tuple[Medication, uuid.UUID | None]]):
+    """Food/drink instructions attached to current medicines, e.g. "after food", "with milk"."""
+    out = []
+    for med, document_id in meds_with_doc:
+        if medication_status(med) not in ("active", "upcoming") or not med.instructions:
+            continue
+        for match in _FOOD.finditer(med.instructions):
+            phrase = match.group(0)
+            out.append(
+                MedicationFoodNote(
+                    medication_id=med.id,
+                    name=med.name,
+                    strength=med.strength,
+                    text=phrase[:1].upper() + phrase[1:],
+                    category="avoid" if phrase.lower().startswith(("avoid", "no ")) else "timing",
+                    document_id=document_id,
+                    source_page=med.source_page,
+                )
+            )
+    return out
+
+
+async def list_diet_notes(session: AsyncSession, user_id: uuid.UUID) -> DietNotesOut:
+    rows = await session.execute(
+        select(DietNote, Document.title, Prescription.prescriber_name, Prescription.issued_on)
+        .join(Document, Document.id == DietNote.document_id)
+        .outerjoin(Prescription, Prescription.id == DietNote.prescription_id)
+        .where(DietNote.user_id == user_id)
+        .order_by(Prescription.issued_on.desc().nulls_last(), DietNote.created_at)
+    )
+    notes = [_diet_out(n, title, who, issued) for n, title, who, issued in rows.all()]
+    med_rows = await session.execute(
+        select(Medication, Prescription.document_id)
+        .join(Prescription, Prescription.id == Medication.prescription_id)
+        .where(Medication.user_id == user_id)
+        .order_by(Medication.name)
+    )
+    return DietNotesOut(notes=notes, medication_notes=medication_food_notes(list(med_rows.all())))
+
+
+async def delete_diet_note(session: AsyncSession, user_id: uuid.UUID, note_id: uuid.UUID) -> None:
+    note = await session.scalar(
+        select(DietNote).where(DietNote.id == note_id, DietNote.user_id == user_id)
+    )
+    if note is None:
+        raise NotFound("Diet note not found.")
+    await session.delete(note)
+    await session.flush()
 
 
 def doses_on(meds: list[Medication], day: date) -> list[dict]:

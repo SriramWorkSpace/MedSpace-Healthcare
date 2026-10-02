@@ -8,6 +8,8 @@ import { MedicationEditor } from "./MedicationEditor";
 import {
   CARE_KINDS,
   emptyCareAction,
+  emptyDietNote,
+  DIET_CATEGORIES,
   emptyMedication,
   formToConfirm,
   payloadToForm,
@@ -39,6 +41,7 @@ export function ReviewForm({ extraction, onConfirm, onDiscard, confirming, onChe
   const { control, register, handleSubmit, formState, getValues } = form;
   const meds = useFieldArray({ control, name: "medications" });
   const actions = useFieldArray({ control, name: "care_actions" });
+  const diet = useFieldArray({ control, name: "diet_notes" });
   const errors = formState.errors;
   const flagged = (payload.medications ?? []).filter(
     (m) => (m.confidence ?? 1) < 0.85 || m.uncertain_fields?.length,
@@ -185,6 +188,60 @@ export function ReviewForm({ extraction, onConfirm, onDiscard, confirming, onChe
                     icon
                     aria-label="Remove task"
                     onClick={() => actions.remove(i)}
+                    className="justify-self-end sm:mb-1"
+                  >
+                    <Trash size={15} />
+                  </Button>
+                </motion.li>
+              ))}
+            </AnimatePresence>
+          </ul>
+        )}
+      </Section>
+
+      <Section
+        title="Diet and lifestyle notes"
+        description="Food and drink instructions written on the document. Copied as written, never added by MedSpace."
+        action={
+          <Button variant="secondary" size="sm" onClick={() => diet.append(emptyDietNote())}>
+            <Plus size={14} weight="bold" /> Add
+          </Button>
+        }
+      >
+        {diet.fields.length === 0 ? (
+          <p className="rounded-card border border-dashed border-line-strong px-5 py-6 text-center text-sm text-ink-2">
+            No diet instructions on this document.
+          </p>
+        ) : (
+          <ul className="card card--flat divide-y divide-line">
+            <AnimatePresence initial={false}>
+              {diet.fields.map((f, i) => (
+                <motion.li
+                  key={f.id}
+                  layout
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0, transition: { duration: 0.12 } }}
+                  className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-[2fr_0.8fr_auto] sm:items-end"
+                >
+                  <Field label="Note" error={errors.diet_notes?.[i]?.text?.message}>
+                    <Input {...register(`diet_notes.${i}.text`)} />
+                  </Field>
+                  <Field label="Type">
+                    <Select {...register(`diet_notes.${i}.category`)}>
+                      {DIET_CATEGORIES.map((c) => (
+                        <option key={c.value} value={c.value}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon
+                    aria-label="Remove note"
+                    onClick={() => diet.remove(i)}
                     className="justify-self-end sm:mb-1"
                   >
                     <Trash size={15} />

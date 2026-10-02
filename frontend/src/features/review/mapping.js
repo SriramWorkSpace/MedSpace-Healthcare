@@ -5,6 +5,14 @@ const blank = (v) => (v === "" || v === undefined ? null : v);
 const num = (v) =>
   v === "" || v === null || v === undefined || Number.isNaN(Number(v)) ? null : Number(v);
 
+export const DIET_CATEGORIES = [
+  { value: "avoid", label: "Avoid" },
+  { value: "limit", label: "Limit" },
+  { value: "include", label: "Include" },
+  { value: "timing", label: "Timing" },
+  { value: "general", label: "General" },
+];
+
 export const CARE_KINDS = [
   { value: "follow_up", label: "Follow-up visit" },
   { value: "lab_test", label: "Lab test" },
@@ -56,6 +64,13 @@ export const reviewSchema = z.object({
       source_page: z.number().nullable().optional(),
     }),
   ),
+  diet_notes: z.array(
+    z.object({
+      text: z.string().trim().min(1, "Write the note or remove it").max(300),
+      category: z.enum(["avoid", "limit", "include", "timing", "general"]),
+      source_page: z.number().nullable().optional(),
+    }),
+  ),
 });
 
 /** Extraction payload -> form values (strings for inputs, never null). */
@@ -99,6 +114,11 @@ export function payloadToForm(payload) {
       notes: a.notes ?? "",
       source_page: a.source_page ?? null,
     })),
+    diet_notes: (p.diet_notes ?? []).map((n) => ({
+      text: n.text ?? "",
+      category: n.category ?? "general",
+      source_page: n.source_page ?? null,
+    })),
   };
 }
 
@@ -127,6 +147,10 @@ export function emptyMedication(issuedOn = "") {
 
 export function emptyCareAction() {
   return { kind: "other", title: "", due_on: "", notes: "", source_page: null };
+}
+
+export function emptyDietNote() {
+  return { text: "", category: "general", source_page: null };
 }
 
 /** Form values -> ConfirmIn body for POST /api/extractions/{id}/confirm. */
@@ -174,6 +198,11 @@ export function formToConfirm(v) {
       due_on: blank(a.due_on),
       notes: blank(a.notes),
       source_page: a.source_page ?? null,
+    })),
+    diet_notes: (v.diet_notes ?? []).map((n) => ({
+      text: n.text.trim(),
+      category: n.category,
+      source_page: n.source_page ?? null,
     })),
   };
 }

@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { format, parseISO } from "date-fns";
 import { motion, useReducedMotion } from "motion/react";
 import {
+  ForkKnife,
   CheckSquare,
   FileText,
   Pill,
@@ -15,7 +16,7 @@ import { LoadingRegion, Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/lib/auth";
 import { firstName, greeting } from "@/lib/format";
 import { EMPTY_QUIPS } from "@/easter-eggs/puns";
-import { useDashboard } from "@/features/records/api";
+import { useDashboard, useDietNotes } from "@/features/records/api";
 import { TodaySchedule } from "@/features/dashboard/TodaySchedule";
 import {
   AsNeededList,
@@ -56,6 +57,7 @@ function DashboardSkeleton() {
 export default function Dashboard() {
   const { user } = useAuth();
   const { data, isPending, isError, refetch } = useDashboard();
+  const diet = useDietNotes();
   const reduce = useReducedMotion();
 
   if (isPending) return <DashboardSkeleton />;
@@ -164,6 +166,30 @@ export default function Dashboard() {
                 <WeekStrip week={data.week} />
               </Panel>
             </motion.div>
+            {diet.data?.notes?.length > 0 && (
+              <motion.div {...stagger(5)}>
+                <Panel
+                  title="From your care team"
+                  action={
+                    <Link
+                      to="/app/diet"
+                      className="text-sm font-medium text-accent hover:underline"
+                    >
+                      All diet notes
+                    </Link>
+                  }
+                >
+                  <ul className="grid grid-cols-1 gap-2.5">
+                    {diet.data.notes.slice(0, 3).map((n) => (
+                      <li key={n.id} className="flex items-start gap-2.5 text-sm">
+                        <ForkKnife size={15} className="mt-0.5 shrink-0 text-accent" />
+                        <span className="text-ink-2">{n.text}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </Panel>
+              </motion.div>
+            )}
           </div>
         </div>
       )}

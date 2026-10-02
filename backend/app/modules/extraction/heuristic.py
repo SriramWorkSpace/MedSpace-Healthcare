@@ -14,6 +14,7 @@ from dateutil import parser as dateparser
 from app.modules.extraction.normalize import normalize_frequency, parse_duration_days
 from app.modules.extraction.schemas import (
     ExtractedCareAction,
+    ExtractedDietNote,
     ExtractedMedication,
     ExtractionPayload,
     FollowUp,
@@ -92,6 +93,48 @@ _SPECIALTY_HINT = re.compile(
 )
 
 
+_DIET = re.compile(
+    r"\b(diet|salt|sodium|sugar|sugary|sweets|alcohol|caffeine|coffee|grapefruit|fried|fatty|"
+    r"oily|spicy|dairy|fluids?|water|hydrat\w*|potassium|protein|fibre|fiber|vegetables|fruit|"
+    r"meals?|portion|carbohydrates?|carbs|junk food|processed food)\b",
+    re.IGNORECASE,
+)
+_DIET_PREFIX = re.compile(r"^\s*(?:diet|advice|lifestyle|nutrition|food)\s*[:\-]\s*", re.IGNORECASE)
+
+
+def diet_category(text: str) -> str:
+    t = text.lower()
+    if re.search(r"\b(avoid|no|do not|don't|stop|never|abstain)\b", t):
+        return "avoid"
+    if re.search(r"\b(limit|reduce|restrict|low|less|cut down|minimi[sz]e|moderate|max)\b", t):
+        return "limit"
+    if re.search(r"\b(increase|more|plenty|include|high[- ]fib|eat|drink|add)\b", t):
+        return "include"
+    if re.search(r"\b(before|after|with|between) (?:meals?|food|breakfast|dinner)\b", t):
+        return "timing"
+    return "general"
+
+
+def _diet_notes(line: str, page_no: int) -> list[ExtractedDietNote]:
+    """Split an advice line like "Diet: low salt. Avoid sugary drinks." into separate notes."""
+    body = _DIET_PREFIX.sub("", line).strip()
+    parts = [p.strip(" .;") for p in re.split(r"(?<=[.;])\s+|;\s*", body) if p.strip(" .;")]
+    notes = []
+    for part in parts or [body]:
+        if not _DIET.search(part):
+            continue
+        text = part[:1].upper() + part[1:]
+        notes.append(
+            ExtractedDietNote(
+                text=text if text.endswith(".") else f"{text}.",
+                category=diet_category(text),
+                source_page=page_no,
+                confidence=0.85,
+            )
+        )
+    return notes
+
+
 def _parse_date(text: str) -> date | None:
     text = text.strip().strip(".")
     if not text:
@@ -146,6 +189,7 @@ def extract(pages: list[str]) -> ExtractionPayload:
     follow_up: FollowUp | None = None
     patient: str | None = None
     lab_lines_seen: set[str] = set()
+    diet: list[ExtractedDietNote] = []
 
     for page_no, text in enumerate(pages, start=1):
         lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
@@ -186,6 +230,14 @@ def extract(pages: list[str]) -> ExtractionPayload:
                     )
                 )
                 # A follow-up line can also mention tests ("Review in 2 weeks with CBC").
+            if _DIET_PREFIX.match(line) or (
+                not _MED_LINE.match(line)
+                and _DIET.search(line)
+                and not _LAB.search(line)
+                and re.search(r"\b(avoid|limit|reduce|diet|drink|eat|increase)\b", line, re.I)
+            ):
+                diet.extend(_diet_notes(line, page_no))
+                continue
             labs = [] if _MED_LINE.match(line) else list(_LAB.finditer(line))
             for lab in labs:
                 label = lab.group(1)
@@ -230,6 +282,7 @@ def extract(pages: list[str]) -> ExtractionPayload:
         follow_up=follow_up,
         medications=meds,
         care_actions=actions,
+        diet_notes=diet,
         summary=summary,
         overall_confidence=round(sum(confidences) / len(confidences), 2),
     )

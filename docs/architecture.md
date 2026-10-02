@@ -99,7 +99,7 @@ modules/<name>/
 | `identity` | `users`, `refresh_tokens` | Signup/login, optional Google sign-in (account matching and verified-email linking), Argon2 hashing, JWT access cookie, rotating refresh tokens with reuse detection, CSRF, demo login |
 | `documents` | `documents`, `document_pages` | Upload intake (type/size/magic-byte validation, SHA-256 dedupe), object storage, page text, processing status, signed preview streaming |
 | `extraction` | `extractions` | Pipeline: text-layer vs. scanned detection → Groq extraction → Pydantic validation → frequency normalization → draft extraction with per-field confidence + source page |
-| `records` | `prescriptions`, `medications`, `care_actions` | Confirm drafts into official records, medication schedules, prescription reports |
+| `records` | `prescriptions`, `medications`, `care_actions`, `diet_notes` | Confirm drafts into official records, medication schedules, prescription reports, diet notes copied from documents (ADR-018) |
 | `timeline` | (read model, no tables) | Chronological union over confirmed records, documents, appointments, follow-ups |
 | `assistant` | `document_chunks`, `chat_threads`, `chat_messages` | Chunking, embeddings, hybrid retrieval (pgvector + full-text, RRF fusion), grounded answers with citations, SSE streaming |
 | `integrations` | `oauth_connections`, `sync_links` | Google OAuth (incremental consent), encrypted tokens, Calendar recurring events, Tasks, idempotent sync/unsync |
@@ -248,7 +248,7 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 | Auth | `POST /auth/signup` · `POST /auth/login` · `POST /auth/demo` · `POST /auth/refresh` · `POST /auth/logout` · `GET /auth/me` · `GET /auth/session` · `GET /auth/google/start` · `GET /auth/google/providers` |
 | Documents | `POST /documents` · `GET /documents` · `GET /documents/{id}` · `GET /documents/{id}/file` · `POST /documents/{id}/reprocess` · `DELETE /documents/{id}` |
 | Extraction | `GET /documents/{id}/extraction` · `POST /extractions/{id}/confirm` · `POST /extractions/{id}/discard` |
-| Records | `GET /prescriptions` · `GET /prescriptions/{id}` · `GET /prescriptions/{id}/report` · `GET /medications?active=true` · `PATCH /medications/{id}` · `GET /care-actions` · `PATCH /care-actions/{id}` |
+| Records | `GET /prescriptions` · `GET /prescriptions/{id}` · `GET /medications?status=` · `PATCH /medications/{id}` · `GET /care-actions` · `PATCH /care-actions/{id}` · `GET /diet-notes` · `DELETE /diet-notes/{id}` |
 | Dashboard | `GET /dashboard` (today's doses, upcoming, needs-review queue, stats) |
 | Timeline | `GET /timeline?cursor=&types=` |
 | Assistant | `POST /assistant/threads` · `GET /assistant/threads` · `POST /assistant/threads/{id}/messages` (SSE) |
@@ -297,6 +297,7 @@ Route map:
 /app/documents/:id      Review workspace (source preview ↔ extracted fields)
 /app/prescriptions/:id  Prescription report
 /app/medications        Medication schedule
+/app/diet                Diet notes from documents
 /app/timeline           Health timeline
 /app/ask                Ask MedSpace (RAG chat)
 /app/sharing            Share links manager

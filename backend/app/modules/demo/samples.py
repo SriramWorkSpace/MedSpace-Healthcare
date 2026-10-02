@@ -48,7 +48,11 @@ SCENARIOS: list[Scenario] = [
             "2. Ibuprofen 400 mg tablet - SOS, max TDS - after food",
             "3. Cetirizine 10 mg tablet - HS x 5 days",
         ],
-        notes=["Follow-up: Review in 2 weeks", "Investigations: CBC before next visit"],
+        notes=[
+            "Follow-up: Review in 2 weeks",
+            "Investigations: CBC before next visit",
+            "Advice: Drink plenty of fluids. Avoid alcohol while on antibiotics.",
+        ],
     ),
     Scenario(
         slug="northgate-diabetes",
@@ -66,6 +70,7 @@ SCENARIOS: list[Scenario] = [
         notes=[
             "Follow-up: Review in 3 months",
             "Investigations: HbA1c and lipid panel before next visit",
+            "Diet: Low salt, low sugar diet. Avoid sugary drinks. Include more vegetables.",
         ],
     ),
     Scenario(
@@ -80,7 +85,10 @@ SCENARIOS: list[Scenario] = [
             "1. Doxycycline 100 mg capsule - OD x 6 weeks - after food, with water",
             "2. Clindamycin 1% gel - at night x 8 weeks",
         ],
-        notes=["Follow-up: Review in 6 weeks"],
+        notes=[
+            "Follow-up: Review in 6 weeks",
+            "Advice: Avoid dairy within 2 hours of each doxycycline dose.",
+        ],
     ),
 ]
 

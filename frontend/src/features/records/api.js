@@ -34,6 +34,30 @@ export function useMedications(status) {
   });
 }
 
+export function useDietNotes() {
+  return useQuery({
+    queryKey: ["records", "diet-notes"],
+    queryFn: () => api.get("/api/diet-notes"),
+  });
+}
+
+export function useDeleteDietNote() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => api.delete(`/api/diet-notes/${id}`),
+    onMutate: async (id) => {
+      await qc.cancelQueries({ queryKey: ["records", "diet-notes"] });
+      const previous = qc.getQueryData(["records", "diet-notes"]);
+      qc.setQueryData(["records", "diet-notes"], (d) =>
+        d ? { ...d, notes: d.notes.filter((n) => n.id !== id) } : d,
+      );
+      return { previous };
+    },
+    onError: (_e, _id, ctx) => qc.setQueryData(["records", "diet-notes"], ctx?.previous),
+    onSettled: () => qc.invalidateQueries({ queryKey: ["records"] }),
+  });
+}
+
 export function useCareActions(openOnly = false) {
   return useQuery({
     queryKey: recordKeys.careActions(openOnly),

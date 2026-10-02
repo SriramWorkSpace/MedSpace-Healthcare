@@ -26,6 +26,7 @@ from app.modules.extraction.models import Extraction, ExtractionStatus
 from app.modules.extraction.normalize import normalize_frequency, parse_duration_days
 from app.modules.extraction.schemas import (
     ConfirmCareAction,
+    ConfirmDietNote,
     ConfirmIn,
     ConfirmMedication,
     ExtractedCareAction,
@@ -186,6 +187,16 @@ def post_process(
                         confidence=med.confidence,
                     )
                 )
+
+    seen_notes: set[str] = set()
+    notes = []
+    for note in p.diet_notes:
+        key = note.text.strip().lower()
+        if key and key not in seen_notes:
+            seen_notes.add(key)
+            note.source_page = min(max(1, note.source_page), page_count)
+            notes.append(note)
+    p.diet_notes = notes
 
     deduped: dict[tuple[str, str], ExtractedCareAction] = {}
     for action in p.care_actions:
@@ -403,5 +414,9 @@ def payload_to_confirm(payload: ExtractionPayload) -> ConfirmIn:
                 source_page=a.source_page,
             )
             for a in payload.care_actions
+        ],
+        diet_notes=[
+            ConfirmDietNote(text=n.text, category=n.category, source_page=n.source_page)
+            for n in payload.diet_notes
         ],
     )

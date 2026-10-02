@@ -71,6 +71,18 @@ class ExtractedCareAction(BaseModel):
     confidence: float = Field(0.8, ge=0, le=1)
 
 
+DietCategory = Literal["avoid", "limit", "include", "timing", "general"]
+
+
+class ExtractedDietNote(BaseModel):
+    """A diet, food or drink instruction written on the document (copied, never invented)."""
+
+    text: str = Field(min_length=1, max_length=300)
+    category: DietCategory = "general"
+    source_page: int = Field(1, ge=1)
+    confidence: float = Field(0.8, ge=0, le=1)
+
+
 class ExtractionPayload(BaseModel):
     document_type: Literal["prescription", "lab_report", "other"] = "prescription"
     prescriber: Prescriber | None = None
@@ -79,6 +91,7 @@ class ExtractionPayload(BaseModel):
     follow_up: FollowUp | None = None
     medications: list[ExtractedMedication] = Field(default_factory=list)
     care_actions: list[ExtractedCareAction] = Field(default_factory=list)
+    diet_notes: list[ExtractedDietNote] = Field(default_factory=list)
     summary: str | None = None
     overall_confidence: float = Field(0.8, ge=0, le=1)
     warnings: list[str] = Field(default_factory=list)
@@ -125,6 +138,12 @@ class ConfirmCareAction(BaseModel):
     source_page: int | None = None
 
 
+class ConfirmDietNote(BaseModel):
+    text: str = Field(min_length=1, max_length=300)
+    category: DietCategory = "general"
+    source_page: int | None = None
+
+
 class ConfirmIn(BaseModel):
     document_kind: Literal["prescription", "lab_report", "other"] = "prescription"
     prescriber: Prescriber | None = None
@@ -132,4 +151,5 @@ class ConfirmIn(BaseModel):
     follow_up: FollowUp | None = None
     medications: list[ConfirmMedication] = Field(default_factory=list, max_length=40)
     care_actions: list[ConfirmCareAction] = Field(default_factory=list, max_length=40)
+    diet_notes: list[ConfirmDietNote] = Field(default_factory=list, max_length=30)
     summary: str | None = Field(None, max_length=2000)

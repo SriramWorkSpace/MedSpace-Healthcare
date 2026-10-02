@@ -115,6 +115,30 @@ export function ReportBody({ rx, compact = false }) {
         </section>
       )}
 
+      {rx.diet_notes?.length > 0 && (
+        <section className="border-t border-line px-6 py-6 sm:px-8">
+          <h2 className="mb-3 text-sm font-semibold">Diet and lifestyle notes</h2>
+          <ul className="grid gap-2">
+            {rx.diet_notes.map((n) => (
+              <li key={n.id} className="flex items-start gap-3 text-sm">
+                <Chip
+                  tone={
+                    n.category === "avoid" ? "danger" : n.category === "limit" ? "warn" : "accent"
+                  }
+                  className="shrink-0 capitalize"
+                >
+                  {n.category}
+                </Chip>
+                <span className="text-ink-2">{n.text}</span>
+                {!compact && n.source_page && (
+                  <span className="ml-auto shrink-0 text-xs text-ink-3">p.{n.source_page}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {rx.summary && (
         <section className="border-t border-line px-6 py-5 sm:px-8">
           <h2 className="mb-1.5 text-sm font-semibold">Summary</h2>

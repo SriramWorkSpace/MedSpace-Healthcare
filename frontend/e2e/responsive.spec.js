@@ -20,6 +20,7 @@ test("no page scrolls sideways on a phone", async ({ page }) => {
     "/app",
     "/app/documents",
     "/app/medications",
+    "/app/diet",
     "/app/timeline",
     "/app/ask",
     "/app/sharing",

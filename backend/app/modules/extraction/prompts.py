@@ -20,6 +20,10 @@ fields you are unsure about in uncertain_fields.
 issue date is known, compute the date; otherwise put the text in follow_up.notes.
 - care_actions are one-off things the patient must do that are written on the document: lab \
 tests, follow-up visits, reports to bring. Do not invent any.
+- diet_notes are diet, food or drink instructions written on the document (e.g. "low-salt \
+diet", "avoid alcohol while on antibiotics"). Copy the wording. category is one of avoid, \
+limit, include, timing or general. Never add nutrition advice of your own. Instructions that \
+belong to a single medicine ("after food") stay in that medicine's instructions.
 - summary: one or two neutral sentences describing what the document contains. No advice.
 - Use null for anything not present. Output JSON only."""
 
@@ -73,6 +77,18 @@ _ACTION = {
 }
 _ACTION["required"] = list(_ACTION["properties"])
 
+_DIET = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "text": {"type": "string"},
+        "category": {"type": "string", "enum": ["avoid", "limit", "include", "timing", "general"]},
+        "source_page": {"type": "integer"},
+        "confidence": {"type": "number"},
+    },
+}
+_DIET["required"] = list(_DIET["properties"])
+
 _PRESCRIBER = {
     "type": ["object", "null"],
     "additionalProperties": False,
@@ -103,6 +119,7 @@ EXTRACTION_SCHEMA: dict[str, Any] = {
         "follow_up": _FOLLOW_UP,
         "medications": {"type": "array", "items": _MED},
         "care_actions": {"type": "array", "items": _ACTION},
+        "diet_notes": {"type": "array", "items": _DIET},
         "summary": _nullable("string"),
         "overall_confidence": {"type": "number"},
     },
@@ -114,6 +131,7 @@ JSON_SHAPE_HINT = (
     "patient_name, issued_on, follow_up{date,notes}, medications[{name,strength,form,dose,route,"
     "frequency_raw,duration_raw,duration_days,instructions,as_needed,source_page,confidence,"
     "uncertain_fields[]}], care_actions[{kind,title,due_on,notes,source_page,confidence}], "
+    "diet_notes[{text,category,source_page,confidence}], "
     "summary, overall_confidence."
 )
 

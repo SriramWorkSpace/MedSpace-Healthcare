@@ -116,6 +116,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 
 ## Change log
 
+- **2026-10-02**: Added Diet notes (ADR-018) instead of generated nutrition advice: extraction (heuristic + LLM schema), review section, `diet_notes` table, Diet page, dashboard card, report and share sections, Ask MedSpace sources. Thin themed scrollbars replace the OS default.
+
 - **2026-10-02**: Added optional "Continue with Google" (ADR-017): one consent can also connect Calendar/Tasks; skipping keeps the connect-later path. 10 backend tests and an e2e test cover account linking, takeover prevention, scopes, returning users and redirects.
 
 - **2026-10-02**: Phase 8 shipped. Full Docker stack verified end to end (worker queue, SeaweedFS S3, fastembed). Accessibility and phone-overflow regressions are now caught by CI. Data export added. Remaining nice-to-haves: recorded Lighthouse scores, structured lab results, real-Groq evaluation set.

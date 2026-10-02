@@ -6,7 +6,7 @@ from app.modules.documents.models import Document, DocumentPage
 from app.modules.extraction.models import Extraction
 from app.modules.identity.models import RefreshToken, User
 from app.modules.integrations.models import OAuthConnection, SyncLink
-from app.modules.records.models import CareAction, Medication, Prescription
+from app.modules.records.models import CareAction, DietNote, Medication, Prescription
 from app.modules.sharing.models import ShareLink, ShareLinkItem
 
 __all__ = [
@@ -14,6 +14,7 @@ __all__ = [
     "CareAction",
     "ChatMessage",
     "ChatThread",
+    "DietNote",
     "Document",
     "DocumentChunk",
     "DocumentPage",

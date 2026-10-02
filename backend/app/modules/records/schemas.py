@@ -49,6 +49,37 @@ class CareActionOut(BaseModel):
     source_page: int | None
 
 
+class DietNoteOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    text: str
+    category: str
+    source_page: int | None
+    document_id: uuid.UUID
+    document_title: str | None = None
+    prescriber_name: str | None = None
+    issued_on: date | None = None
+    created_at: datetime
+
+
+class MedicationFoodNote(BaseModel):
+    """A food or drink instruction attached to one of the user's current medicines."""
+
+    medication_id: uuid.UUID
+    name: str
+    strength: str | None
+    text: str
+    category: str
+    document_id: uuid.UUID | None
+    source_page: int
+
+
+class DietNotesOut(BaseModel):
+    notes: list[DietNoteOut]
+    medication_notes: list[MedicationFoodNote]
+
+
 class PrescriptionSummary(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -71,6 +102,7 @@ class PrescriptionOut(PrescriptionSummary):
     summary: str | None
     medications: list[MedicationOut]
     care_actions: list[CareActionOut]
+    diet_notes: list[DietNoteOut] = []
 
 
 class MedicationUpdate(BaseModel):

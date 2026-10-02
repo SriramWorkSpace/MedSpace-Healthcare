@@ -72,6 +72,28 @@ class Medication(IdMixin, TimestampMixin, Base):
     prescription: Mapped[Prescription] = relationship(back_populates="medications")
 
 
+class DietNote(IdMixin, TimestampMixin, Base):
+    """A diet, food or drink instruction copied from a confirmed document.
+
+    Tied to the document (not only the prescription) so letters and reports can carry notes too.
+    """
+
+    __tablename__ = "diet_notes"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    document_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("documents.id", ondelete="CASCADE"), index=True
+    )
+    prescription_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("prescriptions.id", ondelete="SET NULL"), index=True
+    )
+    text: Mapped[str] = mapped_column(String(300))
+    category: Mapped[str] = mapped_column(String(16), default="general")
+    source_page: Mapped[int | None] = mapped_column(Integer)
+
+
 class CareAction(IdMixin, TimestampMixin, Base):
     __tablename__ = "care_actions"
 

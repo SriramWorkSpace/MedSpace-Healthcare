@@ -72,6 +72,7 @@ async def build_export(session: AsyncSession, user: User) -> dict:
             "documents": [DocumentOut.model_validate(d) for d in docs],
             "prescriptions": prescriptions,
             "other_to_dos": standalone_actions,
+            "diet_notes": (await records.list_diet_notes(session, user.id)).notes,
             "conversations": threads,
             "share_links": shares,
             "activity": activity,
