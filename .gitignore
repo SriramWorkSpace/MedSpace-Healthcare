@@ -38,3 +38,6 @@ graphify-out/obsidian/
 
 # Claude Code local settings (machine-specific paths)
 .claude/settings.local.json
+
+# dated graphify snapshots
+graphify-out/20*/

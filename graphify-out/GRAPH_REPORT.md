@@ -1,461 +1,443 @@
 # Graph Report - MedSpace  (2026-10-02)
 
 ## Corpus Check
-- 92 files · ~65,489 words
+- 220 files · ~82,172 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1425 nodes · 2900 edges · 126 communities (104 shown, 22 thin omitted)
-- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 108 edges (avg confidence: 0.9)
-- Token cost: 104,142 input · 0 output
+- 1670 nodes · 3756 edges · 135 communities (105 shown, 30 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 56 edges (avg confidence: 0.92)
+- Token cost: 0 input · 0 output
+
+## Graph Freshness
+- Built from commit: `01cf2d8c`
+- Run `git rev-parse HEAD` and compare to check if the graph is stale.
+- Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- Backend Test Harness & Samples
-- ORM Models & Base
-- Secure Sharing
-- Frontend Runtime Deps
-- Frontend Dev & Test Tooling
-- Timeline & Dashboard API
-- SPA Router & Layouts
-- RAG Assistant Service
-- Google Sync Service
-- App Factory & Embeddings
-- Documents API Router
-- Google OAuth Router
-- Documents Client API
-- Assistant API Router
-- Identity & Password Security
-- Extraction Pipeline Service
-- Landing Sections
-- API Client & Auth State
-- Schemas & Rate-Limited Routes
-- Document Intake Service
-- Frequency Normalizer
-- Google HTTP Client
-- Domain Errors
-- Auth Cookies & Sessions
-- Review Form Mapping
-- Google Client Port
-- Confirmation Schemas
-- Calendar Event Builders
-- Easter Eggs
-- Settings & Config
-- Current-User Dependency
-- Extraction Pipeline (docs)
-- Integrations Client API
-- Extraction Lifecycle
-- Job Registry
-- Assistant Tests
-- Groq LLM Adapter
-- Backend Conventions (docs)
-- App Navigation
-- CI Workflow
-- HTTP Middleware
-- Google Simulation
-- Modular Monolith Rules (docs)
-- RAG Design (docs)
-- Audit Router
-- Audit Service
-- Storage & Deployment (docs)
-- Auth Forms
-- Records Client API
-- Rate Limiter
-- Model Registry
-- Demo Seeding
-- File Inspection
-- Docs & Graph Workflow
-- Format Helpers
-- Settings Page
-- Profile Router
-- Local Storage Adapter
-- E2E Core Flows
-- Ask Page
-- Config
-- Heuristic
-- Models
-- Storage
-- Storage
-- Architecture
-- Widgets
-- Api
-- Prompts
-- Dialog
-- Puns
-- Api
-- Heromorph
-- Embeddings
-- Todayschedule
-- Workflow
-- Audit
-- Medications
-- Sharing
-- Timeline
-- Router
-- Env
-- Pageskeleton
-- Field
-- Theme
-- Sharedview
-- Decisions
-- Reportbody
-- Landing
-- Queue
-- Marketingnav
-- Processingstate
-- Documents
-- Misc
-- Pyproject
+- csrf
+- records/service.py
+- sharing/service.py
+- dependencies
+- devDependencies
+- timeline/service.py
+- router.jsx
+- assistant/service.py
+- integrations/service.py
+- Architecture Decision Records
+- documents/router.py
+- integrations/router.py
+- documents/api.js
+- TrendChart.jsx
+- identity/service.py
+- extraction/service.py
+- FeatureBento.jsx
+- lib/api.js
+- SignupIn
+- documents/service.py
+- heuristic.py
+- HttpGoogleClient
+- errors.py
+- identity/router.py
+- mapping.js
+- GoogleClient
+- labs.py
+- test_integrations.py
+- EasterEggs.jsx
+- search/service.py
+- deps.py
+- SearchPalette.jsx
+- integrations/api.js
+- Conflict
+- extraction/jobs.py
+- MedSpace Build Plan
+- llm.py
+- CLAUDE.md
+- AppNav.jsx
+- MedSpace Architecture
+- get_settings
+- test_google_signin.py
+- MedSpace
+- test_search.py
+- audit/router.py
+- record
+- Deploying MedSpace
+- AuthForms.jsx
+- records/api.js
+- ratelimit.py
+- scripts
+- User
+- files.py
+- api service (alembic + uvicorn)
+- lib/format.js
+- Settings.jsx
+- Getting started
+- LocalStorage
+- helpers.js
+- Ask.jsx
+- Settings
+- 4. Core flows
+- Diet.jsx
+- ObjectStorage
+- package.json
+- Widgets.jsx
+- sharing/api.js
+- labs/api.js
+- ConfirmDialog.jsx
+- puns.js
+- assistant/api.js
+- HeroMorph.jsx
+- LabDetail.jsx
+- TodaySchedule.jsx
+- Workflow.jsx
+- audit.js
+- Medications.jsx
+- Sharing.jsx
+- Timeline.jsx
+- demo_login
+- Labs.jsx
+- ComingSoon.jsx
+- Field.jsx
+- theme.jsx
+- SharedView.jsx
+- ReportBody.jsx
+- Landing.jsx
+- MarketingNav.jsx
+- ProcessingState.jsx
+- Documents.jsx
+- eslint-plugin-react-refresh
+- medspace-api
+- @phosphor-icons/react
+- @tanstack/react-query
+- @playwright/test
+- tailwindcss
+- @testing-library/react
+- vitest
 
 ## God Nodes (most connected - your core abstractions)
-1. `get_settings()` - 38 edges
-2. `Base` - 20 edges
-3. `User` - 18 edges
-4. `Document` - 18 edges
-5. `record()` - 17 edges
-6. `FakeGoogleClient` - 17 edges
-7. `utcnow()` - 16 edges
-8. `issue_session()` - 16 edges
-9. `csrf()` - 16 edges
-10. `HttpGoogleClient` - 16 edges
+1. `get_settings()` - 61 edges
+2. `User` - 46 edges
+3. `csrf()` - 39 edges
+4. `utcnow()` - 32 edges
+5. `Base` - 32 edges
+6. `IdMixin` - 27 edges
+7. `NotFound` - 26 edges
+8. `record()` - 25 edges
+9. `Document` - 25 edges
+10. `Medication` - 22 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `CI Backend job (ruff + pytest on pgvector Postgres)` --semantically_similar_to--> `postgres service (pgvector/pgvector:pg17)`  [INFERRED] [semantically similar]
   .github/workflows/ci.yml → docker-compose.yml
-- `Two-path document extraction (text vs vision)` --semantically_similar_to--> `Extraction pipeline (classify, extract, validate, normalize, draft)`  [INFERRED] [semantically similar]
-  README.md → docs/architecture.md
-- `Phase 0: Foundations` --references--> `s3 service (SeaweedFS)`  [AMBIGUOUS]
-  docs/plan.md → docker-compose.yml
-- `Upload -> Extract -> Review -> Organize -> Act` --semantically_similar_to--> `Upload/process document sequence flow`  [INFERRED] [semantically similar]
-  README.md → docs/architecture.md
-- `CI E2E job (Playwright + axe, fake providers)` --references--> `FakeGoogleClient (in-memory)`  [INFERRED]
-  .github/workflows/ci.yml → docs/architecture.md
+- `share_url()` --calls--> `get_settings()`  [EXTRACTED]
+  backend/app/modules/sharing/service.py → backend/app/core/config.py
+- `_clean_tables()` --uses--> `Base`  [INFERRED]
+  backend/tests/conftest.py → backend/app/core/db.py
+- `_schema()` --uses--> `Base`  [INFERRED]
+  backend/tests/conftest.py → backend/app/core/db.py
+- `demo_login()` --uses--> `NotFound`  [INFERRED]
+  backend/app/modules/demo/router.py → backend/app/core/errors.py
 
 ## Import Cycles
 - None detected.
 
 ## Hyperedges (group relationships)
-- **Ports with production and offline fake adapters** — docs_architecture_ports_and_adapters, docs_architecture_llmprovider, docs_architecture_embedder, docs_architecture_objectstorage, docs_architecture_googleclient, docs_architecture_fakellm, docs_architecture_hashembedder, docs_architecture_localstorage, docs_architecture_fakegoogleclient [EXTRACTED 1.00]
-- **Upload -> extract -> review -> confirm pipeline** — docs_architecture_module_documents, docs_architecture_module_extraction, docs_architecture_module_records, docs_architecture_extraction_pipeline, docs_architecture_data_lifecycle, docs_architecture_schedule, docs_architecture_queue_mode [EXTRACTED 1.00]
 - **Local Docker Compose stack** — docker_compose_postgres, docker_compose_redis, docker_compose_s3, docker_compose_api, docker_compose_worker, docker_compose_web [EXTRACTED 1.00]
 - **Local Docker Compose Stack** — docker_compose_postgres, docker_compose_redis, docker_compose_api, docker_compose_worker, docker_compose_web [EXTRACTED 1.00]
 
-## Communities (126 total, 22 thin omitted)
+## Communities (135 total, 30 thin omitted)
 
-### Community 0 - "Backend Test Harness & Samples"
-Cohesion: 0.07
-Nodes (69): reset_rate_limits(), build_lab_pdf(), build_pdf(), build_scan_png(), issued(), LabReport, date, Synthetic prescriptions rendered as real PDFs (and one scan-style PNG). Every… (+61 more)
-
-### Community 1 - "ORM Models & Base"
-Cohesion: 0.09
-Nodes (61): Base, IdMixin, UUID, Database engine, session factory and declarative base., Time-ordered UUID (RFC 9562 v7) so primary keys index and sort well., TimestampMixin, utcnow(), uuid7() (+53 more)
-
-### Community 2 - "Secure Sharing"
-Cohesion: 0.10
-Nodes (48): Base, IdMixin, TimestampMixin, A scoped, expiring, revocable read-only link (ADR-010). Only the token's hash…, ShareLink, ShareLinkItem, create_share(), list_shares() (+40 more)
-
-### Community 3 - "Frontend Runtime Deps"
-Cohesion: 0.04
-Nodes (44): clsx, date-fns, @fontsource-variable/geist, @fontsource-variable/geist-mono, dependencies, clsx, date-fns, @fontsource-variable/geist (+36 more)
-
-### Community 4 - "Frontend Dev & Test Tooling"
+### Community 0 - "csrf"
 Cohesion: 0.06
-Nodes (35): @axe-core/playwright, eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, devDependencies, @axe-core/playwright, eslint (+27 more)
+Nodes (91): reset_rate_limits(), build_lab_pdf(), build_pdf(), build_scan_png(), _diabetes(), issued(), LabReport, _lipids() (+83 more)
 
-### Community 5 - "Timeline & Dashboard API"
-Cohesion: 0.11
-Nodes (28): get_dashboard(), get_timeline(), CurrentUser, date, DbSession, get, AsNeededOut, DashboardOut (+20 more)
+### Community 1 - "records/service.py"
+Cohesion: 0.09
+Nodes (73): NotFound, build_export(), AsyncSession, LabResult, Medication, One test result copied from a confirmed lab report (ADR-020). value_text and…, delete_diet_note(), delete_lab_result() (+65 more)
 
-### Community 6 - "SPA Router & Layouts"
+### Community 2 - "sharing/service.py"
+Cohesion: 0.06
+Nodes (83): Base, IdMixin, UUID, Database engine, session factory and declarative base., Time-ordered UUID (RFC 9562 v7) so primary keys index and sort well., TimestampMixin, utcnow(), uuid7() (+75 more)
+
+### Community 3 - "dependencies"
+Cohesion: 0.07
+Nodes (27): clsx, date-fns, @fontsource-variable/geist, @fontsource-variable/geist-mono, dependencies, clsx, date-fns, @fontsource-variable/geist (+19 more)
+
+### Community 4 - "devDependencies"
 Cohesion: 0.08
+Nodes (25): @axe-core/playwright, eslint, @eslint/js, eslint-plugin-react-hooks, devDependencies, @axe-core/playwright, eslint, @eslint/js (+17 more)
+
+### Community 5 - "timeline/service.py"
+Cohesion: 0.18
+Nodes (23): get_dashboard(), get_timeline(), CurrentUser, date, DbSession, get, AsNeededOut, DashboardOut (+15 more)
+
+### Community 6 - "router.jsx"
+Cohesion: 0.07
 Nodes (6): AppLayout(), AuthLayout(), MarketingLayout(), Providers(), RouteError(), router
 
-### Community 7 - "RAG Assistant Service"
-Cohesion: 0.13
-Nodes (26): answer_stream(), _best_snippet(), build_prompt(), chunk_pages(), _clock(), compose_offline(), create_thread(), _day() (+18 more)
+### Community 7 - "assistant/service.py"
+Cohesion: 0.05
+Nodes (63): ChatMessage, DocumentChunk, A page-aware slice of a document, embedded for semantic search and indexed for…, ask(), AskIn, create_thread(), delete_thread(), get_thread() (+55 more)
 
-### Community 8 - "Google Sync Service"
+### Community 8 - "integrations/service.py"
 Cohesion: 0.22
-Nodes (28): get_google(), access_token(), appointment_event(), _clock(), _delete_remote(), disconnect(), get_connection(), _links() (+20 more)
+Nodes (28): encrypt(), get_google(), OAuthConnection, A connected Google account. Tokens are Fernet-encrypted at rest (ADR-008)., access_token(), appointment_event(), _clock(), _delete_remote() (+20 more)
 
-### Community 9 - "App Factory & Embeddings"
-Cohesion: 0.11
-Nodes (16): create_app(), lifespan(), FastAPI application factory., Embedder, FastEmbedEmbedder, get_embedder(), Protocol, Embedding port (ADR-004): local fastembed in production, a deterministic hasher… (+8 more)
-
-### Community 10 - "Documents API Router"
-Cohesion: 0.19
-Nodes (23): delete_document(), download_document(), get_document(), list_documents(), page_preview(), CurrentUser, DbSession, delete (+15 more)
-
-### Community 11 - "Google OAuth Router"
-Cohesion: 0.17
-Nodes (23): GoogleAPIError, pkce_pair(), Google OAuth + Calendar v3 + Tasks v1 behind a small port, with an in-memory…, callback(), connect(), disconnect(), preview(), pull() (+15 more)
-
-### Community 12 - "Documents Client API"
+### Community 9 - "Architecture Decision Records"
 Cohesion: 0.10
+Nodes (21): ADR-001: Modular monolith with two processes, ADR-002: pgvector instead of FAISS, ADR-003: Groq as the LLM provider, behind a provider interface, ADR-004: Local embeddings with fastembed, ADR-005: Calendar for recurring reminders, Tasks for one-off actions, ADR-006: Deterministic frequency normalization, ADR-007: Durable job queue with ARQ + inline fallback, ADR-008: Own authentication; Google OAuth only for integrations (+13 more)
+
+### Community 10 - "documents/router.py"
+Cohesion: 0.17
+Nodes (26): delete_document(), download_document(), get_document(), list_documents(), page_preview(), CurrentUser, DbSession, delete (+18 more)
+
+### Community 11 - "integrations/router.py"
+Cohesion: 0.16
+Nodes (23): connect(), disconnect(), google_sign_in(), preview(), providers(), pull(), BaseModel, CurrentUser (+15 more)
+
+### Community 12 - "documents/api.js"
+Cohesion: 0.11
 Nodes (12): ACTIVE, docKeys, isProcessing(), previewUrl(), uploadDocument(), useDocument(), useDocuments(), DocumentThumb() (+4 more)
 
-### Community 13 - "Assistant API Router"
-Cohesion: 0.17
-Nodes (21): ask(), AskIn, create_thread(), delete_thread(), get_thread(), list_threads(), MessageOut, BaseModel (+13 more)
+### Community 13 - "TrendChart.jsx"
+Cohesion: 0.21
+Nodes (11): describeChange(), FLAG_LABELS, formatNumber(), buildScale(), linePath(), niceTicks(), PAD, Sparkline() (+3 more)
 
-### Community 14 - "Identity & Password Security"
-Cohesion: 0.22
-Nodes (19): hash_password(), needs_rehash(), sha256_hex(), verify_password(), User, authenticate(), create_user(), delete_user() (+11 more)
+### Community 14 - "identity/service.py"
+Cohesion: 0.18
+Nodes (22): constant_time_equals(), create_access_token(), hash_password(), needs_rehash(), new_opaque_token(), UUID, Password hashing, JWT access tokens, opaque token helpers and field encryption., sha256_hex() (+14 more)
 
-### Community 15 - "Extraction Pipeline Service"
-Cohesion: 0.17
-Nodes (19): ExtractionStatus, StrEnum, ExtractionPayload, _coerce(), extract_document(), _extract_text(), _extract_vision(), ExtractionFailed (+11 more)
+### Community 15 - "extraction/service.py"
+Cohesion: 0.12
+Nodes (32): Extraction, One AI reading of a document. Versioned; only a confirmed version becomes…, _nullable(), Any, Prompts and the strict JSON schema for document extraction., repair_prompt(), text_user_prompt(), vision_user_prompt() (+24 more)
 
-### Community 16 - "Landing Sections"
+### Community 16 - "FeatureBento.jsx"
 Cohesion: 0.11
-Nodes (6): FAQ, DAYS, EASE, EASE, Reveal(), PRINCIPLES
+Nodes (6): Faq, DAYS, EASE, EASE, Reveal(), PRINCIPLES
 
-### Community 17 - "API Client & Auth State"
+### Community 17 - "lib/api.js"
 Cohesion: 0.17
 Nodes (13): api(), ApiError, NO_REFRESH, onSessionExpired(), readCookie(), refreshSession(), setSessionExpiredHandler(), UNSAFE (+5 more)
 
-### Community 18 - "Schemas & Rate-Limited Routes"
-Cohesion: 0.19
-Nodes (8): Any, rate_limit(), LoginIn, ProfileUpdate, BaseModel, field_validator, SignupIn, UserOut
+### Community 18 - "SignupIn"
+Cohesion: 0.27
+Nodes (5): LoginIn, ProfileUpdate, BaseModel, field_validator, SignupIn
 
-### Community 19 - "Document Intake Service"
-Cohesion: 0.26
-Nodes (18): Document, create_document(), delete_document(), get_document(), get_document_by_id(), list_documents(), page_preview_png(), purge_user_files() (+10 more)
-
-### Community 20 - "Frequency Normalizer"
-Cohesion: 0.20
-Nodes (16): _clean(), _hm_to_min(), _min_to_hm(), normalize_frequency(), parse_duration_days(), Deterministic normalization of prescription shorthand (ADR-006). The LLM copies…, x 7 days' -> 7, '2/52' -> 14, '3/12' -> 90, '1 month' -> 30. Ongoing or unknown…, Schedule (+8 more)
-
-### Community 21 - "Google HTTP Client"
-Cohesion: 0.16
-Nodes (4): GoogleAuthError, HttpGoogleClient, Consent was revoked or the refresh token is no longer valid., Exception
-
-### Community 22 - "Domain Errors"
+### Community 19 - "documents/service.py"
 Cohesion: 0.18
-Nodes (16): AppError, Forbidden, Gone, install_error_handlers(), PayloadTooLarge, _problem(), Any, Exception (+8 more)
+Nodes (25): PayloadTooLarge, Unprocessable, UnsupportedMedia, Document, DocumentKind, DocumentStatus, StrEnum, create_document() (+17 more)
 
-### Community 23 - "Auth Cookies & Sessions"
-Cohesion: 0.24
-Nodes (17): new_opaque_token(), clear_auth_cookies(), Response, Auth cookie helpers shared by the identity and demo routers., Set access, refresh and CSRF cookies. Returns the CSRF token (also echoed in…, set_auth_cookies(), delete_account(), login() (+9 more)
+### Community 20 - "heuristic.py"
+Cohesion: 0.06
+Nodes (61): diet_category(), _diet_notes(), extract(), _lab_results(), _lab_row(), _medication_from_line(), _parse_date(), date (+53 more)
 
-### Community 24 - "Review Form Mapping"
-Cohesion: 0.25
-Nodes (13): blank(), CARE_KINDS, emptyCareAction(), emptyMedication(), formToConfirm(), num(), payloadToForm(), reviewSchema (+5 more)
+### Community 21 - "HttpGoogleClient"
+Cohesion: 0.17
+Nodes (5): GoogleAPIError, GoogleAuthError, HttpGoogleClient, Exception, Consent was revoked or the refresh token is no longer valid.
 
-### Community 25 - "Google Client Port"
-Cohesion: 0.13
-Nodes (4): Any, GoogleClient, Protocol, Tokens
+### Community 22 - "errors.py"
+Cohesion: 0.12
+Nodes (14): AppError, Forbidden, install_error_handlers(), _problem(), Any, Exception, FastAPI, Request (+6 more)
 
-### Community 26 - "Confirmation Schemas"
+### Community 23 - "identity/router.py"
+Cohesion: 0.16
+Nodes (27): clear_auth_cookies(), Response, Auth cookie helpers shared by the identity and demo routers., Set access, refresh and CSRF cookies. Returns the CSRF token (also echoed in…, set_auth_cookies(), delete_account(), export_data(), login() (+19 more)
+
+### Community 24 - "mapping.js"
 Cohesion: 0.22
-Nodes (14): ConfirmCareAction, ConfirmIn, ConfirmMedication, ExtractedCareAction, ExtractedMedication, ExtractionOut, FollowUp, Prescriber (+6 more)
+Nodes (16): blank(), CARE_KINDS, DIET_CATEGORIES, emptyCareAction(), emptyDietNote(), emptyLabResult(), emptyMedication(), formToConfirm() (+8 more)
 
-### Community 27 - "Calendar Event Builders"
-Cohesion: 0.28
-Nodes (15): dose_event(), Medication, _rrule(), bucket_for(), connect(), first_prescription(), AsyncClient, Google Calendar/Tasks sync against the in-memory simulation… (+7 more)
+### Community 25 - "GoogleClient"
+Cohesion: 0.12
+Nodes (4): GoogleClient, Any, Protocol, Tokens
 
-### Community 28 - "Easter Eggs"
+### Community 26 - "labs.py"
+Cohesion: 0.15
+Nodes (18): analyte_key(), flag_against(), parse_range(), parse_value(), printed_flag(), Deterministic handling of lab results (ADR-020). Values and reference ranges…, H' / 'High' / 'L*' printed next to a value on the report., The printed range wins when it parses (it stays correct if the value is edited… (+10 more)
+
+### Community 27 - "test_integrations.py"
+Cohesion: 0.27
+Nodes (16): decrypt(), _fernet(), dose_event(), _rrule(), bucket_for(), connect(), first_prescription(), AsyncClient (+8 more)
+
+### Community 28 - "EasterEggs.jsx"
 Cohesion: 0.18
 Nodes (12): AppleRain(), makeApples(), AppleRain, EasterEggProvider(), onKey(), EggContext, EGGS, isTyping() (+4 more)
 
-### Community 29 - "Settings & Config"
-Cohesion: 0.24
-Nodes (10): get_settings(), Application settings, loaded from environment variables (and `.env` in…, configure_logging(), Logging configuration., HTTP middleware: security headers, CSRF double-submit check, request logging., LLM port and the Groq adapter (ADR-003). When `LLM_PROVIDER=fake` (the default)…, enqueue(), _get_arq_pool() (+2 more)
+### Community 29 - "search/service.py"
+Cohesion: 0.16
+Nodes (16): CurrentUser, DbSession, get, search(), _like(), _prefix_tsquery(), AsyncSession, BaseModel (+8 more)
 
-### Community 30 - "Current-User Dependency"
-Cohesion: 0.23
-Nodes (12): _extract_token(), get_current_user(), AsyncSession, Request, Shared FastAPI dependencies., create_access_token(), decode_access_token(), decrypt() (+4 more)
+### Community 30 - "deps.py"
+Cohesion: 0.44
+Nodes (8): _extract_token(), get_current_user(), get_optional_user(), AsyncSession, Request, Shared FastAPI dependencies., Unauthorized, decode_access_token()
 
-### Community 31 - "Extraction Pipeline (docs)"
-Cohesion: 0.24
-Nodes (14): Document/extraction data lifecycle (draft -> confirmed), Extraction pipeline (classify, extract, validate, normalize, draft), FakeLLM (deterministic, regex-based), GroqProvider (gpt-oss-120b text, qwen3.8-27b vision), LLMProvider port, extraction module, records module, PrescriptionExtraction schema (per-field confidence + source_page) (+6 more)
+### Community 31 - "SearchPalette.jsx"
+Cohesion: 0.16
+Nodes (10): useSearch(), SearchContext, GROUPS, JUMP_TO, SearchPalette(), useDebounced(), isTyping(), SearchPalette (+2 more)
 
-### Community 32 - "Integrations Client API"
+### Community 32 - "integrations/api.js"
 Cohesion: 0.29
 Nodes (10): connectGoogle(), googleKeys, useDisconnectGoogle(), useGoogleMutation(), useGooglePreview(), useGoogleStatus(), usePullTasks(), useSyncPrescription() (+2 more)
 
-### Community 33 - "Extraction Lifecycle"
-Cohesion: 0.32
-Nodes (13): Conflict, set_status(), process_document(), Extraction, One AI reading of a document. Versioned; only a confirmed version becomes…, confirm(), discard(), get_extraction() (+5 more)
+### Community 33 - "Conflict"
+Cohesion: 0.15
+Nodes (14): Conflict, login_with_google(), Find or create the account for a Google identity. Returns (user, outcome) where…, has_sync_scopes(), pkce_pair(), Google OAuth + Calendar v3 + Tasks v1 behind a small port, with an in-memory…, True when the user left both Calendar and Tasks ticked on Google's consent…, callback() (+6 more)
 
-### Community 34 - "Job Registry"
-Cohesion: 0.27
-Nodes (10): Import every module's jobs so the registry in `app.shared.queue.JOBS` is…, confirm_extraction(), discard_extraction(), get_latest_extraction(), CurrentUser, DbSession, get, post (+2 more)
+### Community 34 - "extraction/jobs.py"
+Cohesion: 0.18
+Nodes (9): Import every module's jobs so the registry in `app.shared.queue.JOBS` is…, process_document(), Background job: process an uploaded document end to end., job(), Register a coroutine as a background job under its function name., purge_demo_accounts(), purge_share_links(), session() (+1 more)
 
-### Community 35 - "Assistant Tests"
-Cohesion: 0.41
-Nodes (12): classify(), ask(), new_thread(), AsyncClient, Consume the SSE stream and return {sources, answer, done, events}., test_answers_are_grounded_and_cited(), test_document_text_is_searchable(), test_intent_classification() (+4 more)
+### Community 35 - "MedSpace Build Plan"
+Cohesion: 0.15
+Nodes (13): Change log, MedSpace Build Plan, Phase 0: Foundations, Phase 10: Lab results and trends, Phase 1: Core platform + design system, Phase 2: Documents + processing pipeline, Phase 3: Prescription intelligence (extract → review → confirm), Phase 4: Dashboard, medications, timeline (+5 more)
 
-### Community 36 - "Groq LLM Adapter"
-Cohesion: 0.26
-Nodes (7): GroqProvider, LLMError, LLMProvider, _parse_json(), Any, Exception, Protocol
+### Community 36 - "llm.py"
+Cohesion: 0.23
+Nodes (9): get_llm(), GroqProvider, LLMError, LLMProvider, _parse_json(), Any, Exception, Protocol (+1 more)
 
-### Community 37 - "Backend Conventions (docs)"
-Cohesion: 0.21
-Nodes (13): AppError subclasses rendered as problem+json, user_id scoping on every query ((id, user_id) loads, 404 for foreign IDs), CSRF double-submit (ms_csrf cookie + X-CSRF-Token), audit module (append-only, record()), identity module, sharing module, Rotating refresh tokens with family reuse detection, Secure sharing flow (hashed tokens, expiry, view limits) (+5 more)
+### Community 37 - "CLAUDE.md"
+Cohesion: 0.18
+Nodes (9): Backend conventions, Commands, Docs discipline, Frontend conventions, Git, graphify, Read first (context recovery), Stack (+1 more)
 
-### Community 38 - "App Navigation"
-Cohesion: 0.22
-Nodes (6): APP_LINKS, MobileDrawer(), ThemeToggle(), initials(), UserMenu(), useScrolled()
+### Community 38 - "AppNav.jsx"
+Cohesion: 0.23
+Nodes (7): APP_LINKS, AppNav(), MobileDrawer(), ThemeToggle(), initials(), UserMenu(), useScrolled()
 
-### Community 39 - "CI Workflow"
-Cohesion: 0.26
-Nodes (12): CI Backend job (ruff + pytest on pgvector Postgres), CI Docker images build job, CI E2E job (Playwright + axe, fake providers), CI Frontend job (lint + Vitest + build), LocalStorage (filesystem), documents module, ObjectStorage port, Ports and adapters (offline fakes) (+4 more)
+### Community 39 - "MedSpace Architecture"
+Cohesion: 0.18
+Nodes (11): 10. Deployment, 1. System overview, 2. Repository layout, 3.1 Ports and adapters, 3. Backend modules (bounded contexts), 5. Data model, 6. API surface (v1), 7. Security model (+3 more)
 
-### Community 40 - "HTTP Middleware"
-Cohesion: 0.26
-Nodes (9): CSRFMiddleware, Request, Response, Double-submit cookie check for cookie-authenticated unsafe requests. Requests…, RequestLogMiddleware, SecurityHeadersMiddleware, constant_time_equals(), BaseHTTPMiddleware (+1 more)
+### Community 40 - "get_settings"
+Cohesion: 0.15
+Nodes (20): get_settings(), Application settings, loaded from environment variables (and `.env` in…, configure_logging(), Logging configuration., CSRFMiddleware, Request, Response, HTTP middleware: security headers, CSRF double-submit check, request logging. (+12 more)
 
-### Community 42 - "Modular Monolith Rules (docs)"
-Cohesion: 0.21
-Nodes (12): Cross-module import rule (service.py/schemas.py only), Thin routers convention, Modular monolith (API + worker processes), demo module (synthetic seeding), timeline module (read model), Upload/process document sequence flow, ADR-001: Modular monolith with two processes, ADR-013: Synthetic data only, explicit non-goals (+4 more)
+### Community 41 - "test_google_signin.py"
+Cohesion: 0.13
+Nodes (20): FakeGoogleClient, GoogleIdentity, In-memory Google for demos and tests. State is per access token and per…, google_sign_in(), AsyncClient, Response, query(), Optional "Continue with Google" sign-in (simulation mode), ADR-017. (+12 more)
 
-### Community 43 - "RAG Design (docs)"
-Cohesion: 0.27
-Nodes (12): Ask MedSpace hybrid RAG (pgvector + full-text), document_chunks (vector(384) HNSW + tsvector GIN), Embedder port, FastEmbedEmbedder (bge-small-en-v1.5, 384-d), HashEmbedder (hashing trick), assistant module, RAG guardrails (cite sources, no diagnosis/dose changes, SQL user scoping), Reciprocal Rank Fusion (top 6 chunks) (+4 more)
+### Community 42 - "MedSpace"
+Cohesion: 0.25
+Nodes (8): Architecture at a glance, Engineering highlights, Features, License, MedSpace, Project structure, Roadmap, Tech stack
 
-### Community 44 - "Audit Router"
+### Community 43 - "test_search.py"
+Cohesion: 0.49
+Nodes (9): AsyncClient, search(), test_document_text_matches_with_snippets(), test_no_matches_and_validation(), test_partial_names_find_medications(), test_prescribers_and_clinics(), test_search_is_private(), test_search_requires_auth() (+1 more)
+
+### Community 44 - "audit/router.py"
 Cohesion: 0.27
 Nodes (9): get_session(), AsyncSession, list_audit(), AsyncSession, CurrentUser, get, AuditLogOut, AuditPage (+1 more)
 
-### Community 45 - "Audit Service"
-Cohesion: 0.25
-Nodes (10): client_ip(), Request, list_for_user(), Any, AsyncSession, Request, UUID, Audit trail: `record()` is the single write path, used by every module. (+2 more)
+### Community 45 - "record"
+Cohesion: 0.33
+Nodes (7): list_for_user(), Any, AsyncSession, Request, UUID, Stage an audit row in the caller's transaction (committed with the business…, record()
 
-### Community 46 - "Storage & Deployment (docs)"
-Cohesion: 0.24
-Nodes (11): s3 service (SeaweedFS), web service (Vite dev), S3Storage (SeaweedFS dev, R2/S3 prod), ADR-014: Same-origin API for first-party auth cookies, ADR-016: SeaweedFS for local S3; storage failures surface as 503, /api rewrite (Vercel rewrites / Netlify _redirects), Deployment checklist (/api/ready, demo, HSTS, X-Frame-Options), Cloudflare R2 private bucket (+3 more)
+### Community 46 - "Deploying MedSpace"
+Cohesion: 0.29
+Nodes (7): 1. Database: Neon (or any Postgres 15+ with pgvector), 2. Object storage: Cloudflare R2 (or AWS S3), 3. API: one container, 4. Web: static build with an `/api` rewrite, 5. Google OAuth (optional), Checklist, Deploying MedSpace
 
-### Community 47 - "Auth Forms"
-Cohesion: 0.24
-Nodes (6): LoginForm(), loginSchema, SignupForm(), signupSchema, useAuthMutation(), useDemoLogin()
+### Community 47 - "AuthForms.jsx"
+Cohesion: 0.18
+Nodes (10): DemoDivider(), LoginForm(), loginSchema, SignupForm(), signupSchema, useAuthMutation(), GOOGLE_ERRORS, useAuthProviders() (+2 more)
 
-### Community 48 - "Records Client API"
-Cohesion: 0.22
+### Community 48 - "records/api.js"
+Cohesion: 0.18
 Nodes (4): recordKeys, useInvalidateRecords(), useUpdateCareAction(), useUpdateMedication()
 
-### Community 49 - "Rate Limiter"
+### Community 49 - "ratelimit.py"
+Cohesion: 0.12
+Nodes (11): client_ip(), _get_store(), _MemoryStore, Any, Request, rate_limit(), Fixed-window rate limiting. Uses Redis when `QUEUE_MODE=arq` (multi-process…, _RedisStore (+3 more)
+
+### Community 50 - "scripts"
+Cohesion: 0.22
+Nodes (9): scripts, build, dev, e2e, format, lint, preview, test (+1 more)
+
+### Community 51 - "User"
 Cohesion: 0.24
-Nodes (4): _get_store(), _MemoryStore, Fixed-window rate limiting. Uses Redis when `QUEUE_MODE=arq` (multi-process…, _RedisStore
+Nodes (12): create_demo_account(), _ingest(), _page_texts(), purge_expired_demo_accounts(), AsyncSession, date, Demo accounts: every "Try the demo" click gets an isolated, synthetic, short-…, Seed demo records for a new simulated account; never let seeding block a sign-… (+4 more)
 
-### Community 50 - "Model Registry"
-Cohesion: 0.36
-Nodes (8): Import every module's ORM models so `Base.metadata` is complete (Alembic,…, ChatMessage, ChatThread, DocumentChunk, Base, IdMixin, TimestampMixin, A page-aware slice of a document, embedded for semantic search and indexed for…
-
-### Community 51 - "Demo Seeding"
-Cohesion: 0.40
-Nodes (9): create_demo_account(), _ingest(), _page_texts(), purge_expired_demo_accounts(), AsyncSession, date, User, Demo accounts: every "Try the demo" click gets an isolated, synthetic, short-… (+1 more)
-
-### Community 52 - "File Inspection"
+### Community 52 - "files.py"
 Cohesion: 0.24
 Nodes (9): inspect(), Inspection, Exception, File inspection: type sniffing by magic bytes, PDF text extraction and page…, Identify the real file type from its leading bytes; never trust the client's…, PNG bytes per page for the vision model. Images are passed through (re-encoded…, render_pages_png(), sniff_mime() (+1 more)
 
-### Community 53 - "Docs & Graph Workflow"
-Cohesion: 0.33
-Nodes (10): Docs discipline (tick plan, add ADR, graphify update), graphify knowledge graph workflow, api service (alembic + uvicorn), x-backend-env shared env anchor, postgres service (pgvector/pgvector:pg17), redis service, worker service (arq WorkerSettings), QUEUE_MODE (inline | arq) (+2 more)
+### Community 53 - "api service (alembic + uvicorn)"
+Cohesion: 0.25
+Nodes (11): CI Backend job (ruff + pytest on pgvector Postgres), CI Docker images build job, CI E2E job (Playwright + axe, fake providers), CI Frontend job (lint + Vitest + build), api service (alembic + uvicorn), x-backend-env shared env anchor, postgres service (pgvector/pgvector:pg17), redis service (+3 more)
 
-### Community 54 - "Format Helpers"
+### Community 54 - "lib/format.js"
 Cohesion: 0.36
 Nodes (8): firstName(), formatBytes(), formatClock(), formatDate(), formatRelativeDay(), greeting(), timeAgo(), toDate()
 
-### Community 56 - "Profile Router"
-Cohesion: 0.22
-Nodes (9): me(), BaseModel, CurrentUser, get, patch, Who am I, without a 401 for anonymous visitors (the SPA calls this on boot)., session_state(), SessionState (+1 more)
+### Community 56 - "Getting started"
+Cohesion: 0.25
+Nodes (8): Deploy, Enable Google sign-in, Calendar & Tasks (optional), Enable real AI extraction (optional), Getting started, Prerequisites, Run everything, Run tests, What works without any API keys
 
-### Community 57 - "Local Storage Adapter"
+### Community 57 - "LocalStorage"
 Cohesion: 0.36
 Nodes (3): LocalStorage, Stores objects under a directory. Used for tests and keyless local runs., Path
 
-### Community 58 - "E2E Core Flows"
-Cohesion: 0.36
-Nodes (5): here, SAMPLE, expectAccessible(), signUp(), startDemo()
+### Community 58 - "helpers.js"
+Cohesion: 0.28
+Nodes (7): here, SAMPLE, expectAccessible(), signUp(), startDemo(), here, LAB_SAMPLE
 
-### Community 60 - "Config"
+### Community 60 - "Settings"
 Cohesion: 0.25
 Nodes (4): field_validator, Key for encrypting OAuth tokens at rest. Derived from JWT secret outside prod., Settings, BaseSettings
 
-### Community 61 - "Heuristic"
-Cohesion: 0.32
-Nodes (7): extract(), _medication_from_line(), _parse_date(), date, Offline, rule-based extractor used when no LLM is configured (CI, demo, keyless…, ExtractedMedication, ExtractionPayload
-
-### Community 62 - "Models"
-Cohesion: 0.36
-Nodes (7): OAuthConnection, Base, IdMixin, TimestampMixin, A connected Google account. Tokens are Fernet-encrypted at rest (ADR-008)., Maps a MedSpace entity (one dose slot, an appointment, a to-do) to its remote…, SyncLink
-
-### Community 63 - "Storage"
-Cohesion: 0.25
-Nodes (3): ObjectStorage, Protocol, Object storage port with filesystem and S3-compatible adapters.
-
-### Community 65 - "Architecture"
-Cohesion: 0.39
-Nodes (8): FakeGoogleClient (in-memory), Google integration (Calendar RRULE events, Tasks list, Fernet tokens), GoogleClient port, HttpGoogleClient (Calendar v3 / Tasks v1), integrations module, sync_links table (idempotent sync mapping), ADR-005: Calendar for recurring reminders, Tasks for one-off actions, Phase 6: Google Calendar + Tasks
-
-### Community 68 - "Prompts"
+### Community 61 - "4. Core flows"
 Cohesion: 0.29
-Nodes (6): _nullable(), Any, Prompts and the strict JSON schema for prescription extraction., repair_prompt(), text_user_prompt(), vision_user_prompt()
+Nodes (7): 4.1 Upload → Extract → Review → Organize → Act, 4.2 Extraction pipeline details, 4.3 Data lifecycle, 4.4 Ask MedSpace (RAG), 4.5 Secure sharing, 4.6 Google integration, 4. Core flows
 
-### Community 70 - "Puns"
+### Community 65 - "package.json"
+Cohesion: 0.40
+Nodes (4): name, private, type, version
+
+### Community 70 - "puns.js"
 Cohesion: 0.29
 Nodes (5): EMPTY_QUIPS, LOADING_PUNS, MARQUEE_PUNS, NOT_FOUND_LINES, PROCESSING_PUNS
 
-### Community 72 - "Heromorph"
+### Community 72 - "HeroMorph.jsx"
 Cohesion: 0.33
 Nodes (6): DURATIONS, EASE, HeroMorph(), PHASES, RX, usePhase()
 
-### Community 74 - "Todayschedule"
+### Community 74 - "TodaySchedule.jsx"
 Cohesion: 0.53
 Nodes (5): nowHHMM(), slotFor(), SLOTS, TodaySchedule(), useTaken()
 
-### Community 79 - "Timeline"
+### Community 79 - "Timeline.jsx"
 Cohesion: 0.40
 Nodes (3): EventRow(), linkFor(), TYPES
 
-### Community 80 - "Router"
+### Community 80 - "demo_login"
 Cohesion: 0.40
 Nodes (5): demo_login(), DbSession, post, Request, Response
 
-### Community 81 - "Env"
-Cohesion: 0.70
-Nodes (4): _do_run(), run_migrations_offline(), run_migrations_online(), _url()
-
-### Community 83 - "Field"
+### Community 83 - "Field.jsx"
 Cohesion: 0.40
 Nodes (3): Input, Select, Textarea
 
-### Community 84 - "Theme"
+### Community 84 - "theme.jsx"
 Cohesion: 0.50
 Nodes (3): systemTheme(), ThemeContext, ThemeProvider()
 
-### Community 87 - "Decisions"
-Cohesion: 0.83
-Nodes (4): UI copy and frontend conventions (tokens, skeleton/empty/error states, Phosphor, no em-dashes), Frontend architecture (React 19, TanStack Query, Zod, Tailwind v4), ADR-011: JavaScript frontend (TypeScript declined), ADR-012: Tailwind v4 utilities plus hand-authored CSS design system
-
-### Community 91 - "Queue"
-Cohesion: 0.67
-Nodes (3): job(), Register a coroutine as a background job under its function name., JobFn
-
-## Ambiguous Edges - Review These
-- `s3 service (SeaweedFS)` → `Phase 0: Foundations`  [AMBIGUOUS]
-  docs/plan.md · relation: references
-
 ## Knowledge Gaps
-- **104 isolated node(s):** `FILTERS`, `EASE`, `NO_REFRESH`, `UNSAFE`, `AuthContext` (+99 more)
+- **186 isolated node(s):** `WorkerSettings`, `medspace-api`, `here`, `SAMPLE`, `here` (+181 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **22 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **30 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **What is the exact relationship between `s3 service (SeaweedFS)` and `Phase 0: Foundations`?**
-  _Edge tagged AMBIGUOUS (relation: references) - confidence is low._
-- **Why does `get_settings()` connect `Settings & Config` to `Backend Test Harness & Samples`, `ORM Models & Base`, `HTTP Middleware`, `Documents API Router`, `Identity & Password Security`, `Extraction Pipeline Service`, `Router`, `Rate Limiter`, `Schemas & Rate-Limited Routes`, `Document Intake Service`, `Env`, `Auth Cookies & Sessions`, `Config`, `Current-User Dependency`?**
-  _High betweenness centrality (0.034) - this node is a cross-community bridge._
-- **Why does `S3Storage` connect `Storage` to `Document Intake Service`, `Storage`?**
-  _High betweenness centrality (0.015) - this node is a cross-community bridge._
-- **Why does `HttpGoogleClient` connect `Google HTTP Client` to `Google Sync Service`, `Google OAuth Router`?**
-  _High betweenness centrality (0.014) - this node is a cross-community bridge._
-- **Are the 2 inferred relationships involving `Base` (e.g. with `_clean_tables()` and `_schema()`) actually correct?**
-  _`Base` has 2 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `FILTERS`, `EASE`, `NO_REFRESH` to the rest of the system?**
-  _104 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Backend Test Harness & Samples` be split into smaller, more focused modules?**
-  _Cohesion score 0.07063063063063063 - nodes in this community are weakly interconnected._
+- **Why does `get_settings()` connect `get_settings` to `csrf`, `sharing/service.py`, `assistant/service.py`, `integrations/service.py`, `documents/router.py`, `integrations/router.py`, `identity/service.py`, `extraction/service.py`, `documents/service.py`, `errors.py`, `identity/router.py`, `test_integrations.py`, `deps.py`, `Conflict`, `llm.py`, `ratelimit.py`, `User`, `Settings`, `demo_login`?**
+  _High betweenness centrality (0.055) - this node is a cross-community bridge._
+- **Why does `User` connect `User` to `records/service.py`, `sharing/service.py`, `extraction/jobs.py`, `Conflict`, `timeline/service.py`, `integrations/service.py`, `test_google_signin.py`, `identity/service.py`, `extraction/service.py`, `ratelimit.py`, `deps.py`?**
+  _High betweenness centrality (0.027) - this node is a cross-community bridge._
+- **Why does `GoogleClient` connect `GoogleClient` to `integrations/service.py`, `Conflict`?**
+  _High betweenness centrality (0.010) - this node is a cross-community bridge._
+- **What connects `WorkerSettings`, `medspace-api`, `here` to the rest of the system?**
+  _186 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `csrf` be split into smaller, more focused modules?**
+  _Cohesion score 0.05919191919191919 - nodes in this community are weakly interconnected._
+- **Should `records/service.py` be split into smaller, more focused modules?**
+  _Cohesion score 0.08544087491455912 - nodes in this community are weakly interconnected._
+- **Should `sharing/service.py` be split into smaller, more focused modules?**
+  _Cohesion score 0.060382916053019146 - nodes in this community are weakly interconnected._
