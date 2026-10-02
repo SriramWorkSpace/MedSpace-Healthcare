@@ -49,7 +49,7 @@ Frontend
 
 Goal: drag-and-drop a prescription and watch it process to "needs review".
 
-- [x] `shared/storage`: S3 (MinIO) + local adapters
+- [x] `shared/storage`: S3 (SeaweedFS locally, R2/S3 in prod) + local adapters
 - [x] `shared/queue`: ARQ + inline modes; `worker.py`
 - [x] `documents`: upload validation (MIME, magic bytes, size, pages), dedupe by sha256, list/detail/delete, authenticated file streaming
 - [x] Page text extraction (PyMuPDF) and scanned detection
