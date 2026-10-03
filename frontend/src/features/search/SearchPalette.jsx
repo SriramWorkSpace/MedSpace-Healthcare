@@ -163,23 +163,35 @@ export default function SearchPalette({ onClose }) {
 
   return createPortal(
     <div className="fixed inset-0" style={{ zIndex: "var(--z-dialog)" }}>
-      {/* Quick and light: the backdrop fades, the panel settles in from just above. */}
+      {/* The page behind stays put and blurs; only opacity and transform animate, which the
+          browser runs on the compositor, so the motion stays smooth while React renders. */}
       <motion.div
-        className="absolute inset-0 bg-[oklch(0.2_0.02_165/0.4)] backdrop-blur-[2px]"
+        className="absolute inset-0 bg-[oklch(0.2_0.02_165/0.28)] backdrop-blur-[6px]"
+        style={{ willChange: "opacity" }}
         onClick={onClose}
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1, transition: { duration: 0.16, ease: "easeOut" } }}
-        exit={{ opacity: 0, transition: { duration: 0.12, ease: "easeIn" } }}
+        animate={{ opacity: 1, transition: { duration: 0.2, ease: EASE_OUT } }}
+        exit={{ opacity: 0, transition: { duration: 0.15, ease: EASE_IN } }}
       />
       <motion.div
-        initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: -8 }}
-        animate={{ opacity: 1, scale: 1, y: 0, transition: { duration: 0.18, ease: EASE_OUT } }}
+        initial={
+          reduce ? { opacity: 0 } : { opacity: 0, transform: "translateY(-10px) scale(0.97)" }
+        }
+        animate={{
+          opacity: 1,
+          transform: "translateY(0px) scale(1)",
+          transition: { duration: 0.22, ease: EASE_OUT },
+        }}
         exit={
           reduce
-            ? { opacity: 0, transition: { duration: 0.1 } }
-            : { opacity: 0, scale: 0.98, y: -4, transition: { duration: 0.12, ease: EASE_IN } }
+            ? { opacity: 0, transition: { duration: 0.12 } }
+            : {
+                opacity: 0,
+                transform: "translateY(-6px) scale(0.98)",
+                transition: { duration: 0.14, ease: EASE_IN },
+              }
         }
-        style={{ transformOrigin: "50% 0%" }}
+        style={{ transformOrigin: "50% 0%", willChange: "transform, opacity" }}
         role="dialog"
         aria-modal="true"
         aria-label="Search MedSpace"

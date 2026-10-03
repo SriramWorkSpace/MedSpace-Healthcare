@@ -8,6 +8,9 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     scroll-padding-top: calc(var(--nav-h) + 16px);
+    /* Always reserve the scrollbar's width, so locking scroll (dialogs, search) never makes
+       the page wider and nudges centered content sideways. */
+    scrollbar-gutter: stable;
   }
 
   body {
