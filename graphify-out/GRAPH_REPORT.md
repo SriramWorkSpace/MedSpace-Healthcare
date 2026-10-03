@@ -1,7 +1,7 @@
 # Graph Report - MedSpace  (2026-10-03)
 
 ## Corpus Check
-- 310 files · ~131,162 words
+- 310 files · ~131,547 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6c02bd32`
+- Built from commit: `50658e0b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -633,11 +633,11 @@ Nodes (3): UUID, Time-ordered UUID (RFC 9562 v7) so primary keys index and sort 
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `User` connect `User` to `db.py`, `records/service.py`, `identity/service.py`, `supply/service.py`, `integrations/service.py`, `doses/service.py`, `sharing/service.py`, `test_account_security.py`, `timedelta`, `extraction/service.py`, `assistant/service.py`, `extraction/jobs.py`, `confirm`, `visits/service.py`, `demo/service.py`, `reminders/service.py`?**
-  _High betweenness centrality (0.048) - this node is a cross-community bridge._
+  _High betweenness centrality (0.069) - this node is a cross-community bridge._
 - **Why does `get_settings()` connect `get_settings` to `test_diet_notes.py`, `User`, `db.py`, `push.py`, `integrations/service.py`, `integrations/router.py`, `identity/router.py`, `extraction/service.py`, `assistant/service.py`, `documents/router.py`, `ratelimit.py`, `.dispatch`, `embeddings.py`, `demo/service.py`, `reminders/service.py`, `env.py`, `test_timeline_dashboard.py`, `demo/router.py`, `identity/service.py`, `sharing/service.py`, `S3Storage`, `documents/service.py`, `Settings`, `test_ratelimit.py`?**
-  _High betweenness centrality (0.043) - this node is a cross-community bridge._
-- **Why does `csrf()` connect `csrf` to `test_diet_notes.py`, `test_sharing.py`, `test_timeline_dashboard.py`, `test_account_security.py`, `timedelta`, `test_assistant.py`, `test_visits.py`, `test_reminders.py`, `test_ratelimit.py`, `conftest.py`, `test_labs.py`, `test_integrations.py`?**
-  _High betweenness centrality (0.037) - this node is a cross-community bridge._
+  _High betweenness centrality (0.051) - this node is a cross-community bridge._
+- **Why does `utcnow()` connect `User` to `test_sharing.py`, `assistant/router.py`, `db.py`, `records/service.py`, `identity/service.py`, `integrations/service.py`, `supply/service.py`, `doses/service.py`, `sharing/service.py`, `extraction/service.py`, `documents/service.py`, `confirm`, `demo/service.py`, `reminders/service.py`?**
+  _High betweenness centrality (0.025) - this node is a cross-community bridge._
 - **Are the 47 inferred relationships involving `timedelta` (e.g. with `create_access_token()` and `create_purpose_token()`) actually correct?**
   _`timedelta` has 47 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `Phase 0: Foundations`, `Phase 1: Core platform + design system`, `Phase 2: Documents + processing pipeline` to the rest of the system?**
