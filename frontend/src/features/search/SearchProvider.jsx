@@ -1,7 +1,9 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { AnimatePresence } from "motion/react";
 import { SearchContext } from "./searchContext";
-
-const SearchPalette = lazy(() => import("./SearchPalette"));
+// Bundled with the app (not lazy): a code-split palette made the first open wait on the
+// network before it could animate in.
+import SearchPalette from "./SearchPalette";
 
 function isTyping(target) {
   return target?.closest?.("input, textarea, select, [contenteditable='true']");
@@ -31,11 +33,10 @@ export function SearchProvider({ children }) {
   return (
     <SearchContext.Provider value={value}>
       {children}
-      {open && (
-        <Suspense fallback={null}>
-          <SearchPalette onClose={close} />
-        </Suspense>
-      )}
+      {/* AnimatePresence keeps the palette mounted until its exit animation finishes. */}
+      <AnimatePresence>
+        {open && <SearchPalette key="search-palette" onClose={close} />}
+      </AnimatePresence>
     </SearchContext.Provider>
   );
 }

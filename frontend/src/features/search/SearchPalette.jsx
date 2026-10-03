@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router";
+import { motion, useReducedMotion } from "motion/react";
 import {
   ArrowRight,
   ChatsCircle,
@@ -20,6 +21,9 @@ import {
 import { cn } from "@/lib/cn";
 import { useSearch } from "./api";
 import { useActing } from "@/features/circle/api";
+
+const EASE_OUT = [0.23, 1, 0.32, 1];
+const EASE_IN = [0.4, 0, 1, 1];
 
 const GROUPS = [
   { key: "medications", label: "Medications", icon: Pill },
@@ -82,6 +86,7 @@ function Snippet({ text }) {
 
 export default function SearchPalette({ onClose }) {
   const navigate = useNavigate();
+  const reduce = useReducedMotion();
   const listId = useId();
   const inputRef = useRef(null);
   const listRef = useRef(null);
@@ -158,12 +163,23 @@ export default function SearchPalette({ onClose }) {
 
   return createPortal(
     <div className="fixed inset-0" style={{ zIndex: "var(--z-dialog)" }}>
-      {/* No open/close animation: this is summoned from the keyboard many times a day. */}
-      <div
+      {/* Quick and light: the backdrop fades, the panel settles in from just above. */}
+      <motion.div
         className="absolute inset-0 bg-[oklch(0.2_0.02_165/0.4)] backdrop-blur-[2px]"
         onClick={onClose}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1, transition: { duration: 0.16, ease: "easeOut" } }}
+        exit={{ opacity: 0, transition: { duration: 0.12, ease: "easeIn" } }}
       />
-      <div
+      <motion.div
+        initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: -8 }}
+        animate={{ opacity: 1, scale: 1, y: 0, transition: { duration: 0.18, ease: EASE_OUT } }}
+        exit={
+          reduce
+            ? { opacity: 0, transition: { duration: 0.1 } }
+            : { opacity: 0, scale: 0.98, y: -4, transition: { duration: 0.12, ease: EASE_IN } }
+        }
+        style={{ transformOrigin: "50% 0%" }}
         role="dialog"
         aria-modal="true"
         aria-label="Search MedSpace"
@@ -280,7 +296,7 @@ export default function SearchPalette({ onClose }) {
           </span>
           <span className="ml-auto">Only your own records are searched.</span>
         </div>
-      </div>
+      </motion.div>
     </div>,
     document.body,
   );
