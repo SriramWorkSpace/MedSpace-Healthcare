@@ -420,10 +420,10 @@
     "semantic_hash": "76601cf1ec42ad3b8674cc644d6e173b"
   },
   "frontend/package.json": {
-    "mtime": 1790883253.0425181,
-    "seen": 1790918922.5479069,
-    "ast_hash": "f82ea87b97f4218cddba3efaf02f23dd",
-    "semantic_hash": "f82ea87b97f4218cddba3efaf02f23dd"
+    "mtime": 1791031302.3601882,
+    "seen": 1791032325.114218,
+    "ast_hash": "8a78e0a8cf9d131346f14affda8cc701",
+    "semantic_hash": ""
   },
   "frontend/src/app/RouteError.jsx": {
     "mtime": 1790884569.9143155,
@@ -540,9 +540,9 @@
     "semantic_hash": "decfef1fa1022b1d269ff7abf123763e"
   },
   "frontend/src/components/ui/Logo.jsx": {
-    "mtime": 1790931223.6423254,
-    "seen": 1790942913.48745,
-    "ast_hash": "90076ac674f0e0749197ea57f03a4509",
+    "mtime": 1791031325.7329366,
+    "seen": 1791032325.1142912,
+    "ast_hash": "8be41db7ee4cc40f1738ee17c1aead5b",
     "semantic_hash": ""
   },
   "frontend/src/components/ui/Skeleton.jsx": {
@@ -768,9 +768,9 @@
     "semantic_hash": "82d7be269faf32636122da96469969ba"
   },
   "frontend/src/main.jsx": {
-    "mtime": 1790968720.254697,
-    "seen": 1790969463.7949274,
-    "ast_hash": "532296ab607ff8c13dccdd336385d18e",
+    "mtime": 1791031302.6387303,
+    "seen": 1791032325.114594,
+    "ast_hash": "4300f3f340fa28cb04ca715f1fd42a5d",
     "semantic_hash": ""
   },
   "frontend/src/pages/NotFound.jsx": {
@@ -906,9 +906,9 @@
     "semantic_hash": ""
   },
   "docs/plan.md": {
-    "mtime": 1791027950.9757428,
-    "seen": 1791028486.3586946,
-    "ast_hash": "79e9805a42ab7531ccfbf3426d6df82c",
+    "mtime": 1791032316.5274317,
+    "seen": 1791032325.1147153,
+    "ast_hash": "619acc48ada820dc643fa94e772f68c8",
     "semantic_hash": ""
   },
   "backend/app/modules/assistant/__init__.py": {
@@ -1869,6 +1869,18 @@
     "mtime": 1791027504.6453032,
     "seen": 1791028486.358596,
     "ast_hash": "46e33103d4661a1b351f4898a11ad89e",
+    "semantic_hash": ""
+  },
+  "logo-removebg-preview.png": {
+    "mtime": 1791030155.2233117,
+    "seen": 1791032325.1147182,
+    "ast_hash": "00934a1d219ca3cba87d7626b5f17996",
+    "semantic_hash": ""
+  },
+  "logo.jpg": {
+    "mtime": 1791030021.9352472,
+    "seen": 1791032325.114721,
+    "ast_hash": "766a28b76cc0be6ea83bcba2fa2e7202",
     "semantic_hash": ""
   }
 }
