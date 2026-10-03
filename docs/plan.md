@@ -112,6 +112,15 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 - [x] Multi-stage web image (nginx + /api proxy), deployment guide (docs/deployment.md), README screenshots
 - [x] Final graphify update and docs sync
 
+## Phase 18: Account security
+
+- [x] Two-step verification: TOTP (RFC 6238) with encrypted secrets, replay protection, QR setup, ten hashed one-time recovery codes (ADR-029)
+- [x] Sign-in second step for password and Google sign-in, via a short-lived signed token; per-account attempt limit
+- [x] Session-bound access tokens (`sid`): signing a device out takes effect on its next request
+- [x] Settings, Security: two-step on/off, new recovery codes, signed-in devices with sign out and sign out everywhere else, change or add a password (signs out other devices)
+- [x] CI dependency audit job (pip-audit, npm audit for runtime packages)
+- [x] Tests: 19 backend (RFC vectors, drift and replay, setup, sign-in with code and recovery code, forged and wrong-kind tokens, attempt limit, Google sign-in, disable, regenerate, sessions list, revoke and cross-account revoke, sign out others, password change and first password), 1 e2e (with axe)
+
 ## Phase 17: Dose reminders by push notification
 
 - [x] `reminders` module: push subscriptions, settings (lead time), reminder log; push port with pywebpush (VAPID) and a fake (ADR-028)
@@ -202,6 +211,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 ---
 
 ## Change log
+
+- **2026-10-03**: Phase 18 shipped: two-step verification, a signed-in devices list with immediate sign-out, password changes, and a dependency audit in CI (ADR-029).
 
 - **2026-10-03**: Phase 17 shipped: dose reminders by Web Push with Taken and Skip on the notification (ADR-028).
 

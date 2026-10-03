@@ -1,20 +1,41 @@
 from __future__ import annotations
 
+import uuid
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, Request, Response, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from app.core.deps import CurrentUser, DbSession
+from app.core.deps import CurrentUser, DbSession, OptionalUser
 from app.core.errors import RateLimited
 from app.core.ratelimit import check, rate_limit
-from app.core.security import ACCESS_COOKIE, REFRESH_COOKIE, decode_access_token
+from app.core.security import (
+    ACCESS_COOKIE,
+    REFRESH_COOKIE,
+    decode_access_claims,
+    decode_purpose_token,
+)
 from app.modules.audit import service as audit
 from app.modules.documents import service as documents
-from app.modules.identity import service
+from app.modules.identity import security, service
 from app.modules.identity.cookies import clear_auth_cookies, set_auth_cookies
-from app.modules.identity.schemas import LoginIn, ProfileUpdate, SignupIn, UserOut
+from app.modules.identity.schemas import (
+    CodeIn,
+    DeviceSessionOut,
+    LoginIn,
+    LoginResult,
+    MfaDisableIn,
+    MfaLoginIn,
+    MfaSetupOut,
+    PasswordChangeIn,
+    ProfileUpdate,
+    RecoveryCodesOut,
+    SecurityOut,
+    SignedOut,
+    SignupIn,
+    UserOut,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 profile_router = APIRouter(prefix="/me", tags=["profile"])
@@ -45,7 +66,7 @@ async def signup(data: SignupIn, request: Request, response: Response, session: 
 
 @router.post(
     "/login",
-    response_model=SessionOut,
+    response_model=LoginResult,
     dependencies=[Depends(rate_limit("auth:login", 10, 60, by="ip"))],
 )
 async def login(data: LoginIn, request: Request, response: Response, session: DbSession):
@@ -57,11 +78,41 @@ async def login(data: LoginIn, request: Request, response: Response, session: Db
             extra={"retry_after": attempt.reset},
         )
     user = await service.authenticate(session, data.email, data.password)
+    if user.mfa_enabled:
+        # Password was right; the session waits for the second factor (ADR-029).
+        await audit.record(
+            session, action="auth.login_mfa_pending", user_id=user.id, request=request
+        )
+        await session.commit()
+        return LoginResult(mfa_required=True, mfa_token=security.mfa_challenge(user))
     issued = await service.issue_session(session, user, request)
     await audit.record(session, action="auth.login", user_id=user.id, request=request)
     await session.commit()
     csrf = set_auth_cookies(response, issued.access_token, issued.refresh_token)
-    return SessionOut(user=UserOut.model_validate(user), csrf_token=csrf)
+    return LoginResult(user=UserOut.model_validate(user), csrf_token=csrf)
+
+
+@router.post(
+    "/login/mfa",
+    response_model=LoginResult,
+    dependencies=[Depends(rate_limit("auth:mfa", 10, 60, by="ip"))],
+)
+async def login_mfa(data: MfaLoginIn, request: Request, response: Response, session: DbSession):
+    claims = decode_purpose_token(data.mfa_token, security.MFA_PURPOSE)
+    if claims:  # five tries per account per five minutes, wherever they come from
+        attempt = await check("auth:mfa-user", claims["sub"], 5, 300)
+        if not attempt.allowed:
+            raise RateLimited(
+                "Too many codes tried. Wait a few minutes, then sign in again.",
+                extra={"retry_after": attempt.reset},
+            )
+    user, next_path = await security.finish_mfa(
+        session, data.mfa_token, data.code, data.recovery_code, request
+    )
+    issued = await service.issue_session(session, user, request)
+    await session.commit()
+    csrf = set_auth_cookies(response, issued.access_token, issued.refresh_token)
+    return LoginResult(user=UserOut.model_validate(user), csrf_token=csrf, next=next_path)
 
 
 @router.post(
@@ -96,11 +147,9 @@ class SessionState(BaseModel):
 
 
 @router.get("/session", response_model=SessionState)
-async def session_state(request: Request, session: DbSession):
-    """Who am I, without a 401 for anonymous visitors (the SPA calls this on boot)."""
-    token = request.cookies.get(ACCESS_COOKIE)
-    user_id = decode_access_token(token) if token else None
-    user = await service.get_user(session, user_id) if user_id else None
+async def session_state(user: OptionalUser):
+    """Who am I, without a 401 for anonymous visitors (the SPA calls this on boot).
+    A signed-out device's still-unexpired access token counts as anonymous."""
     return SessionState(user=UserOut.model_validate(user) if user else None)
 
 
@@ -145,3 +194,101 @@ async def delete_account(user: CurrentUser, response: Response, session: DbSessi
     clear_auth_cookies(response)
     response.status_code = status.HTTP_204_NO_CONTENT
     return response
+
+
+# ---- Account security (ADR-029) ----------------------------------------------------------------
+
+
+def _current_session(request: Request) -> uuid.UUID | None:
+    token = request.cookies.get(ACCESS_COOKIE)
+    claims = decode_access_claims(token) if token else None
+    return claims[1] if claims else None
+
+
+async def _security_out(session, user, request: Request) -> SecurityOut:
+    sessions = await security.list_sessions(session, user, _current_session(request))
+    return SecurityOut(
+        mfa_enabled=user.mfa_enabled,
+        recovery_codes_left=await security.recovery_codes_left(session, user),
+        has_password=user.has_password,
+        sessions=[DeviceSessionOut(**vars(s)) for s in sessions],
+    )
+
+
+@profile_router.get("/security", response_model=SecurityOut)
+async def get_security(request: Request, user: CurrentUser, session: DbSession):
+    return await _security_out(session, user, request)
+
+
+@profile_router.post("/mfa/setup", response_model=MfaSetupOut)
+async def mfa_setup(user: CurrentUser, session: DbSession):
+    setup = await security.begin_setup(session, user)
+    await session.commit()
+    return MfaSetupOut(secret=setup.secret, otpauth_uri=setup.otpauth_uri, qr_svg=setup.qr_svg)
+
+
+@profile_router.post(
+    "/mfa/enable",
+    response_model=RecoveryCodesOut,
+    dependencies=[Depends(rate_limit("me:mfa", 10, 300))],
+)
+async def mfa_enable(data: CodeIn, request: Request, user: CurrentUser, session: DbSession):
+    codes = await security.enable(session, user, data.code, _current_session(request), request)
+    await session.commit()
+    return RecoveryCodesOut(codes=codes)
+
+
+@profile_router.post(
+    "/mfa/disable", status_code=204, dependencies=[Depends(rate_limit("me:mfa", 10, 300))]
+)
+async def mfa_disable(data: MfaDisableIn, request: Request, user: CurrentUser, session: DbSession):
+    await security.disable(session, user, data.password, data.code, data.recovery_code, request)
+    await session.commit()
+
+
+@profile_router.post(
+    "/mfa/recovery-codes",
+    response_model=RecoveryCodesOut,
+    dependencies=[Depends(rate_limit("me:mfa", 10, 300))],
+)
+async def mfa_new_codes(data: CodeIn, request: Request, user: CurrentUser, session: DbSession):
+    codes = await security.regenerate_codes(session, user, data.code, request)
+    await session.commit()
+    return RecoveryCodesOut(codes=codes)
+
+
+@profile_router.delete("/sessions/{session_id}", status_code=204)
+async def end_session(
+    session_id: uuid.UUID, request: Request, user: CurrentUser, session: DbSession
+):
+    await security.revoke_session(session, user, session_id, request)
+    await session.commit()
+
+
+@profile_router.post("/sessions/sign-out-others", response_model=SignedOut)
+async def end_other_sessions(request: Request, user: CurrentUser, session: DbSession):
+    count = await security.revoke_other_sessions(session, user, _current_session(request))
+    await audit.record(
+        session,
+        action="auth.other_sessions_revoked",
+        user_id=user.id,
+        request=request,
+        meta={"count": count},
+    )
+    await session.commit()
+    return SignedOut(signed_out=count)
+
+
+@profile_router.post(
+    "/password",
+    response_model=SignedOut,
+    dependencies=[Depends(rate_limit("me:password", 5, 600))],
+)
+async def change_password(
+    data: PasswordChangeIn, request: Request, user: CurrentUser, session: DbSession
+):
+    count = await security.change_password(
+        session, user, data.current_password, data.new_password, _current_session(request), request
+    )
+    await session.commit()
+    return SignedOut(signed_out=count)

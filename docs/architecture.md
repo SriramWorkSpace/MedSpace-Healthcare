@@ -96,7 +96,7 @@ modules/<name>/
 
 | Module | Owns | Key responsibilities |
 |---|---|---|
-| `identity` | `users`, `refresh_tokens` | Signup/login, optional Google sign-in (account matching and verified-email linking), Argon2 hashing, JWT access cookie, rotating refresh tokens with reuse detection, CSRF, demo login |
+| `identity` | `users`, `refresh_tokens`, `recovery_codes` | Signup/login, optional Google sign-in (account matching and verified-email linking), Argon2 hashing, JWT access cookie bound to its session, rotating refresh tokens with reuse detection, CSRF, demo login; account security (`security.py`): two-step verification (TOTP, recovery codes, sign-in second step), signed-in devices, password changes (ADR-029) |
 | `documents` | `documents`, `document_pages` | Upload intake (type/size/magic-byte validation, SHA-256 dedupe), object storage, page text, processing status, signed preview streaming |
 | `extraction` | `extractions` | Pipeline: text-layer vs. scanned detection → Groq extraction → Pydantic validation → frequency normalization → draft extraction with per-field confidence + source page |
 | `records` | `prescriptions`, `medications`, `care_actions`, `diet_notes`, `lab_results` | Confirm drafts into official records, medication schedules, prescription reports, diet notes copied from documents (ADR-018), lab results and their trends (ADR-020) |
@@ -262,7 +262,7 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 
 | Area | Endpoints |
 |---|---|
-| Auth | `POST /auth/signup` · `POST /auth/login` · `POST /auth/demo` · `POST /auth/refresh` · `POST /auth/logout` · `GET /auth/me` · `GET /auth/session` · `GET /auth/google/start` · `GET /auth/google/providers` |
+| Auth | `POST /auth/signup` · `POST /auth/login` (session, or `mfa_required` with a 5-minute token) · `POST /auth/login/mfa` · `POST /auth/demo` · `POST /auth/refresh` · `POST /auth/logout` · `GET /auth/me` · `GET /auth/session` · `GET /auth/google/start` · `GET /auth/google/providers` |
 | Documents | `POST /documents` · `GET /documents` · `GET /documents/{id}` · `GET /documents/{id}/file` · `POST /documents/{id}/reprocess` · `DELETE /documents/{id}` |
 | Extraction | `GET /documents/{id}/extraction` · `POST /extractions/{id}/confirm` · `POST /extractions/{id}/discard` |
 | Records | `GET /prescriptions` · `GET /prescriptions/{id}` · `GET /medications?status=` · `PATCH /medications/{id}` · `GET /care-actions` · `PATCH /care-actions/{id}` · `GET /diet-notes` · `DELETE /diet-notes/{id}` |
@@ -278,6 +278,7 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 | Assistant | `POST /assistant/threads` · `GET /assistant/threads` · `POST /assistant/threads/{id}/messages` (SSE) |
 | Integrations | `GET /integrations/google/status` · `GET /integrations/google/connect` · `GET /integrations/google/callback` · `POST /integrations/google/sync` · `DELETE /integrations/google/sync/{link_id}` · `DELETE /integrations/google` |
 | Sharing | `POST /shares` · `GET /shares` · `DELETE /shares/{id}` (revoke) · `GET /public/shares/{token}` · `GET /public/shares/{token}/documents/{doc_id}/file` |
+| Account security | `GET /me/security` · `POST /me/mfa/setup` · `POST /me/mfa/enable` · `POST /me/mfa/disable` · `POST /me/mfa/recovery-codes` · `DELETE /me/sessions/{id}` · `POST /me/sessions/sign-out-others` · `POST /me/password` |
 | Audit | `GET /audit?cursor=` (user's own trail) |
 | Ops | `GET /health` · `GET /ready` |
 
@@ -287,13 +288,16 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 |---|---|
 | Passwords | Argon2id (`argon2-cffi`) |
 | Session | Short-lived JWT access token (15 min) in `httpOnly; Secure; SameSite=Lax` cookie; opaque refresh token (14 days) in a path-scoped cookie, stored hashed, rotated on every use with **family reuse detection** (reuse ⇒ revoke family) |
+| Second factor | Optional TOTP two-step verification (ADR-029): Fernet-encrypted secret, one-step drift window, replay-protected; ten SHA-256-hashed one-time recovery codes. Password or Google sign-in then yields a 5-minute signed token, not a session. Disabling, regenerating codes and changing the password need fresh proof. |
+| Sign-out | Access tokens carry their session (`sid`); each request checks the session is live, so revoking a device (or every other device) takes effect immediately |
 | CSRF | Double-submit token: readable `ms_csrf` cookie echoed in `X-CSRF-Token` for unsafe methods |
 | Authorization | Every query filters by `current_user.id`; resources fetched by `(id, user_id)` so foreign IDs return 404, not 403 |
 | Uploads | Allow-list MIME + magic-byte sniffing, 15 MB cap, 30 pages cap, random storage keys, never served inline from storage domain |
 | Secrets | Google tokens encrypted with Fernet; share tokens and refresh tokens hashed (SHA-256) |
 | Rate limiting | Two layers (ADR-027): a baseline budget on every `/api` route (600 reads and 120 writes per minute) plus tighter per-route limits on sign-in, sign-up, AI calls, uploads, exports, sharing and invitations, and a per-account sign-in limit. Keyed by user when signed in, by client IP otherwise; client IPs honour `X-Forwarded-For` only for `TRUSTED_PROXY_HOPS` proxies. Sliding-window counters in Redis (shared by every API process) or memory (single process); fails open. Responses carry `RateLimit-*` headers and 429s carry `Retry-After`. |
 | Headers | CSP, `X-Content-Type-Options`, `Referrer-Policy: strict-origin-when-cross-origin`, HSTS in prod |
-| Audit | `auth.*`, `document.*`, `extraction.confirmed`, `share.*`, `integration.*` events with IP + UA |
+| Audit | `auth.*`, `mfa.*`, `document.*`, `extraction.confirmed`, `share.*`, `integration.*` events with IP + UA |
+| Dependencies | CI audit job: pip-audit and `npm audit --omit=dev --audit-level=high` |
 | Data | Synthetic data only. **Not HIPAA compliant**; disclaimer shown in-app and in README |
 
 ## 8. Frontend architecture

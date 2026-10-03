@@ -17,6 +17,7 @@ from app.core.ratelimit import rate_limit
 from app.core.security import JWT_ALG, constant_time_equals
 from app.modules.audit import service as audit
 from app.modules.demo import service as demo
+from app.modules.identity import security as identity_security
 from app.modules.identity import service as identity
 from app.modules.identity.cookies import set_auth_cookies
 from app.modules.integrations import service
@@ -178,6 +179,17 @@ async def callback(
             return fail("email_taken")
         if outcome == "created" and google.mode == "simulation":
             await demo.seed_quietly(session, account)  # simulated sign-ins get the demo records
+        if account.mfa_enabled:
+            # Google proved the first factor; the account's own second factor still applies.
+            await session.commit()
+            resp = RedirectResponse(
+                _frontend(
+                    "/login",
+                    mfa=identity_security.mfa_challenge(account, claims.get("next") or "/app"),
+                )
+            )
+            resp.delete_cookie(STATE_COOKIE, path="/api/integrations/google")
+            return resp
         issued = await identity.issue_session(session, account, request)
         await audit.record(
             session,

@@ -4,9 +4,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { Eye, EyeSlash, Sparkle } from "@phosphor-icons/react";
+import { ShieldCheck, Sparkle } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/Field";
+import { CodeInput, PasswordInput } from "@/components/ui/PasswordInput";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { useDemoLogin } from "./useDemoLogin";
@@ -26,23 +27,6 @@ const signupSchema = z.object({
     .min(10, "Use at least 10 characters")
     .max(128, "That's a little long. 128 characters max"),
 });
-
-function PasswordInput(props) {
-  const [visible, setVisible] = useState(false);
-  return (
-    <div className="relative">
-      <Input type={visible ? "text" : "password"} className="pr-11" {...props} />
-      <button
-        type="button"
-        onClick={() => setVisible((v) => !v)}
-        aria-label={visible ? "Hide password" : "Show password"}
-        className="absolute right-1.5 top-1/2 grid grid-cols-1 size-8 -translate-y-1/2 place-items-center rounded-lg text-ink-3 hover:text-ink"
-      >
-        {visible ? <EyeSlash size={17} /> : <Eye size={17} />}
-      </button>
-    </div>
-  );
-}
 
 function FormError({ error }) {
   if (!error) return null;
@@ -76,15 +60,16 @@ function DemoDivider() {
   );
 }
 
-function useAuthMutation(path, setError) {
+function useAuthMutation(path, setError, onMfa) {
   const { setSession } = useAuth();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   return useMutation({
     mutationFn: (values) => api.post(path, values),
     onSuccess: (session) => {
+      if (session.mfa_required) return onMfa?.(session.mfa_token);
       setSession(session);
-      navigate(params.get("next") || "/app", { replace: true });
+      navigate(session.next || params.get("next") || "/app", { replace: true });
     },
     onError: (err) => {
       if (err instanceof ApiError) {
@@ -107,15 +92,109 @@ function GoogleFirst() {
   );
 }
 
+/** Second sign-in step: a code from the authenticator app, or a one-time recovery code. */
+function MfaStep({ token, onCancel }) {
+  const [code, setCode] = useState("");
+  const [useRecovery, setUseRecovery] = useState(false);
+  const verify = useAuthMutation("/api/auth/login/mfa", () => {});
+  const expired = verify.error?.status === 401 && /took too long/.test(verify.error.message);
+
+  return (
+    <>
+      <span className="grid size-12 place-items-center rounded-full bg-accent-soft text-accent">
+        <ShieldCheck size={24} weight="duotone" />
+      </span>
+      <h1 className="mt-5 text-3xl font-semibold tracking-tight">Check your phone</h1>
+      <p className="mt-2 text-ink-2">
+        {useRecovery
+          ? "Enter one of the recovery codes you saved. Each one works once."
+          : "Enter the 6-digit code from your authenticator app."}
+      </p>
+      <form
+        className="mt-8 grid grid-cols-1 gap-4"
+        noValidate
+        onSubmit={(e) => {
+          e.preventDefault();
+          verify.mutate({
+            mfa_token: token,
+            [useRecovery ? "recovery_code" : "code"]: code.trim(),
+          });
+        }}
+      >
+        <FormError error={verify.error?.message} />
+        <Field label={useRecovery ? "Recovery code" : "Code"}>
+          {useRecovery ? (
+            <Input
+              autoComplete="off"
+              className="font-mono"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              autoFocus
+            />
+          ) : (
+            <CodeInput value={code} onChange={(e) => setCode(e.target.value)} autoFocus />
+          )}
+        </Field>
+        {expired ? (
+          <Button className="mt-2 w-full" onClick={onCancel}>
+            Start again
+          </Button>
+        ) : (
+          <Button
+            type="submit"
+            className="mt-2 w-full"
+            loading={verify.isPending}
+            disabled={useRecovery ? code.trim().length < 8 : code.trim().length < 6}
+          >
+            Verify
+          </Button>
+        )}
+      </form>
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-sm">
+        <button
+          type="button"
+          className="font-medium text-accent hover:underline"
+          onClick={() => {
+            setUseRecovery((v) => !v);
+            setCode("");
+            verify.reset();
+          }}
+        >
+          {useRecovery ? "Use your authenticator app" : "Use a recovery code"}
+        </button>
+        <button type="button" className="text-ink-2 hover:text-ink" onClick={onCancel}>
+          Back to sign in
+        </button>
+      </div>
+    </>
+  );
+}
+
 export function LoginForm() {
+  const [params, setParams] = useSearchParams();
+  const [mfaToken, setMfaToken] = useState(() => params.get("mfa"));
   const form = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   });
-  const login = useAuthMutation("/api/auth/login", form.setError);
+  const login = useAuthMutation("/api/auth/login", form.setError, setMfaToken);
   const { errors } = form.formState;
-  const [params] = useSearchParams();
   const googleError = GOOGLE_ERRORS[params.get("google")];
+
+  if (mfaToken)
+    return (
+      <MfaStep
+        token={mfaToken}
+        onCancel={() => {
+          setMfaToken(null);
+          login.reset();
+          if (params.has("mfa")) {
+            params.delete("mfa");
+            setParams(params, { replace: true });
+          }
+        }}
+      />
+    );
 
   return (
     <>

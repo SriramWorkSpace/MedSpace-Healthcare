@@ -6,7 +6,7 @@ from app.modules.circle.models import CareLink
 from app.modules.documents.models import Document, DocumentPage
 from app.modules.doses.models import DoseLog
 from app.modules.extraction.models import Extraction
-from app.modules.identity.models import RefreshToken, User
+from app.modules.identity.models import RecoveryCode, RefreshToken, User
 from app.modules.integrations.models import OAuthConnection, SyncLink
 from app.modules.records.models import (
     CareAction,
@@ -38,6 +38,7 @@ __all__ = [
     "OAuthConnection",
     "Prescription",
     "PushSubscription",
+    "RecoveryCode",
     "RefreshToken",
     "ReminderLog",
     "ReminderSettings",

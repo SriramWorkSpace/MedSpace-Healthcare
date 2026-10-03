@@ -7,10 +7,13 @@ import {
   Eye,
   FileArrowUp,
   GoogleLogo,
+  Key,
   LinkBreak,
   LinkSimple,
+  ShieldCheck,
   ShieldWarning,
   SignIn,
+  SignOut,
   Sparkle,
   Trash,
   UserPlus,
@@ -38,6 +41,28 @@ const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 export const AUDIT = {
   "auth.signup": { icon: UserPlus, label: () => "Created your account" },
   "auth.login": { icon: SignIn, label: () => "Signed in" },
+  "auth.login_mfa_pending": {
+    icon: SignIn,
+    label: () => "Entered your password, waiting for a code",
+  },
+  "auth.login_mfa": {
+    icon: ShieldCheck,
+    label: (m) =>
+      m.factor === "recovery" ? "Signed in with a recovery code" : "Signed in with a code",
+  },
+  "mfa.enabled": { icon: ShieldCheck, label: () => "Turned on two-step verification" },
+  "mfa.disabled": {
+    icon: ShieldWarning,
+    tone: "danger",
+    label: () => "Turned off two-step verification",
+  },
+  "mfa.recovery_codes_regenerated": { icon: Key, label: () => "Made new recovery codes" },
+  "auth.password_changed": { icon: Key, label: () => "Changed your password" },
+  "auth.session_revoked": { icon: SignOut, label: () => "Signed out a device" },
+  "auth.other_sessions_revoked": {
+    icon: SignOut,
+    label: (m) => `Signed out ${plural(m.count ?? 0, "other device")}`,
+  },
   "auth.demo_login": { icon: Sparkle, label: () => "Started a demo session" },
   "auth.refresh_reuse_detected": {
     icon: ShieldWarning,

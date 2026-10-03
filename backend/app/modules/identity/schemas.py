@@ -82,4 +82,66 @@ class UserOut(BaseModel):
     is_demo: bool
     has_password: bool = True
     google_linked: bool = False
+    mfa_enabled: bool = False
     created_at: datetime
+
+
+class LoginResult(BaseModel):
+    """Either a session (user + csrf_token), or a request for the second factor."""
+
+    user: UserOut | None = None
+    csrf_token: str | None = None
+    mfa_required: bool = False
+    mfa_token: str | None = None
+    next: str | None = None  # where a Google sign-in was headed
+
+
+class MfaLoginIn(BaseModel):
+    mfa_token: str = Field(min_length=20, max_length=2000)
+    code: str | None = Field(None, max_length=12)
+    recovery_code: str | None = Field(None, max_length=20)
+
+
+class MfaSetupOut(BaseModel):
+    secret: str
+    otpauth_uri: str
+    qr_svg: str
+
+
+class CodeIn(BaseModel):
+    code: str = Field(min_length=6, max_length=12)
+
+
+class RecoveryCodesOut(BaseModel):
+    codes: list[str]
+
+
+class MfaDisableIn(BaseModel):
+    password: str | None = Field(None, max_length=128)
+    code: str | None = Field(None, max_length=12)
+    recovery_code: str | None = Field(None, max_length=20)
+
+
+class PasswordChangeIn(BaseModel):
+    current_password: str | None = Field(None, max_length=128)
+    new_password: str = Field(min_length=10, max_length=128)
+
+
+class DeviceSessionOut(BaseModel):
+    id: uuid.UUID
+    device: str
+    ip: str | None
+    signed_in_at: datetime
+    last_active_at: datetime
+    current: bool
+
+
+class SecurityOut(BaseModel):
+    mfa_enabled: bool
+    recovery_codes_left: int
+    has_password: bool
+    sessions: list[DeviceSessionOut]
+
+
+class SignedOut(BaseModel):
+    signed_out: int

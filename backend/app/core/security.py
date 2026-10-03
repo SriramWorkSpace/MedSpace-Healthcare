@@ -39,11 +39,14 @@ def needs_rehash(password_hash: str) -> bool:
     return _hasher.check_needs_rehash(password_hash)
 
 
-def create_access_token(user_id: uuid.UUID) -> str:
+def create_access_token(user_id: uuid.UUID, session_id: uuid.UUID | None = None) -> str:
+    """`session_id` (the refresh-token family) lets a signed-out device's access token die
+    immediately instead of living out its TTL (ADR-029)."""
     settings = get_settings()
     now = datetime.now(UTC)
     payload = {
         "sub": str(user_id),
+        "sid": str(session_id) if session_id else None,
         "type": "access",
         "iat": now,
         "exp": now + timedelta(minutes=settings.access_token_ttl_minutes),
@@ -52,7 +55,8 @@ def create_access_token(user_id: uuid.UUID) -> str:
     return jwt.encode(payload, settings.jwt_secret.get_secret_value(), algorithm=JWT_ALG)
 
 
-def decode_access_token(token: str) -> uuid.UUID | None:
+def decode_access_claims(token: str) -> tuple[uuid.UUID, uuid.UUID | None] | None:
+    """(user id, session id) from a valid access token, else None."""
     try:
         payload = jwt.decode(
             token, get_settings().jwt_secret.get_secret_value(), algorithms=[JWT_ALG]
@@ -62,9 +66,39 @@ def decode_access_token(token: str) -> uuid.UUID | None:
     if payload.get("type") != "access":
         return None
     try:
-        return uuid.UUID(payload["sub"])
+        sid = payload.get("sid")
+        return uuid.UUID(payload["sub"]), uuid.UUID(sid) if sid else None
     except (KeyError, ValueError):
         return None
+
+
+def decode_access_token(token: str) -> uuid.UUID | None:
+    claims = decode_access_claims(token)
+    return claims[0] if claims else None
+
+
+def create_purpose_token(user_id: uuid.UUID, purpose: str, minutes: int, **extra) -> str:
+    """Short-lived signed token for one step of a flow (e.g. the second sign-in factor)."""
+    now = datetime.now(UTC)
+    payload = {
+        "sub": str(user_id),
+        "type": purpose,
+        "iat": now,
+        "exp": now + timedelta(minutes=minutes),
+        "jti": secrets.token_hex(8),
+        **extra,
+    }
+    return jwt.encode(payload, get_settings().jwt_secret.get_secret_value(), algorithm=JWT_ALG)
+
+
+def decode_purpose_token(token: str, purpose: str) -> dict | None:
+    try:
+        payload = jwt.decode(
+            token, get_settings().jwt_secret.get_secret_value(), algorithms=[JWT_ALG]
+        )
+    except jwt.PyJWTError:
+        return None
+    return payload if payload.get("type") == purpose else None
 
 
 def new_opaque_token(nbytes: int = 32) -> str:

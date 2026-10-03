@@ -10,6 +10,7 @@ import {
   DeviceMobile,
   UsersThree,
   GoogleLogo,
+  Key,
   LockSimple,
   ShieldCheck,
   Trash,
@@ -37,9 +38,11 @@ import {
 import { describeAudit, deviceFrom, useAuditLog } from "@/features/settings/audit";
 import { DeviceSettings } from "@/features/offline/DeviceSettings";
 import { CareCircleSettings } from "@/features/circle/CareCircleSettings";
+import { SecuritySettings } from "@/features/security/SecuritySettings";
 
 const SECTIONS = [
   { id: "profile", label: "Profile", icon: User },
+  { id: "security", label: "Security", icon: Key },
   { id: "integrations", label: "Integrations", icon: GoogleLogo },
   { id: "device", label: "This device", icon: DeviceMobile },
   { id: "circle", label: "Care circle", icon: UsersThree },
@@ -440,6 +443,13 @@ export default function Settings() {
         <div className="grid grid-cols-1 max-w-3xl gap-12">
           <Section id="profile" title="Profile">
             <ProfileForm />
+          </Section>
+          <Section
+            id="security"
+            title="Security"
+            description="Two-step verification, your password, and the devices signed in to your account."
+          >
+            <SecuritySettings />
           </Section>
           <Section
             id="integrations"

@@ -30,13 +30,6 @@ then into calendar reminders, to-dos, a health timeline and answers you can trac
 | ![Side-by-side review of an extracted prescription](docs/screenshots/review.png) | ![Source-grounded answers with citations](docs/screenshots/ask.png) |
 | **Dashboard (dark)** | **Printable report** |
 | ![Today's doses, review queue and upcoming items](docs/screenshots/dashboard-dark.png) | ![Prescription summary report](docs/screenshots/report.png) |
-| **Dose reminders** | A notification on your phone or computer when a dose is due, even with MedSpace closed. Tap Taken or Skip right on the notification. Doses you've already ticked aren't reminded. |
-| **Care circle** | Invite a family member or carer as a viewer or a helper. They switch to your records from their own account, helpers can tick doses and refills, every change shows in your activity log, and you can remove them at any time. |
-| **Install and use offline** | Add MedSpace to your home screen. Turn on offline access for a device and your medicines, schedule, labs and visit preps stay readable without a connection; dose ticks made offline sync when you're back. Nothing is kept on the device unless you choose it, and signing out deletes it. |
-| **Measured extraction** | A labelled synthetic corpus scores extraction field by field in CI. The offline extractor went from 92.5% on held-out phrasings to passing both test sets after the fixes the evaluation surfaced ([method and caveats](docs/evaluation.md)). |
-| **Supply and refills** | Count what you have and MedSpace estimates what's left from your schedule, when it runs out, and warns you on the dashboard before it does. One tap adds a refill. |
-| **Visit prep** | Before an appointment, collect your questions and get a one-page brief of what changed since last time: medicines, doses, new lab results, open to-dos. Print it or share it with a secure link. |
-| **Dose tracking** | Tick doses off on the dashboard and they sync to every device. Each medicine gets a 14-day strip and a history calendar where you can fill in or correct past days. Unmarked doses stay "not logged": MedSpace never assumes a miss. |
 | **Visit prep** | **Dashboard** |
 | ![Questions, prompts from records and the visit brief](docs/screenshots/visit-prep.png) | ![Today's doses, review queue and upcoming items](docs/screenshots/dashboard.png) |
 | **Medications** | **Dose history** |
@@ -56,6 +49,14 @@ then into calendar reminders, to-dos, a health timeline and answers you can trac
 
 | | |
 |---|---|
+| **Account security** | Optional two-step verification with any authenticator app, one-time recovery codes, and a list of every device signed in to your account. Sign one out, or all of them, and it takes effect on that device's next request. |
+| **Dose reminders** | A notification on your phone or computer when a dose is due, even with MedSpace closed. Tap Taken or Skip right on the notification. Doses you've already ticked aren't reminded. |
+| **Care circle** | Invite a family member or carer as a viewer or a helper. They switch to your records from their own account, helpers can tick doses and refills, every change shows in your activity log, and you can remove them at any time. |
+| **Install and use offline** | Add MedSpace to your home screen. Turn on offline access for a device and your medicines, schedule, labs and visit preps stay readable without a connection; dose ticks made offline sync when you're back. Nothing is kept on the device unless you choose it, and signing out deletes it. |
+| **Measured extraction** | A labelled synthetic corpus scores extraction field by field in CI. The offline extractor went from 92.5% on held-out phrasings to passing both test sets after the fixes the evaluation surfaced ([method and caveats](docs/evaluation.md)). |
+| **Supply and refills** | Count what you have and MedSpace estimates what's left from your schedule, when it runs out, and warns you on the dashboard before it does. One tap adds a refill. |
+| **Visit prep** | Before an appointment, collect your questions and get a one-page brief of what changed since last time: medicines, doses, new lab results, open to-dos. Print it or share it with a secure link. |
+| **Dose tracking** | Tick doses off on the dashboard and they sync to every device. Each medicine gets a 14-day strip and a history calendar where you can fill in or correct past days. Unmarked doses stay "not logged": MedSpace never assumes a miss. |
 | **Prescription intelligence** | Drop a PDF or photo. MedSpace extracts medicines, dosage, frequency, duration, instructions, prescriber, dates and follow-ups, each with a confidence score and the page it came from. |
 | **Human-in-the-loop review** | A side-by-side workspace shows the source next to the extracted fields. Nothing becomes "official" until you confirm it. |
 | **Prescription reports** | Clean, printable summaries with medication schedules and source references. |

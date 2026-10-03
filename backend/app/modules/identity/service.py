@@ -126,10 +126,11 @@ async def issue_session(
 ) -> IssuedSession:
     settings = get_settings()
     raw = new_opaque_token()
+    family = family_id or uuid7()
     session.add(
         RefreshToken(
             user_id=user.id,
-            family_id=family_id or uuid7(),
+            family_id=family,
             token_hash=sha256_hex(raw),
             expires_at=utcnow() + timedelta(days=settings.refresh_token_ttl_days),
             ip=client_ip(request) if request else None,
@@ -138,7 +139,7 @@ async def issue_session(
     )
     user.last_login_at = utcnow()
     await session.flush()
-    return IssuedSession(user, create_access_token(user.id), raw)
+    return IssuedSession(user, create_access_token(user.id, family), raw)
 
 
 async def rotate_refresh_token(
