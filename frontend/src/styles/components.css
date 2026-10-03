@@ -292,39 +292,29 @@
     }
   }
 
-  .searchpill {
+  /* Nav search: an icon button (it opens the command palette, so it shouldn't look like an
+     input). The shortcut chip appears where there's room. */
+  .searchbtn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
     height: 34px;
     min-width: 34px;
+    padding-inline: 8px;
     border-radius: var(--radius-pill);
-    border: 1px solid var(--line);
-    background: var(--surface);
-    color: var(--ink-3);
-    font-size: 13.5px;
+    color: var(--ink-2);
     transition:
-      border-color var(--dur-fast) ease,
+      background-color var(--dur-fast) ease,
       color var(--dur-fast) ease,
       transform 160ms var(--ease-out);
   }
-  .searchpill:hover {
-    border-color: var(--line-strong);
-    color: var(--ink-2);
+  .searchbtn:hover {
+    background: var(--surface-2);
+    color: var(--ink);
   }
-  .searchpill:active {
+  .searchbtn:active {
     transform: scale(0.97);
-  }
-  @media (min-width: 1280px) {
-    .searchpill {
-      justify-content: flex-start;
-      width: 200px;
-      padding-inline: 12px 6px;
-    }
-    .searchpill .kbd {
-      margin-left: auto;
-    }
   }
 
   .navlink {

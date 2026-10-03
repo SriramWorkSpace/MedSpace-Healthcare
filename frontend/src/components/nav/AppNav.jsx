@@ -102,11 +102,13 @@ export function AppNav() {
             onClick={openSearch}
             aria-label="Search your records"
             aria-keyshortcuts={IS_MAC ? "Meta+K" : "Control+K"}
-            className="searchpill"
+            title={`Search (${IS_MAC ? "⌘K" : "Ctrl K"})`}
+            className="searchbtn"
           >
-            <MagnifyingGlass size={16} weight="bold" />
-            <span className="hidden xl:inline">Search…</span>
-            <kbd className="kbd hidden xl:inline">{IS_MAC ? "⌘K" : "Ctrl K"}</kbd>
+            <MagnifyingGlass size={18} weight="bold" />
+            <kbd className="kbd hidden xl:inline" aria-hidden>
+              {IS_MAC ? "⌘K" : "Ctrl K"}
+            </kbd>
           </button>
           {!isActing && (
             <Button
