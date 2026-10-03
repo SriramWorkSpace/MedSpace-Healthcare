@@ -19,6 +19,7 @@ logger = logging.getLogger("medspace.http")
 UNSAFE_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 # Routes that establish a session (no CSRF cookie yet) or are public/token-authenticated.
 CSRF_EXEMPT_PREFIXES = (
+    "/api/push/actions",  # notification buttons: a signed token, never cookies
     "/api/auth/login",
     "/api/auth/signup",
     "/api/auth/demo",

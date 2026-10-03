@@ -7,6 +7,7 @@ import { isOfflineEnabled, setOfflineEnabled } from "@/lib/offline";
 import { isStandalone, promptInstall } from "@/lib/install";
 import { formatDate } from "@/lib/format";
 import { useInstallPrompt, useSavedAt } from "./hooks";
+import { ReminderSettings } from "@/features/reminders/ReminderSettings";
 
 /** Settings section: install the app, and keep an offline copy on this device (opt-in). */
 export function DeviceSettings() {
@@ -28,6 +29,7 @@ export function DeviceSettings() {
 
   return (
     <div className="card divide-y divide-line">
+      <ReminderSettings />
       <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="max-w-[60ch]">
           <p id="offline-label" className="font-medium">

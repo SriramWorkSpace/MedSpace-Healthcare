@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import asyncio
+import logging
+import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -30,6 +32,7 @@ from app.modules.identity.router import router as auth_router
 from app.modules.integrations.router import auth_router as google_auth_router
 from app.modules.integrations.router import router as integrations_router
 from app.modules.records.router import router as records_router
+from app.modules.reminders.router import router as reminders_router
 from app.modules.search.router import router as search_router
 from app.modules.sharing.router import public_router as public_share_router
 from app.modules.sharing.router import router as sharing_router
@@ -39,13 +42,36 @@ from app.modules.visits.router import router as visits_router
 from app.shared.embeddings import warm_up
 
 
+async def reminder_loop() -> None:
+    """Once a minute, send due dose reminders (inline deployments without a worker)."""
+    from app.core.db import SessionLocal
+    from app.modules.reminders import service as reminders
+
+    while True:
+        await asyncio.sleep(60 - time.time() % 60)  # on the minute
+        try:
+            async with SessionLocal() as session:
+                await reminders.send_due_reminders(session)
+                await session.commit()
+        except Exception:  # never let one bad tick stop the loop
+            logging.getLogger("medspace.reminders").exception("reminder tick failed")
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     configure_logging()
-    warm = asyncio.create_task(warm_up()) if get_settings().embedding_provider != "hash" else None
+    settings = get_settings()
+    warm = asyncio.create_task(warm_up()) if settings.embedding_provider != "hash" else None
+    # With a worker (QUEUE_MODE=arq) reminders run as an ARQ cron job; inline, they run here.
+    ticker = (
+        asyncio.create_task(reminder_loop())
+        if settings.queue_mode == "inline" and settings.reminder_loop_enabled
+        else None
+    )
     yield
-    if warm and not warm.done():
-        warm.cancel()
+    for task in (warm, ticker):
+        if task and not task.done():
+            task.cancel()
     await engine.dispose()
 
 
@@ -102,6 +128,7 @@ def create_app() -> FastAPI:
     api.include_router(visits_router)
     api.include_router(supply_router)
     api.include_router(circle_router)
+    api.include_router(reminders_router)
     api.include_router(assistant_router)
     api.include_router(integrations_router)
     api.include_router(google_auth_router)

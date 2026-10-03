@@ -66,7 +66,7 @@ ALLOWED = {"viewer": _READ, "helper": _READ | _HELP}
 
 # Routes about the signed-in person themselves: the acting header is ignored here.
 # Compared by first path segment: a prefix test would treat "/medications" as "/me".
-_SELF_SECTIONS = {"auth", "circle", "me", "audit", "integrations", "demo", "public"}
+_SELF_SECTIONS = {"auth", "circle", "me", "audit", "integrations", "demo", "public", "push"}
 
 
 def link_status(link: CareLink) -> str:

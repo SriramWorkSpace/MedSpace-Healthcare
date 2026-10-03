@@ -49,6 +49,15 @@ class Settings(BaseSettings):
     # Reverse proxies we run in front of the API (nginx = 1). 0 ignores X-Forwarded-For.
     trusted_proxy_hops: int = 0
 
+    # --- Push reminders (ADR-028) ---------------------------------------------
+    # auto: webpush when VAPID keys are set, otherwise a simulated sender (dev, demo, CI).
+    push_provider: Literal["auto", "fake", "webpush"] = "auto"
+    vapid_public_key: str | None = None
+    vapid_private_key: SecretStr | None = None
+    vapid_subject: str = "mailto:privacy@medspace.example"
+    # Inline mode has no worker: run the once-a-minute reminder tick inside the API process.
+    reminder_loop_enabled: bool = True
+
     # --- Storage -------------------------------------------------------------
     storage_provider: Literal["local", "s3"] = "local"
     storage_local_dir: str = ".data/storage"

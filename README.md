@@ -30,6 +30,7 @@ then into calendar reminders, to-dos, a health timeline and answers you can trac
 | ![Side-by-side review of an extracted prescription](docs/screenshots/review.png) | ![Source-grounded answers with citations](docs/screenshots/ask.png) |
 | **Dashboard (dark)** | **Printable report** |
 | ![Today's doses, review queue and upcoming items](docs/screenshots/dashboard-dark.png) | ![Prescription summary report](docs/screenshots/report.png) |
+| **Dose reminders** | A notification on your phone or computer when a dose is due, even with MedSpace closed. Tap Taken or Skip right on the notification. Doses you've already ticked aren't reminded. |
 | **Care circle** | Invite a family member or carer as a viewer or a helper. They switch to your records from their own account, helpers can tick doses and refills, every change shows in your activity log, and you can remove them at any time. |
 | **Install and use offline** | Add MedSpace to your home screen. Turn on offline access for a device and your medicines, schedule, labs and visit preps stay readable without a connection; dose ticks made offline sync when you're back. Nothing is kept on the device unless you choose it, and signing out deletes it. |
 | **Measured extraction** | A labelled synthetic corpus scores extraction field by field in CI. The offline extractor went from 92.5% on held-out phrasings to passing both test sets after the fixes the evaluation surfaced ([method and caveats](docs/evaluation.md)). |

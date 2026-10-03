@@ -53,9 +53,11 @@ Environment (see `.env.example` for every option):
 | `TRUSTED_PROXY_HOPS` | number of proxies **you control** that append to `X-Forwarded-For` before the API: `1` behind the bundled nginx or one load balancer, `2` for a CDN rewrite plus a platform load balancer. Wrong values either share one budget across all users (too low) or let clients spoof their IP (too high). |
 | `RATE_LIMIT_BACKEND` | `redis` whenever more than one API process runs (limits must be shared); `memory` only for a single process |
 | `RATE_LIMIT_SCALE` | leave at `1` in production |
+| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | for dose reminders by notification: generate once with `python -m app.shared.push` and keep them stable (changing them invalidates every device's subscription). Without them reminders are simulated. |
+| `VAPID_SUBJECT` | `mailto:` address push services can contact about your traffic |
 
 With `QUEUE_MODE=arq`, run a second process from the same image:
-`arq app.worker.WorkerSettings` (it also purges expired demo accounts and stale share links).
+`arq app.worker.WorkerSettings` (it sends dose reminders every minute and purges expired demo accounts and stale share links). In inline mode the API process sends reminders itself.
 
 ## 4. Web: static build with an `/api` rewrite
 

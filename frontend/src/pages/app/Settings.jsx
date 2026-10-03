@@ -458,7 +458,7 @@ export default function Settings() {
           <Section
             id="device"
             title="This device"
-            description="Install the app and choose whether this browser keeps an offline copy."
+            description="Reminders, installing the app, and whether this browser keeps an offline copy."
           >
             <DeviceSettings />
           </Section>

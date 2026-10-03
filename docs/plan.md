@@ -112,6 +112,14 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 - [x] Multi-stage web image (nginx + /api proxy), deployment guide (docs/deployment.md), README screenshots
 - [x] Final graphify update and docs sync
 
+## Phase 17: Dose reminders by push notification
+
+- [x] `reminders` module: push subscriptions, settings (lead time), reminder log; push port with pywebpush (VAPID) and a fake (ADR-028)
+- [x] Minute tick (ARQ cron, or an in-process loop inline): due doses in the user's timezone, skip marked, claim atomically, group by time, send to every device, drop expired endpoints
+- [x] Taken / Skip from the notification via a signed 12-hour token (no cookies, CSRF-exempt route)
+- [x] Service worker push and click handlers; Settings: reminders switch with permission handling, lead time, test notification
+- [x] Tests: 6 backend (subscriptions and privacy, once-only timing, marked doses, lead time, switching off, token actions incl. tampering, expired devices, real sender signing and encryption against a mock push service), 1 e2e on the production build
+
 ## Phase 16: Care circle (caregiver access)
 
 - [x] `care_links` table and `circle` module: email-bound one-time invitations (hashed, 7-day expiry), accept, change role, revoke or leave (ADR-026)
@@ -194,6 +202,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 ---
 
 ## Change log
+
+- **2026-10-03**: Phase 17 shipped: dose reminders by Web Push with Taken and Skip on the notification (ADR-028).
 
 - **2026-10-03**: Rate limiting hardened (ADR-027): fixed a spoofable client IP (`X-Forwarded-For` trusted blindly), added a baseline budget for every route, limits on AI, export, sharing and invitation endpoints, a per-account sign-in limit, per-user keys, sliding windows, `RateLimit-*` headers, explicit Redis backend, and limiter-on e2e in CI. 8 new backend tests, 1 unit test.
 

@@ -14,6 +14,7 @@ os.environ.update(
             "postgresql+asyncpg://medspace:medspace@localhost:5432/medspace_test",
         ),
         "QUEUE_MODE": "inline",
+        "REMINDER_LOOP_ENABLED": "false",
         "STORAGE_PROVIDER": "local",
         "STORAGE_LOCAL_DIR": tempfile.mkdtemp(prefix="medspace-test-"),
         "LLM_PROVIDER": "fake",
