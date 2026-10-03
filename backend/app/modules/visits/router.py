@@ -2,16 +2,22 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from app.core.deps import CurrentUser, DbSession
+from app.core.ratelimit import rate_limit
 from app.modules.visits import service
 from app.modules.visits.schemas import VisitBrief, VisitCreate, VisitOut, VisitUpdate
 
 router = APIRouter(prefix="/visits", tags=["visits"])
 
 
-@router.post("", response_model=VisitOut, status_code=201)
+@router.post(
+    "",
+    response_model=VisitOut,
+    status_code=201,
+    dependencies=[Depends(rate_limit("visits:create", 60, 3600))],
+)
 async def create_visit(data: VisitCreate, user: CurrentUser, session: DbSession):
     prep = await service.create_prep(session, user, data)
     await session.commit()

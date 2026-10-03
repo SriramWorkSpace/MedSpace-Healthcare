@@ -7,7 +7,8 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from app.core.deps import CurrentUser, DbSession
-from app.core.ratelimit import rate_limit
+from app.core.errors import RateLimited
+from app.core.ratelimit import check, rate_limit
 from app.core.security import ACCESS_COOKIE, REFRESH_COOKIE, decode_access_token
 from app.modules.audit import service as audit
 from app.modules.documents import service as documents
@@ -28,7 +29,10 @@ class SessionOut(BaseModel):
     "/signup",
     response_model=SessionOut,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(rate_limit("auth:signup", 5, 60))],
+    dependencies=[
+        Depends(rate_limit("auth:signup", 5, 60, by="ip")),
+        Depends(rate_limit("auth:signup-hour", 20, 3600, by="ip")),
+    ],
 )
 async def signup(data: SignupIn, request: Request, response: Response, session: DbSession):
     user = await service.create_user(session, data)
@@ -42,9 +46,16 @@ async def signup(data: SignupIn, request: Request, response: Response, session: 
 @router.post(
     "/login",
     response_model=SessionOut,
-    dependencies=[Depends(rate_limit("auth:login", 10, 60))],
+    dependencies=[Depends(rate_limit("auth:login", 10, 60, by="ip"))],
 )
 async def login(data: LoginIn, request: Request, response: Response, session: DbSession):
+    # Per account as well as per IP: guessing one password from many addresses still slows down.
+    attempt = await check("auth:login-account", data.email.strip().lower(), 10, 900)
+    if not attempt.allowed:
+        raise RateLimited(
+            "Too many sign-in attempts for this account. Try again in a few minutes.",
+            extra={"retry_after": attempt.reset},
+        )
     user = await service.authenticate(session, data.email, data.password)
     issued = await service.issue_session(session, user, request)
     await audit.record(session, action="auth.login", user_id=user.id, request=request)
@@ -56,7 +67,7 @@ async def login(data: LoginIn, request: Request, response: Response, session: Db
 @router.post(
     "/refresh",
     response_model=SessionOut,
-    dependencies=[Depends(rate_limit("auth:refresh", 30, 60))],
+    dependencies=[Depends(rate_limit("auth:refresh", 30, 60, by="ip"))],
 )
 async def refresh(request: Request, response: Response, session: DbSession):
     try:
@@ -105,7 +116,7 @@ async def update_profile(data: ProfileUpdate, user: CurrentUser, session: DbSess
     return user
 
 
-@profile_router.get("/export")
+@profile_router.get("/export", dependencies=[Depends(rate_limit("me:export", 5, 600))])
 async def export_data(user: CurrentUser, session: DbSession):
     """Everything this account holds, as one JSON file (tokens and secrets excluded)."""
     from app.modules.identity.export import build_export
@@ -121,7 +132,11 @@ async def export_data(user: CurrentUser, session: DbSession):
     )
 
 
-@profile_router.delete("", status_code=status.HTTP_204_NO_CONTENT)
+@profile_router.delete(
+    "",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(rate_limit("me:delete", 3, 3600))],
+)
 async def delete_account(user: CurrentUser, response: Response, session: DbSession):
     user_id = user.id
     await service.delete_user(session, user)

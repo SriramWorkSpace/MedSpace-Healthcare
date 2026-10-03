@@ -195,6 +195,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 
 ## Change log
 
+- **2026-10-03**: Rate limiting hardened (ADR-027): fixed a spoofable client IP (`X-Forwarded-For` trusted blindly), added a baseline budget for every route, limits on AI, export, sharing and invitation endpoints, a per-account sign-in limit, per-user keys, sliding windows, `RateLimit-*` headers, explicit Redis backend, and limiter-on e2e in CI. 8 new backend tests, 1 unit test.
+
 - **2026-10-03**: Phase 16 shipped: care circle with role-limited caregiver access (ADR-026). The access tests caught a prefix-matching bug ("/medications" treated as "/me") before release.
 
 - **2026-10-03**: Phase 15 shipped: installable app with opt-in offline access (ADR-025).

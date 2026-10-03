@@ -32,7 +32,7 @@ flowchart LR
 Build from `backend/Dockerfile`. Start command:
 
 ```bash
-sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips='*'"
+sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT --no-proxy-headers"
 ```
 
 Environment (see `.env.example` for every option):
@@ -50,6 +50,9 @@ Environment (see `.env.example` for every option):
 | `EMBEDDING_PROVIDER` | `fastembed` (model downloads once; give the disk ~300 MB) |
 | `LLM_PROVIDER` / `GROQ_API_KEY` | optional, for real extraction and answers |
 | `GOOGLE_PROVIDER` + client id/secret | optional, see README |
+| `TRUSTED_PROXY_HOPS` | number of proxies **you control** that append to `X-Forwarded-For` before the API: `1` behind the bundled nginx or one load balancer, `2` for a CDN rewrite plus a platform load balancer. Wrong values either share one budget across all users (too low) or let clients spoof their IP (too high). |
+| `RATE_LIMIT_BACKEND` | `redis` whenever more than one API process runs (limits must be shared); `memory` only for a single process |
+| `RATE_LIMIT_SCALE` | leave at `1` in production |
 
 With `QUEUE_MODE=arq`, run a second process from the same image:
 `arq app.worker.WorkerSettings` (it also purges expired demo accounts and stale share links).
@@ -87,3 +90,5 @@ scopes are sensitive: without Google verification, only listed test users can co
 - [ ] "Try the demo" lands on a seeded dashboard
 - [ ] Uploading a sample PDF reaches "Needs review"
 - [ ] Response headers include HSTS and `X-Frame-Options: DENY`
+- [ ] API responses carry `RateLimit-Limit` / `RateLimit-Remaining`; eleven quick wrong-password sign-ins to one account return `429` with `Retry-After`
+- [ ] Sending a fake `X-Forwarded-For` does not reset a rate limit

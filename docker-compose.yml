@@ -13,6 +13,11 @@ x-backend-env: &backend-env
     S3_SECRET_KEY: medspace-secret
     HF_HOME: /cache/hf
     FASTEMBED_CACHE_PATH: /cache/fastembed
+    # Rate limits share Redis across api processes; the Vite proxy forwards the browser's IP.
+    RATE_LIMIT_BACKEND: redis
+    TRUSTED_PROXY_HOPS: "1"
+    # Local e2e runs create many demo accounts from one machine; never loosen limits in prod.
+    RATE_LIMIT_SCALE: "10"
 
 services:
   postgres:

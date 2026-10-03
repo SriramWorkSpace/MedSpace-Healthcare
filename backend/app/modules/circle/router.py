@@ -40,12 +40,20 @@ async def invite(data: InviteIn, request: Request, user: CurrentUser, session: D
     return InviteCreated(link=out, url=service.invite_url(token), token=token)
 
 
-@router.get("/invites/{token}", response_model=InvitePreview)
+@router.get(
+    "/invites/{token}",
+    response_model=InvitePreview,
+    dependencies=[Depends(rate_limit("circle:preview", 30, 60))],
+)
 async def preview(token: str, user: CurrentUser, session: DbSession):
     return await service.preview(session, user, token)
 
 
-@router.post("/accept", response_model=CareLinkOut)
+@router.post(
+    "/accept",
+    response_model=CareLinkOut,
+    dependencies=[Depends(rate_limit("circle:accept", 20, 3600))],
+)
 async def accept(data: AcceptIn, request: Request, user: CurrentUser, session: DbSession):
     link = await service.accept(session, user, data.token, request)
     await session.commit()

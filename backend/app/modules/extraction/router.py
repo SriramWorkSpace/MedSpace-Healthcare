@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 
 from app.core.deps import CurrentUser, DbSession
+from app.core.ratelimit import rate_limit
 from app.modules.extraction import service
 from app.modules.extraction.schemas import ConfirmIn, ExtractionOut
 
@@ -16,7 +17,11 @@ async def get_latest_extraction(doc_id: uuid.UUID, user: CurrentUser, session: D
     return await service.latest_for_document(session, user.id, doc_id)
 
 
-@router.post("/extractions/{extraction_id}/confirm", response_model=ExtractionOut)
+@router.post(
+    "/extractions/{extraction_id}/confirm",
+    response_model=ExtractionOut,
+    dependencies=[Depends(rate_limit("extractions:confirm", 30, 60))],
+)
 async def confirm_extraction(
     extraction_id: uuid.UUID,
     data: ConfirmIn,

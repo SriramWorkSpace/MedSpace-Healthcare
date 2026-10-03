@@ -289,7 +289,7 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 | Authorization | Every query filters by `current_user.id`; resources fetched by `(id, user_id)` so foreign IDs return 404, not 403 |
 | Uploads | Allow-list MIME + magic-byte sniffing, 15 MB cap, 30 pages cap, random storage keys, never served inline from storage domain |
 | Secrets | Google tokens encrypted with Fernet; share tokens and refresh tokens hashed (SHA-256) |
-| Rate limiting | Per-IP + per-user limits on auth, upload, assistant (Redis-backed sliding window; in-memory in inline mode) |
+| Rate limiting | Two layers (ADR-027): a baseline budget on every `/api` route (600 reads and 120 writes per minute) plus tighter per-route limits on sign-in, sign-up, AI calls, uploads, exports, sharing and invitations, and a per-account sign-in limit. Keyed by user when signed in, by client IP otherwise; client IPs honour `X-Forwarded-For` only for `TRUSTED_PROXY_HOPS` proxies. Sliding-window counters in Redis (shared by every API process) or memory (single process); fails open. Responses carry `RateLimit-*` headers and 429s carry `Retry-After`. |
 | Headers | CSP, `X-Content-Type-Options`, `Referrer-Policy: strict-origin-when-cross-origin`, HSTS in prod |
 | Audit | `auth.*`, `document.*`, `extraction.confirmed`, `share.*`, `integration.*` events with IP + UA |
 | Data | Synthetic data only. **Not HIPAA compliant**; disclaimer shown in-app and in README |

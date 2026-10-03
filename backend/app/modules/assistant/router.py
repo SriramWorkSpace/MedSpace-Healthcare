@@ -49,7 +49,12 @@ class AskIn(BaseModel):
     content: str = Field(min_length=1, max_length=1000)
 
 
-@router.post("/threads", response_model=ThreadOut, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/threads",
+    response_model=ThreadOut,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(rate_limit("assistant:threads", 30, 60))],
+)
 async def create_thread(data: ThreadIn, user: CurrentUser, session: DbSession):
     thread = await service.create_thread(session, user.id, data.title)
     await session.commit()

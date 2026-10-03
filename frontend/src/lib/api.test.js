@@ -55,4 +55,17 @@ describe("api client", () => {
     await expect(api.get("/api/documents")).rejects.toBeInstanceOf(ApiError);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
+
+  it("tells people when they can try again after a 429", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse(429, { detail: "Slow down a little.", code: "rate_limited", retry_after: 42 }),
+    );
+    const err = await api.get("/api/me/export").catch((e) => e);
+    expect(err).toBeInstanceOf(ApiError);
+    expect(err.retryAfter).toBe(42);
+    expect(err.message).toBe("Slow down a little. Try again in 42 seconds.");
+    expect(ApiError.message(429, { detail: "Wait.", retry_after: 600 })).toBe(
+      "Wait. Try again in 10 minutes.",
+    );
+  });
 });

@@ -111,7 +111,7 @@ async def connect(user: CurrentUser):
     return _redirect_to_google({"mode": "connect", "sub": str(user.id)}, sign_in=False)
 
 
-@auth_router.get("/start", dependencies=[Depends(rate_limit("auth:google", 20, 60))])
+@auth_router.get("/start", dependencies=[Depends(rate_limit("auth:google", 20, 60, by="ip"))])
 async def google_sign_in(next: str | None = None):
     """Sign in (or sign up) with Google, asking for Calendar and Tasks in the same consent."""
     return _redirect_to_google({"mode": "login", "next": safe_next(next)}, sign_in=True)

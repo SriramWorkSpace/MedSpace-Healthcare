@@ -42,6 +42,12 @@ class Settings(BaseSettings):
     cookie_domain: str | None = None
     token_encryption_key: SecretStr | None = None
     rate_limit_enabled: bool = True
+    # memory: one process only. redis: shared by every API process (use it in production).
+    rate_limit_backend: Literal["auto", "memory", "redis"] = "auto"
+    # Multiplies every limit; >1 loosens limits for local e2e runs, never set below 1 in prod.
+    rate_limit_scale: float = 1.0
+    # Reverse proxies we run in front of the API (nginx = 1). 0 ignores X-Forwarded-For.
+    trusted_proxy_hops: int = 0
 
     # --- Storage -------------------------------------------------------------
     storage_provider: Literal["local", "s3"] = "local"

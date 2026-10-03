@@ -17,6 +17,7 @@ from app.core.db import engine
 from app.core.errors import ServiceUnavailable, install_error_handlers
 from app.core.logging import configure_logging
 from app.core.middleware import CSRFMiddleware, RequestLogMiddleware, SecurityHeadersMiddleware
+from app.core.ratelimit import RateLimitMiddleware
 from app.modules.assistant.router import router as assistant_router
 from app.modules.audit.router import router as audit_router
 from app.modules.circle.router import router as circle_router
@@ -62,6 +63,8 @@ def create_app() -> FastAPI:
     # Middleware executes bottom-up for requests: logging → CORS → CSRF → headers.
     app.add_middleware(SecurityHeadersMiddleware)
     app.add_middleware(CSRFMiddleware)
+    # Inside CORS, so a 429 still carries CORS headers the browser can read.
+    app.add_middleware(RateLimitMiddleware)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
@@ -74,7 +77,13 @@ def create_app() -> FastAPI:
             "authorization",
             "x-acting-for",
         ],
-        expose_headers=["x-request-id", "retry-after"],
+        expose_headers=[
+            "x-request-id",
+            "retry-after",
+            "ratelimit-limit",
+            "ratelimit-remaining",
+            "ratelimit-reset",
+        ],
     )
     app.add_middleware(RequestLogMiddleware)
     install_error_handlers(app)

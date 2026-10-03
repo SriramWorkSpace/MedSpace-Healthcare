@@ -112,7 +112,10 @@ async def update_document(
 
 
 @router.post(
-    "/{doc_id}/reprocess", response_model=DocumentOut, status_code=status.HTTP_202_ACCEPTED
+    "/{doc_id}/reprocess",
+    response_model=DocumentOut,
+    status_code=status.HTTP_202_ACCEPTED,
+    dependencies=[Depends(rate_limit("documents:reprocess", 10, 60))],  # an AI call each
 )
 async def reprocess_document(
     doc_id: uuid.UUID, request: Request, user: CurrentUser, session: DbSession

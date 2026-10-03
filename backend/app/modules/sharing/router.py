@@ -15,13 +15,18 @@ router = APIRouter(prefix="/shares", tags=["sharing"])
 public_router = APIRouter(
     prefix="/public/shares",
     tags=["sharing (public)"],
-    dependencies=[Depends(rate_limit("public:shares", 60, 60))],
+    dependencies=[Depends(rate_limit("public:shares", 60, 60, by="ip"))],
 )
 
 PUBLIC_HEADERS = {"Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow"}
 
 
-@router.post("", response_model=ShareCreated, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=ShareCreated,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(rate_limit("shares:create", 30, 3600))],
+)
 async def create_share(data: ShareCreate, request: Request, user: CurrentUser, session: DbSession):
     link, token = await service.create(session, user, data, request)
     await session.commit()
@@ -53,14 +58,20 @@ async def open_share(token: str, request: Request, response: Response, session: 
     return bundle
 
 
-@public_router.get("/{token}/documents/{doc_id}/pages/{page_no}/preview")
+@public_router.get(
+    "/{token}/documents/{doc_id}/pages/{page_no}/preview",
+    dependencies=[Depends(rate_limit("public:files", 120, 60, by="ip"))],
+)
 async def shared_preview(token: str, doc_id: uuid.UUID, page_no: int, session: DbSession):
     doc = await service.shared_document(session, token, doc_id)
     png = await documents.page_preview_png(doc, page_no)
     return Response(content=png, media_type="image/png", headers=PUBLIC_HEADERS)
 
 
-@public_router.get("/{token}/documents/{doc_id}/file")
+@public_router.get(
+    "/{token}/documents/{doc_id}/file",
+    dependencies=[Depends(rate_limit("public:files", 120, 60, by="ip"))],
+)
 async def shared_file(token: str, doc_id: uuid.UUID, session: DbSession):
     doc = await service.shared_document(session, token, doc_id)
     data = await documents.read_original(doc)

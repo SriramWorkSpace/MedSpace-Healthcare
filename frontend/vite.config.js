@@ -46,12 +46,14 @@ export default defineConfig({
   server: {
     port: 5173,
     // File events don't cross Docker bind mounts on Windows/macOS; poll inside containers.
-    watch: process.env.VITE_USE_POLLING === "true" ? { usePolling: true, interval: 300 } : undefined,
-    proxy: { "/api": { target: apiTarget, changeOrigin: false } },
+    watch:
+      process.env.VITE_USE_POLLING === "true" ? { usePolling: true, interval: 300 } : undefined,
+    // xfwd: pass the browser's address as X-Forwarded-For (the API trusts one hop).
+    proxy: { "/api": { target: apiTarget, changeOrigin: false, xfwd: true } },
   },
   preview: {
     port: 4173,
-    proxy: { "/api": { target: apiTarget, changeOrigin: false } },
+    proxy: { "/api": { target: apiTarget, changeOrigin: false, xfwd: true } },
   },
   test: {
     environment: "jsdom",

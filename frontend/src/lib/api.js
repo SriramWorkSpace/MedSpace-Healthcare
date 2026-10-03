@@ -14,11 +14,20 @@ const NO_REFRESH = ["/api/auth/login", "/api/auth/signup", "/api/auth/demo", "/a
 export class ApiError extends Error {
   /** @param {number} status @param {any} problem */
   constructor(status, problem) {
-    super(problem?.detail || problem?.title || `Request failed (${status})`);
+    super(ApiError.message(status, problem));
     this.name = "ApiError";
     this.status = status;
     this.code = problem?.code;
     this.problem = problem;
+    this.retryAfter = status === 429 ? Number(problem?.retry_after) || null : null;
+  }
+
+  static message(status, problem) {
+    const base = problem?.detail || problem?.title || `Request failed (${status})`;
+    const wait = Number(problem?.retry_after);
+    if (status !== 429 || !wait) return base;
+    const when = wait < 90 ? `${wait} seconds` : `${Math.ceil(wait / 60)} minutes`;
+    return `${base} Try again in ${when}.`;
   }
 
   /** Field errors from a 422 problem, keyed by the last path segment. */
