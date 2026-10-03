@@ -18,8 +18,9 @@ export function ThemeToggle() {
       size="sm"
       icon
       aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
-      onClick={() => {
-        toggle();
+      onClick={(e) => {
+        const box = e.currentTarget.getBoundingClientRect();
+        toggle({ x: box.left + box.width / 2, y: box.top + box.height / 2 });
         countClick();
       }}
     >

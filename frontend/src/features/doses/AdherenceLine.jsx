@@ -20,7 +20,7 @@ export function AdherenceLine({ history, window }) {
         </p>
         <Link
           to={`/app/medications/${history.medication_id}`}
-          className="inline-flex shrink-0 items-center gap-1 font-medium text-accent hover:underline"
+          className="tap inline-flex shrink-0 items-center gap-1 font-medium text-accent hover:underline"
           aria-label={`Dose history for ${history.name}`}
         >
           History <ArrowRight size={12} weight="bold" />

@@ -44,7 +44,7 @@ function Source({ note }) {
   return (
     <Link
       to={href}
-      className="truncate text-xs text-ink-3 group-hover:text-ink-2 hover:text-accent hover:underline"
+      className="-my-1.5 block truncate py-1.5 text-xs text-ink-3 group-hover:text-ink-2 hover:text-accent hover:underline"
     >
       {bits.join(" · ")}
       {note.source_page && ` · p.${note.source_page}`}

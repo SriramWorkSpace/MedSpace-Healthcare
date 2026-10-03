@@ -303,6 +303,23 @@
     }
   }
 
+  /* Touch targets: on touch screens a small link or icon button gets an invisible 44px hit
+     area centred on it, without changing layout. Not for elements that clip overflow. */
+  @media (pointer: coarse) {
+    .tap {
+      position: relative;
+    }
+    .tap::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: max(100%, 44px);
+      height: max(100%, 44px);
+      transform: translate(-50%, -50%);
+    }
+  }
+
   /* Page gutters. The nav bar spans the window (.shell); app pages share its gutters and
      stop growing at --page-max (.shell--page), so they line up with the nav up to that width. */
   .shell {

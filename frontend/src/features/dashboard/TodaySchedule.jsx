@@ -133,7 +133,9 @@ export function TodaySchedule({ doses, dateKey, readOnly = false }) {
                         >
                           {d.name}{" "}
                           {d.strength && (
-                            <span className="font-normal text-ink-3">{d.strength}</span>
+                            <span className="font-normal whitespace-nowrap text-ink-3">
+                              {d.strength}
+                            </span>
                           )}
                         </span>
                         {d.instructions && (
@@ -190,7 +192,7 @@ export function TodaySchedule({ doses, dateKey, readOnly = false }) {
       </div>
       <p className="mt-4 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-ink-3">
         <Pill size={13} /> Saved to your account, so every device stays in sync.
-        <Link to="/app/medications" className="text-accent hover:underline">
+        <Link to="/app/medications" className="tap text-accent hover:underline">
           See dose history
         </Link>
       </p>

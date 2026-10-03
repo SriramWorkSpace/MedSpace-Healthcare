@@ -115,7 +115,7 @@ function AssistantBubble({ text, citations, streaming, searching, onOpen }) {
 function EmptyChat({ onPick }) {
   const reduce = useReducedMotion();
   return (
-    <div className="mx-auto flex max-w-xl flex-col items-center py-10 text-center">
+    <div className="mx-auto flex max-w-xl flex-col items-center py-6 text-center sm:py-10">
       <div className="grid grid-cols-1 size-14 place-items-center rounded-2xl bg-accent-soft text-accent-soft-ink">
         <ChatsCircle size={28} weight="duotone" />
       </div>
@@ -123,7 +123,8 @@ function EmptyChat({ onPick }) {
       <p className="mt-2 text-ink-2">
         Answers come only from documents you've uploaded, with the page they came from.
       </p>
-      <div className="mt-8 flex flex-wrap justify-center gap-2">
+      {/* Phones show four suggestions so none sit under the composer. */}
+      <div className="mt-6 flex flex-wrap justify-center gap-2 max-sm:[&>:nth-child(n+5)]:hidden sm:mt-8">
         {SUGGESTIONS.map((q, i) => (
           <motion.button
             key={q}

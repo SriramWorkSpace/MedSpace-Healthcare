@@ -83,7 +83,7 @@ function EditTimesDialog({ med, onClose }) {
               type="button"
               aria-label={`Remove ${formatClock(t)}`}
               onClick={() => setTimes(times.filter((x) => x !== t))}
-              className="grid grid-cols-1 size-4 place-items-center rounded-full"
+              className="tap grid grid-cols-1 size-4 place-items-center rounded-full"
             >
               <X size={10} weight="bold" />
             </button>
@@ -152,15 +152,18 @@ function MedicationCard({ med, onEdit, index, focused, history, window, supply, 
       data-focused={focused || undefined}
       className="card flex flex-col p-5"
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
+      {/* The schedule chip drops below the name when both don't fit (narrow phones). */}
+      <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
+        <div className="flex min-w-0 flex-1 basis-48 items-center gap-3">
           <span className="grid grid-cols-1 size-10 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent-soft-ink">
             <Pill size={19} weight="duotone" />
           </span>
           <div className="min-w-0">
             <p className="line-clamp-2 font-semibold break-words">
               {med.name}{" "}
-              {med.strength && <span className="font-normal text-ink-3">{med.strength}</span>}
+              {med.strength && (
+                <span className="font-normal whitespace-nowrap text-ink-3">{med.strength}</span>
+              )}
             </p>
             <p className="truncate text-xs text-ink-3">
               {[med.form, med.prescriber_name].filter(Boolean).join(" · ") || "Prescription"}

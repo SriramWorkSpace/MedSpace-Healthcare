@@ -153,7 +153,7 @@ function MfaStep({ token, onCancel }) {
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-sm">
         <button
           type="button"
-          className="font-medium text-accent hover:underline"
+          className="tap font-medium text-accent hover:underline"
           onClick={() => {
             setUseRecovery((v) => !v);
             setCode("");
@@ -162,7 +162,7 @@ function MfaStep({ token, onCancel }) {
         >
           {useRecovery ? "Use your authenticator app" : "Use a recovery code"}
         </button>
-        <button type="button" className="text-ink-2 hover:text-ink" onClick={onCancel}>
+        <button type="button" className="tap text-ink-2 hover:text-ink" onClick={onCancel}>
           Back to sign in
         </button>
       </div>
@@ -220,7 +220,7 @@ export function LoginForm() {
       <DemoDivider />
       <p className="mt-8 text-center text-sm text-ink-2">
         New here?{" "}
-        <Link to="/signup" className="font-medium text-accent hover:underline">
+        <Link to="/signup" className="tap font-medium text-accent hover:underline">
           Create account
         </Link>
       </p>
@@ -265,7 +265,7 @@ export function SignupForm() {
       <DemoDivider />
       <p className="mt-8 text-center text-sm text-ink-2">
         Already have an account?{" "}
-        <Link to="/login" className="font-medium text-accent hover:underline">
+        <Link to="/login" className="tap font-medium text-accent hover:underline">
           Sign in
         </Link>
       </p>

@@ -115,7 +115,7 @@ export default function Dashboard() {
               action={
                 <Link
                   to="/app/medications"
-                  className="text-sm font-medium text-accent hover:underline"
+                  className="tap text-sm font-medium text-accent hover:underline"
                 >
                   All medications
                 </Link>
@@ -179,7 +179,7 @@ export default function Dashboard() {
                   action={
                     <Link
                       to="/app/diet"
-                      className="text-sm font-medium text-accent hover:underline"
+                      className="tap text-sm font-medium text-accent hover:underline"
                     >
                       All diet notes
                     </Link>

@@ -17,7 +17,7 @@ export function SupplyLine({ supply, onCount, onRefill }) {
       <button
         type="button"
         onClick={onCount}
-        className="mt-3 inline-flex items-center gap-1.5 self-start rounded-full text-xs font-medium text-accent hover:underline"
+        className="tap mt-3 inline-flex items-center gap-1.5 self-start rounded-full text-xs font-medium text-accent hover:underline"
       >
         <Package size={14} /> Track supply
       </button>

@@ -28,7 +28,7 @@ function BackLink() {
   return (
     <Link
       to="/app/visits"
-      className="no-print mb-4 inline-flex items-center gap-1.5 rounded-lg text-sm text-ink-2 hover:text-accent"
+      className="tap no-print mb-4 inline-flex items-center gap-1.5 rounded-lg text-sm text-ink-2 hover:text-accent"
     >
       <ArrowLeft size={14} weight="bold" />
       All visits

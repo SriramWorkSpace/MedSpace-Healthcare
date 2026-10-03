@@ -25,7 +25,7 @@ function ScheduleEditor({ control, index }) {
     <div className="grid grid-cols-1 gap-2.5">
       <div className="flex items-center justify-between gap-3">
         <span className="field__label">Schedule</span>
-        <label className="inline-flex cursor-pointer items-center gap-2 text-[13px] text-ink-2">
+        <label className="-my-2 inline-flex cursor-pointer items-center gap-2 py-2 text-[13px] text-ink-2">
           <input
             type="checkbox"
             checked={asNeeded.value}
@@ -48,7 +48,7 @@ function ScheduleEditor({ control, index }) {
                 type="button"
                 aria-label={`Remove ${formatClock(t)}`}
                 onClick={() => times.onChange(times.value.filter((x) => x !== t))}
-                className="grid grid-cols-1 size-4 place-items-center rounded-full hover:bg-[color-mix(in_oklch,var(--accent),transparent_80%)]"
+                className="tap grid grid-cols-1 size-4 place-items-center rounded-full hover:bg-[color-mix(in_oklch,var(--accent),transparent_80%)]"
               >
                 <X size={10} weight="bold" />
               </button>

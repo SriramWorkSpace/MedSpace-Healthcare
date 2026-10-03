@@ -49,6 +49,26 @@
   }
 }
 
+/* Theme switch (lib/theme.jsx): the new theme is clipped to a growing circle; the old one stays
+   put underneath. Default cross-fades are off so the edge of the circle is crisp. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 2;
+}
+.theme-switching,
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

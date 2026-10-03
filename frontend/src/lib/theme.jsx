@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { flushSync } from "react-dom";
 
 const ThemeContext = createContext(null);
 const STORAGE_KEY = "ms-theme";
@@ -40,8 +41,47 @@ export function ThemeProvider({ children }) {
     }
   }, []);
 
+  /**
+   * Switch theme. Given an origin point (the toggle's centre), the new theme is revealed as a
+   * circle growing from it, via the View Transitions API. Falls back to an instant switch.
+   */
   const toggle = useCallback(
-    () => setTheme(resolved === "dark" ? "light" : "dark"),
+    (origin) => {
+      const next = resolved === "dark" ? "light" : "dark";
+      const apply = () => {
+        document.documentElement.dataset.theme = next;
+        flushSync(() => setTheme(next));
+      };
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!origin || reduce || typeof document.startViewTransition !== "function") {
+        apply();
+        return;
+      }
+
+      const root = document.documentElement;
+      root.classList.add("theme-switching"); // no colour cross-fades inside the snapshot
+      const transition = document.startViewTransition(apply);
+      const { x, y } = origin;
+      const radius = Math.hypot(
+        Math.max(x, window.innerWidth - x),
+        Math.max(y, window.innerHeight - y),
+      );
+      transition.ready
+        .then(() =>
+          root.animate(
+            {
+              clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`],
+            },
+            {
+              duration: 560,
+              easing: "cubic-bezier(0.65, 0, 0.35, 1)",
+              pseudoElement: "::view-transition-new(root)",
+            },
+          ),
+        )
+        .catch(() => {});
+      transition.finished.finally(() => root.classList.remove("theme-switching"));
+    },
     [resolved, setTheme],
   );
 

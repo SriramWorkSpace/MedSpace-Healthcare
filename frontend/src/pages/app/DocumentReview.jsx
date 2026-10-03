@@ -216,7 +216,7 @@ export default function DocumentReview() {
     <>
       <Link
         to="/app/documents"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-ink-2 hover:text-ink"
+        className="tap mb-4 inline-flex items-center gap-1.5 text-sm text-ink-2 hover:text-ink"
       >
         <ArrowLeft size={14} weight="bold" /> Documents
       </Link>

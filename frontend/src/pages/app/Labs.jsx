@@ -126,7 +126,7 @@ export default function Labs() {
                 </h2>
                 <Link
                   to={`/app/documents/${group.id}${group.latest.source_page ? `?page=${group.latest.source_page}` : ""}`}
-                  className="text-sm text-ink-3 hover:text-accent hover:underline"
+                  className="tap text-sm text-ink-3 hover:text-accent hover:underline"
                 >
                   Collected {formatDate(group.latest.collected_on)}. View report
                 </Link>

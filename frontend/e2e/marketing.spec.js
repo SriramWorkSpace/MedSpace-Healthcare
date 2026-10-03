@@ -30,3 +30,21 @@ test("unknown routes show the 404 pun", async ({ page }) => {
   await expect(page.getByText("Error 404")).toBeVisible();
   await expect(page.getByRole("link", { name: "Home page" })).toBeVisible();
 });
+
+test("the theme switch animates from the toggle and settles in both directions", async ({
+  page,
+}) => {
+  await page.emulateMedia({ colorScheme: "light", reducedMotion: "no-preference" });
+  await page.goto("/");
+  const html = page.locator("html");
+  await expect(html).toHaveAttribute("data-theme", "light");
+
+  await page.getByRole("button", { name: "Switch to dark theme" }).click();
+  await expect(html).toHaveAttribute("data-theme", "dark");
+  await expect(html).not.toHaveClass(/theme-switching/);
+
+  await page.getByRole("button", { name: "Switch to light theme" }).click();
+  await expect(html).toHaveAttribute("data-theme", "light");
+  await expect(html).not.toHaveClass(/theme-switching/);
+  expect(await page.evaluate(() => localStorage.getItem("ms-theme"))).toBe("light");
+});

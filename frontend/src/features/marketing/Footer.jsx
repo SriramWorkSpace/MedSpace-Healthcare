@@ -16,26 +16,32 @@ export function Footer() {
             Laughter is the best medicine. Still, follow your prescription.
           </p>
         </div>
-        <nav aria-label="Product" className="grid grid-cols-1 content-start gap-2.5 text-sm">
-          <p className="font-semibold">Product</p>
-          <a href="/#how-it-works" className="text-ink-2 hover:text-ink">
+        <nav
+          aria-label="Product"
+          className="grid grid-cols-1 content-start gap-0.5 text-sm sm:gap-2.5"
+        >
+          <p className="font-semibold max-sm:mb-1">Product</p>
+          <a href="/#how-it-works" className="text-ink-2 hover:text-ink max-sm:py-2">
             How it works
           </a>
-          <a href="/#features" className="text-ink-2 hover:text-ink">
+          <a href="/#features" className="text-ink-2 hover:text-ink max-sm:py-2">
             Features
           </a>
-          <a href="/#privacy" className="text-ink-2 hover:text-ink">
+          <a href="/#privacy" className="text-ink-2 hover:text-ink max-sm:py-2">
             Privacy
           </a>
-          <Link to="/login" className="text-ink-2 hover:text-ink">
+          <Link to="/login" className="text-ink-2 hover:text-ink max-sm:py-2">
             Sign in
           </Link>
         </nav>
-        <nav aria-label="Project" className="grid grid-cols-1 content-start gap-2.5 text-sm">
-          <p className="font-semibold">Project</p>
+        <nav
+          aria-label="Project"
+          className="grid grid-cols-1 content-start gap-0.5 text-sm sm:gap-2.5"
+        >
+          <p className="font-semibold max-sm:mb-1">Project</p>
           <a
             href="https://github.com/SriramWorkSpace/MedSpace-Healthcare"
-            className="inline-flex items-center gap-1.5 text-ink-2 hover:text-ink"
+            className="inline-flex items-center gap-1.5 text-ink-2 hover:text-ink max-sm:py-2"
             target="_blank"
             rel="noreferrer"
           >
@@ -43,7 +49,7 @@ export function Footer() {
           </a>
           <a
             href="https://github.com/SriramWorkSpace/MedSpace-Healthcare/blob/main/docs/architecture.md"
-            className="text-ink-2 hover:text-ink"
+            className="text-ink-2 hover:text-ink max-sm:py-2"
             target="_blank"
             rel="noreferrer"
           >
@@ -51,7 +57,7 @@ export function Footer() {
           </a>
           <a
             href="https://github.com/SriramWorkSpace/MedSpace-Healthcare/blob/main/docs/decisions.md"
-            className="text-ink-2 hover:text-ink"
+            className="text-ink-2 hover:text-ink max-sm:py-2"
             target="_blank"
             rel="noreferrer"
           >

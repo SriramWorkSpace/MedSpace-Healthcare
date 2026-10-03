@@ -212,6 +212,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 
 ## Change log
 
+- **2026-10-03**: Theme switch reveals the new theme as a circle growing from the toggle (View Transitions API; instant with reduced motion or without browser support). Phone pass at 360, 390 and 412 wide, landscape and tablet: no horizontal overflow on any page; small links and icon buttons get 44px touch areas on touch screens (`.tap`); medication cards move the schedule chip below the name on narrow phones; strengths no longer split across lines; Ask shows four suggestions on phones.
+
 - **2026-10-03**: New brand: the MedSpace logo mark (with a light-ink copy for the dark theme) and a Zen Dots wordmark, "Med" in the logo's red and "Space" in its black. Favicon and app icons regenerated from the mark. Layout widened: edge-to-edge nav bar, app pages up to 1920px.
 
 - **2026-10-03**: Phase 18 shipped: two-step verification, a signed-in devices list with immediate sign-out, password changes, and a dependency audit in CI (ADR-029).
