@@ -98,7 +98,7 @@ modules/<name>/
 |---|---|---|
 | `identity` | `users`, `refresh_tokens`, `recovery_codes`, `email_tokens` | Signup/login, optional Google sign-in (account matching and verified-email linking), Argon2 hashing, JWT access cookie bound to its session, rotating refresh tokens with reuse detection, CSRF, demo login; account security (`security.py`): two-step verification (TOTP, recovery codes, sign-in second step), signed-in devices, password changes (ADR-029); email confirmation and password reset links (`recovery.py`, ADR-030) |
 | `documents` | `documents`, `document_pages` | Upload intake (type/size/magic-byte validation, SHA-256 dedupe), object storage, page text, processing status, signed preview streaming |
-| `extraction` | `extractions` | Pipeline: text-layer vs. scanned detection → Groq extraction → Pydantic validation → frequency normalization → draft extraction with per-field confidence + source page |
+| `extraction` | `extractions` | Pipeline: text-layer vs. scanned detection → Groq extraction → Pydantic validation → frequency normalization → draft extraction with per-field confidence + source page; evidence boxes located in the PDF text layer for review highlights (`evidence.py`, ADR-031) |
 | `records` | `prescriptions`, `medications`, `care_actions`, `diet_notes`, `lab_results` | Confirm drafts into official records, medication schedules, prescription reports, diet notes copied from documents (ADR-018), lab results and their trends (ADR-020) |
 | `timeline` | (read model, no tables) | Chronological union over confirmed records, documents, appointments, follow-ups |
 | `doses` | `dose_logs` | Taken/skipped marks per scheduled dose, history and streaks computed from the schedule in the user's timezone; unmarked doses are "not logged", never "missed" (ADR-021) |
@@ -266,7 +266,7 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 |---|---|
 | Auth | `POST /auth/signup` · `POST /auth/login` (session, or `mfa_required` with a 5-minute token) · `POST /auth/login/mfa` · `POST /auth/password/forgot` · `POST /auth/password/reset` · `POST /auth/email/verify` · `POST /auth/demo` · `POST /auth/refresh` · `POST /auth/logout` · `GET /auth/me` · `GET /auth/session` · `GET /auth/google/start` · `GET /auth/google/providers` |
 | Documents | `POST /documents` · `GET /documents` · `GET /documents/{id}` · `GET /documents/{id}/file` · `POST /documents/{id}/reprocess` · `DELETE /documents/{id}` |
-| Extraction | `GET /documents/{id}/extraction` · `POST /extractions/{id}/confirm` · `POST /extractions/{id}/discard` |
+| Extraction | `GET /documents/{id}/extraction` · `GET /documents/{id}/evidence` (where each field is printed) · `POST /extractions/{id}/confirm` · `POST /extractions/{id}/discard` |
 | Records | `GET /prescriptions` · `GET /prescriptions/{id}` · `GET /medications?status=` · `PATCH /medications/{id}` · `GET /care-actions` · `PATCH /care-actions/{id}` · `GET /diet-notes` · `DELETE /diet-notes/{id}` |
 | Labs | `GET /labs` (one trend per test, newest report first) · `GET /labs/{key}` (every result plus a chartable series) · `DELETE /lab-results/{id}` |
 | Dashboard | `GET /dashboard` (today's doses, upcoming, needs-review queue, stats) |

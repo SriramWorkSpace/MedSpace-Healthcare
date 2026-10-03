@@ -1,15 +1,73 @@
-import { useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
-import { ArrowsIn, ArrowsOut, CaretLeft, CaretRight } from "@phosphor-icons/react";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { ArrowsIn, ArrowsOut, CaretLeft, CaretRight, X } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/cn";
 import { previewUrl } from "@/features/documents/api";
 
-function PageImage({ docId, page, zoomed }) {
+const STATUS_NOTE = {
+  missing: "Not marked: it isn't printed this way on the page",
+  photo: "Not marked: highlights need a PDF with selectable text",
+  added: "Added by you, so there's nothing to show on the page",
+};
+
+/** Marker-style boxes over the page image, at fractions of its size (any zoom, any width). */
+function Highlights({ boxes, scrollRoot }) {
+  const reduce = useReducedMotion();
+  const first = useRef(null);
+  const key = boxes.map((b) => b.join(",")).join("|");
+
+  useEffect(() => {
+    // Bring the first box into view inside the viewer only; never scroll the page itself.
+    const el = first.current;
+    const root = scrollRoot.current;
+    if (!el || !root) return;
+    const box = el.getBoundingClientRect();
+    const view = root.getBoundingClientRect();
+    const outside =
+      box.top < view.top + 12 ||
+      box.bottom > view.bottom - 12 ||
+      box.left < view.left ||
+      box.right > view.right;
+    if (!outside) return;
+    root.scrollBy({
+      top: box.top - view.top - view.height / 3,
+      left: box.left < view.left || box.right > view.right ? box.left - view.left - 24 : 0,
+      behavior: reduce ? "auto" : "smooth",
+    });
+  }, [key, reduce, scrollRoot]);
+
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0">
+      {boxes.map(([x0, y0, x1, y1], i) => (
+        <motion.span
+          key={`${key}-${i}`}
+          ref={i === 0 ? first : undefined}
+          data-highlight
+          initial={reduce ? false : { opacity: 0, transform: "scale(1.12)" }}
+          animate={{ opacity: 1, transform: "scale(1)" }}
+          transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1], delay: i * 0.03 }}
+          className="absolute rounded-[3px] bg-warn/40 mix-blend-multiply ring-2 ring-warn"
+          style={{
+            left: `${x0 * 100}%`,
+            top: `${y0 * 100}%`,
+            width: `${(x1 - x0) * 100}%`,
+            height: `${(y1 - y0) * 100}%`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function PageImage({ docId, page, zoomed, boxes, scrollRoot }) {
   const [loaded, setLoaded] = useState(false);
   return (
-    <div className={cn("relative w-full", !loaded && "aspect-[0.707]")}>
+    <div
+      className={cn("relative", !loaded && "aspect-[0.707] w-full")}
+      style={zoomed ? { width: "160%" } : undefined}
+    >
       {!loaded && <Skeleton className="absolute inset-0" />}
       <img
         src={previewUrl(docId, page)}
@@ -18,18 +76,20 @@ function PageImage({ docId, page, zoomed }) {
         className={cn(
           "w-full rounded-lg bg-white shadow-sm ring-1 ring-line transition-opacity duration-300",
           loaded ? "opacity-100" : "opacity-0",
-          zoomed ? "max-w-none" : "",
         )}
-        style={zoomed ? { width: "160%" } : undefined}
       />
+      {loaded && boxes.length > 0 && <Highlights boxes={boxes} scrollRoot={scrollRoot} />}
     </div>
   );
 }
 
 /** Left pane of the review workspace: the original document, page by page. */
-export function SourceViewer({ doc, page, onPageChange, highlight }) {
+export function SourceViewer({ doc, page, onPageChange, highlight, onClearHighlight }) {
   const [zoomed, setZoomed] = useState(false);
+  const scrollRoot = useRef(null);
   const pages = doc.page_count;
+  const boxes = highlight?.page === page ? highlight.boxes : [];
+  const note = highlight ? STATUS_NOTE[highlight.status] : null;
 
   return (
     <div className="card flex h-full flex-col overflow-hidden">
@@ -59,18 +119,32 @@ export function SourceViewer({ doc, page, onPageChange, highlight }) {
             <CaretRight size={15} weight="bold" />
           </Button>
         </div>
-        <AnimatePresence>
-          {highlight && (
-            <motion.span
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="chip chip--warn truncate"
-            >
-              Checking: {highlight}
-            </motion.span>
-          )}
-        </AnimatePresence>
+        <div role="status" aria-live="polite" className="flex min-w-0 justify-end">
+          <AnimatePresence mode="popLayout">
+            {highlight && (
+              <motion.span
+                key="highlight"
+                initial={{ opacity: 0, transform: "translateY(-4px)" }}
+                animate={{ opacity: 1, transform: "translateY(0px)" }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.16 }}
+                className="chip chip--warn min-w-0 gap-1 pr-1"
+              >
+                <span className="truncate">
+                  {highlight.status === "found" ? "Showing" : "Checking"}: {highlight.label}
+                </span>
+                <button
+                  type="button"
+                  aria-label="Clear highlight"
+                  onClick={onClearHighlight}
+                  className="tap grid size-5 shrink-0 place-items-center rounded-full hover:bg-[color-mix(in_oklch,var(--warn),transparent_75%)]"
+                >
+                  <X size={11} weight="bold" />
+                </button>
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </div>
         <Button
           variant="ghost"
           size="sm"
@@ -81,8 +155,12 @@ export function SourceViewer({ doc, page, onPageChange, highlight }) {
           {zoomed ? <ArrowsIn size={15} weight="bold" /> : <ArrowsOut size={15} weight="bold" />}
         </Button>
       </div>
+      {note && (
+        <p className="border-b border-line bg-warn-soft px-4 py-2 text-xs text-warn-ink">{note}</p>
+      )}
       <div
-        className="flex-1 overflow-auto bg-surface-2 p-4"
+        ref={scrollRoot}
+        className="relative flex-1 overflow-auto bg-surface-2 p-4"
         tabIndex={0}
         role="region"
         aria-label={`Source document, page ${page}`}
@@ -95,7 +173,13 @@ export function SourceViewer({ doc, page, onPageChange, highlight }) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
           >
-            <PageImage docId={doc.id} page={page} zoomed={zoomed} />
+            <PageImage
+              docId={doc.id}
+              page={page}
+              zoomed={zoomed}
+              boxes={boxes}
+              scrollRoot={scrollRoot}
+            />
           </motion.div>
         </AnimatePresence>
       </div>

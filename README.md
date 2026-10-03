@@ -58,7 +58,7 @@ then into calendar reminders, to-dos, a health timeline and answers you can trac
 | **Visit prep** | Before an appointment, collect your questions and get a one-page brief of what changed since last time: medicines, doses, new lab results, open to-dos. Print it or share it with a secure link. |
 | **Dose tracking** | Tick doses off on the dashboard and they sync to every device. Each medicine gets a 14-day strip and a history calendar where you can fill in or correct past days. Unmarked doses stay "not logged": MedSpace never assumes a miss. |
 | **Prescription intelligence** | Drop a PDF or photo. MedSpace extracts medicines, dosage, frequency, duration, instructions, prescriber, dates and follow-ups, each with a confidence score and the page it came from. |
-| **Human-in-the-loop review** | A side-by-side workspace shows the source next to the extracted fields. Nothing becomes "official" until you confirm it. |
+| **Human-in-the-loop review** | A side-by-side workspace shows the source next to the extracted fields. Click into any field and MedSpace highlights exactly where it's printed on the page. Nothing becomes "official" until you confirm it. |
 | **Prescription reports** | Clean, printable summaries with medication schedules and source references. |
 | **Google Calendar** | Confirmed schedules become recurring dose reminders; appointments and follow-ups become events. Edit or remove them any time. |
 | **Google Tasks** | One-off care actions (get a lab test, finish the course, upload a report) land in a dedicated MedSpace list. |

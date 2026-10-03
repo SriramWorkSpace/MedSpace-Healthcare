@@ -34,6 +34,8 @@ class Extraction(IdMixin, Base):
     method: Mapped[str] = mapped_column(String(32))  # heuristic | groq-text | groq-vision | none
     model: Mapped[str | None] = mapped_column(String(80))
     payload: Mapped[dict] = mapped_column(JSONB)
+    # Where each field is printed (ADR-031); computed on first request, then cached.
+    evidence: Mapped[dict | None] = mapped_column(JSONB)
     overall_confidence: Mapped[float] = mapped_column(Float, default=0)
     prescription_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("prescriptions.id", ondelete="SET NULL", use_alter=True)

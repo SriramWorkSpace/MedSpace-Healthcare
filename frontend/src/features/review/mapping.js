@@ -97,7 +97,8 @@ export function payloadToForm(payload) {
     },
     follow_up: { date: p.follow_up?.date ?? "", notes: p.follow_up?.notes ?? "" },
     summary: p.summary ?? "",
-    medications: (p.medications ?? []).map((m) => ({
+    medications: (p.medications ?? []).map((m, i) => ({
+      _ev: `medications.${i}`,
       name: m.name ?? "",
       strength: m.strength ?? "",
       form: m.form ?? "",
@@ -117,19 +118,22 @@ export function payloadToForm(payload) {
       confidence: m.confidence ?? 1,
       uncertain_fields: m.uncertain_fields ?? [],
     })),
-    care_actions: (p.care_actions ?? []).map((a) => ({
+    care_actions: (p.care_actions ?? []).map((a, i) => ({
+      _ev: `care_actions.${i}`,
       kind: a.kind ?? "other",
       title: a.title ?? "",
       due_on: a.due_on ?? "",
       notes: a.notes ?? "",
       source_page: a.source_page ?? null,
     })),
-    diet_notes: (p.diet_notes ?? []).map((n) => ({
+    diet_notes: (p.diet_notes ?? []).map((n, i) => ({
+      _ev: `diet_notes.${i}`,
       text: n.text ?? "",
       category: n.category ?? "general",
       source_page: n.source_page ?? null,
     })),
-    lab_results: (p.lab_results ?? []).map((r) => ({
+    lab_results: (p.lab_results ?? []).map((r, i) => ({
+      _ev: `lab_results.${i}`,
       name: r.name ?? "",
       value: r.value ?? "",
       unit: r.unit ?? "",

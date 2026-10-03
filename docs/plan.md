@@ -112,6 +112,14 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 - [x] Multi-stage web image (nginx + /api proxy), deployment guide (docs/deployment.md), README screenshots
 - [x] Final graphify update and docs sync
 
+## Phase 20: Evidence highlights
+
+- [x] Locator: every extracted value found in the PDF text layer, boxes as fractions of the page; anchored to the item's line so repeated values resolve correctly; fallbacks for wrapped and lightly normalised values (ADR-031)
+- [x] `GET /documents/{id}/evidence`, computed once per extraction and cached (versioned); available to caregivers who can read documents
+- [x] Review workspace: focusing a field highlights where it is printed (or its whole line), switches page, scrolls only the viewer; "p.N" shows the medicine line and explains when nothing can be marked; works after removing or adding items
+- [x] Photos and scans: no text layer, so no highlights, and the viewer says so
+- [x] Tests: 10 backend (every medicine field on every sample prescription verified by reading the text inside its box, lab rows, letterhead and dates, photos, missing values, endpoint caching, privacy, reprocessing), 5 unit, 1 e2e (with axe)
+
 ## Phase 19: Email and account recovery
 
 - [x] Mail port: SMTP adapter and an in-memory outbox; dev-only `/api/dev/outbox` (ADR-030)
@@ -221,6 +229,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 ---
 
 ## Change log
+
+- **2026-10-03**: Phase 20 shipped: evidence highlights in the review workspace (ADR-031).
 
 - **2026-10-03**: Phase 19 shipped: email confirmation, forgot and reset password, security alert emails, emailed care circle invitations, and a fix for Google sign-in linking into accounts whose address was never confirmed (ADR-030).
 

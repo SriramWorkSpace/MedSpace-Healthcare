@@ -1,4 +1,5 @@
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import { evidenceKeys, itemName } from "./evidence";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "motion/react";
 import { CheckCircle, Plus, Trash, Warning } from "@phosphor-icons/react";
@@ -32,7 +33,7 @@ function Section({ title, description, action, children }) {
   );
 }
 
-export function ReviewForm({ extraction, onConfirm, onDiscard, confirming, onCheckSource }) {
+export function ReviewForm({ extraction, onConfirm, onDiscard, confirming, onLocate }) {
   const payload = extraction.payload;
   const form = useForm({
     resolver: zodResolver(reviewSchema),
@@ -46,6 +47,24 @@ export function ReviewForm({ extraction, onConfirm, onDiscard, confirming, onChe
   const results = useFieldArray({ control, name: "lab_results" });
   const isLabReport = useWatch({ control, name: "document_kind" }) === "lab_report";
   const errors = formState.errors;
+
+  /** Ask the source viewer to show where `path` is printed. `explicit`: a button press. */
+  const locate = (path, fieldLabel, explicit = false) => {
+    const item = /^(\w+)\.(\d+)/.exec(path);
+    const name = itemName(path, getValues);
+    onLocate?.({
+      keys: evidenceKeys(path, getValues),
+      page: item ? getValues(`${item[1]}.${item[2]}.source_page`) : null,
+      label: [name, fieldLabel].filter(Boolean).join(" · ") || "This field",
+      explicit,
+    });
+  };
+  const onFieldFocus = (e) => {
+    const { name, type } = e.target;
+    if (!name || type === "checkbox" || type === "submit") return;
+    const label = e.target.labels?.[0]?.textContent?.replace("(optional)", "").trim();
+    locate(name, label);
+  };
   const flagged = (payload.medications ?? []).filter(
     (m) => (m.confidence ?? 1) < 0.85 || m.uncertain_fields?.length,
   ).length;
@@ -114,6 +133,7 @@ export function ReviewForm({ extraction, onConfirm, onDiscard, confirming, onChe
 
   return (
     <form
+      onFocusCapture={onFieldFocus}
       noValidate
       onSubmit={handleSubmit((values) => onConfirm(formToConfirm(values)))}
       className="grid grid-cols-1 gap-10 pb-28"
@@ -201,7 +221,7 @@ export function ReviewForm({ extraction, onConfirm, onDiscard, confirming, onChe
                   register={register}
                   errors={errors}
                   onRemove={() => meds.remove(i)}
-                  onCheckSource={onCheckSource}
+                  onCheckSource={(path) => locate(path, null, true)}
                 />
               ))}
             </AnimatePresence>

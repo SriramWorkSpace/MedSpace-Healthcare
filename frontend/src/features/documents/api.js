@@ -6,6 +6,7 @@ export const docKeys = {
   list: (filters) => ["documents", "list", filters ?? {}],
   detail: (id) => ["documents", "detail", id],
   extraction: (id) => ["documents", "extraction", id],
+  evidence: (id) => ["documents", "evidence", id],
 };
 
 const ACTIVE = new Set(["queued", "processing"]);
@@ -37,6 +38,17 @@ export function useExtraction(id, { enabled = true } = {}) {
     queryFn: () => api.get(`/api/documents/${id}/extraction`),
     enabled,
     retry: false,
+  });
+}
+
+/** Where each extracted field is printed on the page (ADR-031). */
+export function useEvidence(id, { enabled = true } = {}) {
+  return useQuery({
+    queryKey: docKeys.evidence(id),
+    queryFn: () => api.get(`/api/documents/${id}/evidence`),
+    enabled,
+    retry: false,
+    staleTime: Infinity, // fixed for an extraction; reprocessing invalidates docKeys.all
   });
 }
 

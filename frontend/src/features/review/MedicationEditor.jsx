@@ -122,8 +122,8 @@ export function MedicationEditor({ index, control, register, errors, onRemove, o
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onCheckSource(med.source_page, med.name)}
-            aria-label={`Show page ${med?.source_page} of the source`}
+            onClick={() => onCheckSource(`medications.${index}`)}
+            aria-label={`Show ${med?.name || "this medicine"} on page ${med?.source_page} of the source`}
           >
             <Eye size={14} /> p.{med?.source_page}
           </Button>

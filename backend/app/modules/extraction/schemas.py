@@ -190,3 +190,19 @@ class ConfirmIn(BaseModel):
     diet_notes: list[ConfirmDietNote] = Field(default_factory=list, max_length=30)
     lab_results: list[ConfirmLabResult] = Field(default_factory=list, max_length=80)
     summary: str | None = Field(None, max_length=2000)
+
+
+class EvidenceSpot(BaseModel):
+    page: int
+    boxes: list[list[float]]  # [x0, y0, x1, y1] as fractions of the page
+
+
+class EvidenceOut(BaseModel):
+    """Where each field of the latest extraction is printed. Keys are review-form paths
+    ("medications.0.strength"); `items` holds one spot per item ("medications.0")."""
+
+    extraction_id: uuid.UUID
+    available: bool
+    reason: str | None = None  # "no_text": a photo or scan, nothing to search
+    fields: dict[str, EvidenceSpot]
+    items: dict[str, EvidenceSpot]

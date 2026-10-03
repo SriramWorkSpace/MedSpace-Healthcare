@@ -22,6 +22,7 @@ import {
   useDeleteDocument,
   useDiscardExtraction,
   useDocument,
+  useEvidence,
   useExtraction,
   useReprocessDocument,
 } from "@/features/documents/api";
@@ -32,6 +33,7 @@ import { ReviewForm } from "@/features/review/ReviewForm";
 import { ConfirmSuccess } from "@/features/review/ConfirmSuccess";
 import { formatBytes, formatDate } from "@/lib/format";
 import { useActing } from "@/features/circle/api";
+import { findSpot } from "@/features/review/evidence";
 
 function ReviewSkeleton() {
   return (
@@ -62,6 +64,7 @@ export default function DocumentReview() {
   const extraction = useExtraction(id, {
     enabled: status === "needs_review" || status === "confirmed",
   });
+  const evidence = useEvidence(id, { enabled: Boolean(extraction.data) });
   const confirm = useConfirmExtraction();
   const discard = useDiscardExtraction();
   const reprocess = useReprocessDocument();
@@ -93,10 +96,22 @@ export default function DocumentReview() {
   const d = doc.data;
   const meta = STATUS_META[d.status] ?? STATUS_META.queued;
 
-  const checkSource = (n, label) => {
-    setPage(n);
-    setHighlight(label);
-    setTimeout(() => setHighlight(null), 2400);
+  // Evidence highlights (ADR-031): a focused field (or the "p.N" button) shows its spot.
+  const locate = ({ keys, page: fallbackPage, label, explicit }) => {
+    const ev = evidence.data;
+    const spot = findSpot(ev, keys);
+    if (spot) {
+      setPage(spot.page);
+      setHighlight({ label, page: spot.page, boxes: spot.boxes, status: "found" });
+      return;
+    }
+    if (!explicit) {
+      setHighlight(null); // focusing a field with nothing to show clears the last highlight
+      return;
+    }
+    if (fallbackPage) setPage(fallbackPage);
+    const status = !keys ? "added" : ev && !ev.available ? "photo" : "missing";
+    setHighlight({ label, page: fallbackPage, boxes: [], status });
   };
 
   const onConfirm = (body) =>
@@ -170,7 +185,13 @@ export default function DocumentReview() {
     body = (
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-8">
         <div className="lg:sticky lg:top-[calc(var(--nav-h)+20px)] lg:h-[calc(100dvh-var(--nav-h)-140px)]">
-          <SourceViewer doc={d} page={page} onPageChange={setPage} highlight={highlight} />
+          <SourceViewer
+            doc={d}
+            page={page}
+            onPageChange={setPage}
+            highlight={highlight}
+            onClearHighlight={() => setHighlight(null)}
+          />
         </div>
         <div>
           {isDraft && isActing ? (
@@ -184,7 +205,7 @@ export default function DocumentReview() {
               confirming={confirm.isPending}
               onConfirm={onConfirm}
               onDiscard={() => setConfirmDiscard(true)}
-              onCheckSource={checkSource}
+              onLocate={locate}
             />
           ) : (
             <div className="card grid grid-cols-1 gap-4 p-6">

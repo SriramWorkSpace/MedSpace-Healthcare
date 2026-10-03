@@ -21,7 +21,7 @@ from app.modules.audit import service as audit
 from app.modules.documents import files
 from app.modules.documents import service as documents
 from app.modules.documents.models import Document, DocumentStatus
-from app.modules.extraction import heuristic, prompts
+from app.modules.extraction import evidence, heuristic, prompts
 from app.modules.extraction.models import Extraction, ExtractionStatus
 from app.modules.extraction.normalize import normalize_frequency, parse_duration_days
 from app.modules.extraction.schemas import (
@@ -321,6 +321,23 @@ async def latest_for_document(
     if extraction is None:
         raise NotFound("No extraction yet for this document.")
     return extraction
+
+
+async def evidence_for_document(
+    session: AsyncSession, user_id: uuid.UUID, doc_id: uuid.UUID
+) -> tuple[Extraction, dict]:
+    """Field locations for the latest extraction, computed once per extraction (ADR-031)."""
+    extraction = await latest_for_document(session, user_id, doc_id)
+    cached = extraction.evidence
+    if cached and cached.get("version") == evidence.VERSION:
+        return extraction, cached
+    doc = await documents.get_document(session, user_id, doc_id)
+    data = await documents.read_original(doc)
+    payload = ExtractionPayload.model_validate(extraction.payload)
+    found = await asyncio.to_thread(evidence.locate, data, doc.mime_type, payload)
+    extraction.evidence = found
+    await session.flush()
+    return extraction, found
 
 
 async def get_extraction(

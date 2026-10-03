@@ -53,6 +53,7 @@ _READ = {
         "/documents/{doc_id}/file",
         "/documents/{doc_id}/pages/{page_no}/preview",
         "/documents/{doc_id}/extraction",
+        "/documents/{doc_id}/evidence",
     )
 }
 _HELP = {
