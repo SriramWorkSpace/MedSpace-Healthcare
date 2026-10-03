@@ -212,6 +212,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 
 ## Change log
 
+- **2026-10-03**: New brand: the MedSpace logo mark (with a light-ink copy for the dark theme) and a Zen Dots wordmark, "Med" in the logo's red and "Space" in its black. Favicon and app icons regenerated from the mark. Layout widened: edge-to-edge nav bar, app pages up to 1920px.
+
 - **2026-10-03**: Phase 18 shipped: two-step verification, a signed-in devices list with immediate sign-out, password changes, and a dependency audit in CI (ADR-029).
 
 - **2026-10-03**: Phase 17 shipped: dose reminders by Web Push with Taken and Skip on the notification (ADR-028).

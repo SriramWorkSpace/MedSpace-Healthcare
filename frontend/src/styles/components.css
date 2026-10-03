@@ -284,6 +284,25 @@
     }
   }
 
+  /* Logo mark: the black stroke turns light on the dark theme (two pre-rendered images). */
+  .logo-mark--dark {
+    display: none;
+  }
+  :root[data-theme="dark"] .logo-mark--light {
+    display: none;
+  }
+  :root[data-theme="dark"] .logo-mark--dark {
+    display: block;
+  }
+  @media print {
+    :root[data-theme="dark"] .logo-mark--light {
+      display: block;
+    }
+    :root[data-theme="dark"] .logo-mark--dark {
+      display: none;
+    }
+  }
+
   /* Page gutters. The nav bar spans the window (.shell); app pages share its gutters and
      stop growing at --page-max (.shell--page), so they line up with the nav up to that width. */
   .shell {

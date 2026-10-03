@@ -4,6 +4,7 @@ import { RouterProvider } from "react-router";
 import { onlineManager } from "@tanstack/react-query";
 import "@fontsource-variable/geist";
 import "@fontsource-variable/geist-mono";
+import "@fontsource/zen-dots/latin-400.css";
 import "./styles/index.css";
 import "./lib/install";
 import { Providers } from "./app/providers";

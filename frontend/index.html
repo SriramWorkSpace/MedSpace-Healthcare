@@ -3,10 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="MedSpace turns prescriptions and medical documents into structured records, reminders and answers you can trace to the source." />
+    <meta
+      name="description"
+      content="MedSpace turns prescriptions and medical documents into structured records, reminders and answers you can trace to the source."
+    />
     <meta name="theme-color" content="#f6f8f6" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#121a17" media="(prefers-color-scheme: dark)" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="/brand/logo-mark-64.png"
+      media="(prefers-color-scheme: light)"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="/brand/logo-mark-64-dark.png"
+      media="(prefers-color-scheme: dark)"
+    />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <title>MedSpace · Your health, all in one space</title>
@@ -15,7 +29,8 @@
       (function () {
         try {
           var t = localStorage.getItem("ms-theme");
-          var dark = t === "dark" || (t !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
+          var dark =
+            t === "dark" || (t !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
           document.documentElement.dataset.theme = dark ? "dark" : "light";
         } catch (e) {}
       })();

@@ -31,6 +31,7 @@
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
+  --font-brand: var(--font-brand);
 
   --radius-control: var(--radius-control);
   --radius-card: var(--radius-card);

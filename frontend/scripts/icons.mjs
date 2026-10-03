@@ -1,14 +1,14 @@
-// Renders public/favicon.svg into the PNG icons the web app manifest needs.
+// Renders the logo mark (public/brand/logo-mark-512.png) into the PNG icons the web app manifest needs.
 //   node scripts/icons.mjs
 import { mkdirSync, readFileSync } from "node:fs";
 import { chromium } from "@playwright/test";
 
-const svg = readFileSync("public/favicon.svg", "utf8");
+const mark = `data:image/png;base64,${readFileSync("public/brand/logo-mark-512.png").toString("base64")}`;
 mkdirSync("public/icons", { recursive: true });
 const browser = await chromium.launch();
 const page = await browser.newPage();
 
-// "any": the logo fills the square. "maskable": logo inside the 80% safe zone on brand green,
+// "any": the logo fills the square. "maskable": logo inside the 80% safe zone on white,
 // so launchers can crop it to a circle or squircle without clipping the cross.
 const variants = [
   ["icon-192.png", 192, 1],
@@ -20,8 +20,8 @@ for (const [name, size, scale] of variants) {
   const inner = Math.round(size * scale);
   await page.setViewportSize({ width: size, height: size });
   await page.setContent(
-    `<body style="margin:0;width:${size}px;height:${size}px;display:grid;place-items:center;background:${scale < 1 ? "#1f7a5c" : "transparent"}">
-       <div style="width:${inner}px;height:${inner}px">${svg.replace("<svg ", `<svg width="${inner}" height="${inner}" `)}</div>
+    `<body style="margin:0;width:${size}px;height:${size}px;display:grid;place-items:center;background:${scale < 1 ? "#ffffff" : "transparent"}">
+       <img src="${mark}" width="${inner}" height="${inner}" />
      </body>`,
   );
   await page.screenshot({ path: `public/icons/${name}`, omitBackground: scale === 1 });
