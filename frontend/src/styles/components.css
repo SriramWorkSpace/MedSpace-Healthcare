@@ -284,6 +284,36 @@
     }
   }
 
+  /* Page gutters. The nav bar spans the window (.shell); app pages share its gutters and
+     stop growing at --page-max (.shell--page), so they line up with the nav up to that width. */
+  .shell {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: 16px;
+  }
+  @media (min-width: 640px) {
+    .shell {
+      padding-inline: 24px;
+    }
+  }
+  @media (min-width: 1280px) {
+    .shell {
+      padding-inline: 32px;
+    }
+  }
+  @media (min-width: 1536px) {
+    .shell {
+      padding-inline: 40px;
+    }
+  }
+  .shell--page {
+    max-width: var(--page-max);
+  }
+  /* Marketing compositions are art-directed; they grow a little, then stay centred. */
+  .shell--marketing {
+    max-width: 1440px;
+  }
+
   /* navlink compact: nine links share the bar with search and upload on small laptops. */
   @media (min-width: 1024px) and (max-width: 1279.98px) {
     .topnav .navlink {

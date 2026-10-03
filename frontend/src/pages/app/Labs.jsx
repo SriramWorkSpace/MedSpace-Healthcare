@@ -59,7 +59,7 @@ function LabsSkeleton() {
   return (
     <LoadingRegion label="Loading lab results">
       <Skeleton className="mb-4 h-5 w-64" />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         {Array.from({ length: 6 }, (_, i) => (
           <div key={i} className="card card--flat grid grid-cols-1 gap-4 p-5">
             <Skeleton className="h-5 w-36" />
@@ -131,7 +131,7 @@ export default function Labs() {
                   Collected {formatDate(group.latest.collected_on)}. View report
                 </Link>
               </div>
-              <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                 {group.trends.map(({ trend, index }) => (
                   <TrendCard key={trend.key} trend={trend} index={index} />
                 ))}

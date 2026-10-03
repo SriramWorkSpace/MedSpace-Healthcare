@@ -165,7 +165,7 @@ export default function Documents() {
               Nothing here right now. {EMPTY_QUIPS.review}
             </p>
           ) : (
-            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
               <AnimatePresence mode="popLayout">
                 {visible.map((doc, i) => (
                   <DocumentCard key={doc.id} doc={doc} index={i} />

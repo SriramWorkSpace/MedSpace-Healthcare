@@ -43,10 +43,7 @@ export function MarketingNav() {
 
   return (
     <header className="topnav" data-scrolled={scrolled || open}>
-      <nav
-        aria-label="Primary"
-        className="mx-auto flex h-full max-w-[1280px] items-center gap-6 px-4 sm:px-6"
-      >
+      <nav aria-label="Primary" className="shell flex h-full items-center gap-6">
         <Link to="/" onClick={countClick} aria-label="MedSpace home" className="rounded-lg">
           <Logo />
         </Link>

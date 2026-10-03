@@ -58,10 +58,7 @@ export function AppNav() {
 
   return (
     <header className="topnav" data-scrolled={scrolled || open}>
-      <nav
-        aria-label="Primary"
-        className="mx-auto flex h-full max-w-[1280px] items-center gap-3 px-4 sm:px-6"
-      >
+      <nav aria-label="Primary" className="shell flex h-full items-center gap-3">
         <Link
           to="/app"
           onClick={countLogoClick}

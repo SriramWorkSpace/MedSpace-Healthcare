@@ -77,7 +77,10 @@ export function DocumentCard({ doc, index = 0 }) {
 
 export function DocumentGridSkeleton({ count = 6 }) {
   return (
-    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-hidden>
+    <ul
+      className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
+      aria-hidden
+    >
       {Array.from({ length: count }, (_, i) => (
         <li key={i} className="card card--flat overflow-hidden">
           <Skeleton className="aspect-[4/3] rounded-none" />

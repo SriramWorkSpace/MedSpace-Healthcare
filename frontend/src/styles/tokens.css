@@ -73,6 +73,7 @@
   --z-egg: 80;
 
   --nav-h: 64px;
+  --page-max: 1920px; /* app content cap, so lines stay readable on ultra-wide screens */
 }
 
 :root[data-theme="dark"] {

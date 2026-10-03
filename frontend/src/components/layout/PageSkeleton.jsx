@@ -6,7 +6,7 @@ import { useState } from "react";
 export function PageSkeleton() {
   const [pun] = useState(() => pick(LOADING_PUNS));
   return (
-    <LoadingRegion label={pun} className="mx-auto max-w-[1280px] px-4 pt-8 sm:px-6 sm:pt-10">
+    <LoadingRegion label={pun}>
       <Skeleton className="h-9 w-64" />
       <Skeleton className="mt-3 h-4 w-80 max-w-full" />
       <p className="mt-4 text-xs text-ink-3">{pun}…</p>

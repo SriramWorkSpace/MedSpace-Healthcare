@@ -166,7 +166,7 @@ export default function Timeline() {
       )}
 
       {isPending ? (
-        <LoadingRegion label="Loading timeline" className="grid grid-cols-1 max-w-3xl gap-8">
+        <LoadingRegion label="Loading timeline" className="grid grid-cols-1 max-w-4xl gap-8">
           {[0, 1].map((g) => (
             <div key={g}>
               <Skeleton className="mb-4 h-4 w-28" />
@@ -200,7 +200,7 @@ export default function Timeline() {
           quip={active.size ? undefined : EMPTY_QUIPS.timeline}
         />
       ) : (
-        <div className="grid grid-cols-1 max-w-3xl gap-10">
+        <div className="grid grid-cols-1 max-w-4xl gap-10">
           {upcoming.length > 0 && <Group title="Upcoming" events={upcoming} accent />}
           {months.map(([key, events]) => (
             <Group key={key} title={format(parseISO(`${key}-01`), "MMMM yyyy")} events={events} />

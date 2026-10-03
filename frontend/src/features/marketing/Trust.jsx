@@ -28,7 +28,7 @@ const PRINCIPLES = [
 export function Trust() {
   return (
     <section id="privacy" className="border-y border-line bg-bg-sunken">
-      <div className="mx-auto grid grid-cols-1 max-w-[1280px] gap-14 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:py-28">
+      <div className="shell shell--marketing grid grid-cols-1 gap-14 py-20 lg:grid-cols-2 lg:py-28">
         <Reveal>
           <h2 className="text-3xl font-semibold tracking-tight sm:text-5xl">
             AI reads it.

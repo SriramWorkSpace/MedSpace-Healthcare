@@ -440,7 +440,7 @@ export default function Settings() {
             ))}
           </ul>
         </nav>
-        <div className="grid grid-cols-1 max-w-3xl gap-12">
+        <div className="grid grid-cols-1 max-w-5xl gap-12">
           <Section id="profile" title="Profile">
             <ProfileForm />
           </Section>

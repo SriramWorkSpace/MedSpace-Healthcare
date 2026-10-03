@@ -195,7 +195,7 @@ export function Workflow() {
   const reduce = useReducedMotion();
 
   return (
-    <section id="how-it-works" className="mx-auto max-w-[1280px] px-4 py-20 sm:px-6 lg:py-28">
+    <section id="how-it-works" className="shell shell--marketing py-20 lg:py-28">
       <div className="max-w-2xl">
         <h2 className="text-3xl font-semibold tracking-tight sm:text-5xl">
           From paper to plan in five steps.

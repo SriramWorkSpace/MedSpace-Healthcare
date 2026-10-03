@@ -166,7 +166,7 @@ function ShareLink() {
 
 export function FeatureBento() {
   return (
-    <section id="features" className="mx-auto max-w-[1280px] px-4 py-20 sm:px-6 lg:py-28">
+    <section id="features" className="shell shell--marketing py-20 lg:py-28">
       <Reveal className="max-w-2xl">
         <h2 className="text-3xl font-semibold tracking-tight sm:text-5xl">
           One space for the whole routine.

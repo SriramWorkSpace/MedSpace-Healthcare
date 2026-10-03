@@ -72,7 +72,7 @@ export function Faq() {
   return (
     <section
       id="faq"
-      className="mx-auto grid grid-cols-1 max-w-[1280px] gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:py-28"
+      className="shell shell--marketing grid grid-cols-1 gap-10 py-20 lg:grid-cols-[0.8fr_1.2fr] lg:py-28"
     >
       <Reveal>
         <h2 className="text-3xl font-semibold tracking-tight sm:text-5xl">Questions, answered.</h2>

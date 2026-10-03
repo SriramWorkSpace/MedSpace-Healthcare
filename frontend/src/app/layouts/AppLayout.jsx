@@ -15,7 +15,7 @@ import { ActingBanner } from "@/features/circle/ActingBanner";
 function ShellSkeleton() {
   return (
     <div aria-hidden>
-      <div className="flex h-[var(--nav-h)] items-center gap-4 px-6">
+      <div className="shell flex h-[var(--nav-h)] items-center gap-4">
         <Skeleton className="h-7 w-32" />
         <div className="hidden gap-2 lg:flex">
           {Array.from({ length: 6 }, (_, i) => (
@@ -24,7 +24,9 @@ function ShellSkeleton() {
         </div>
         <Skeleton variant="circle" className="ml-auto size-8" />
       </div>
-      <PageSkeleton />
+      <div className="shell shell--page pt-8 sm:pt-10">
+        <PageSkeleton />
+      </div>
     </div>
   );
 }
@@ -39,7 +41,7 @@ export default function AppLayout() {
   if (!user && !online) {
     // Signing in needs a connection; don't bounce to a login page that can't work.
     return (
-      <main id="main" className="mx-auto max-w-[1280px] px-4 pt-16 sm:px-6">
+      <main id="main" className="shell shell--page pt-16">
         <EmptyState
           icon={CloudSlash}
           title="You're offline"
@@ -72,7 +74,7 @@ export default function AppLayout() {
           You're exploring a demo account with synthetic records. It resets in 24 hours.
         </aside>
       )}
-      <main id="main" className="mx-auto max-w-[1280px] px-4 pb-24 pt-8 sm:px-6 sm:pt-10">
+      <main id="main" className="shell shell--page pb-24 pt-8 sm:pt-10">
         <Suspense fallback={<PageSkeleton />}>
           <Outlet />
         </Suspense>
