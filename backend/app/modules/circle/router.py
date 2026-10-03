@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, Request
 
 from app.core.deps import CurrentUser, DbSession
 from app.core.ratelimit import rate_limit
@@ -17,6 +17,7 @@ from app.modules.circle.schemas import (
     RoleIn,
 )
 from app.modules.identity.models import User
+from app.modules.notify import service as notify
 
 router = APIRouter(prefix="/circle", tags=["circle"])
 
@@ -32,12 +33,22 @@ async def get_circle(user: CurrentUser, session: DbSession):
     status_code=201,
     dependencies=[Depends(rate_limit("circle-invite", 20, 3600))],
 )
-async def invite(data: InviteIn, request: Request, user: CurrentUser, session: DbSession):
+async def invite(
+    data: InviteIn,
+    request: Request,
+    user: CurrentUser,
+    session: DbSession,
+    background: BackgroundTasks,
+):
     link, token = await service.invite(session, user, data, request)
+    owner, demo = user.display_name, user.is_demo
     await session.commit()
     await session.refresh(link)
     out = service.to_out(link, None)
-    return InviteCreated(link=out, url=service.invite_url(token), token=token)
+    url = service.invite_url(token)
+    if not demo:  # demo accounts are open to anyone, so they never send real email
+        background.add_task(notify.send_circle_invite, link.invite_email, owner, link.role, url)
+    return InviteCreated(link=out, url=url, token=token, emailed=not demo)
 
 
 @router.get(

@@ -29,11 +29,17 @@ class User(IdMixin, TimestampMixin, Base):
     dose_times: Mapped[dict] = mapped_column(JSONB, default=lambda: dict(DEFAULT_DOSE_TIMES))
     is_demo: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Set once the owner proves the address (link in an email, or Google says it's verified).
+    email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     # Two-step verification (ADR-029). Secrets are Fernet-encrypted at rest.
     totp_secret_enc: Mapped[str | None] = mapped_column(Text)
     totp_pending_enc: Mapped[str | None] = mapped_column(Text)  # set up but not yet confirmed
     totp_enabled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     totp_last_step: Mapped[int | None] = mapped_column(Integer)  # replay protection
+
+    @property
+    def email_verified(self) -> bool:
+        return self.email_verified_at is not None
 
     @property
     def has_password(self) -> bool:
@@ -78,3 +84,23 @@ class RecoveryCode(IdMixin, Base):
     )
     code_hash: Mapped[str] = mapped_column(String(64))
     used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class EmailToken(IdMixin, Base):
+    """A one-time link sent by email (ADR-030): verify an address, or reset a password.
+
+    Only the hash is stored. `email` pins the token to the address it was sent to, so changing
+    the account's email invalidates outstanding links.
+    """
+
+    __tablename__ = "email_tokens"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    purpose: Mapped[str] = mapped_column(String(16))  # "verify" | "reset"
+    email: Mapped[str] = mapped_column(String(320))
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

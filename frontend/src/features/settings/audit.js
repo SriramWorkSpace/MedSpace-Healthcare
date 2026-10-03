@@ -58,6 +58,9 @@ export const AUDIT = {
   },
   "mfa.recovery_codes_regenerated": { icon: Key, label: () => "Made new recovery codes" },
   "auth.password_changed": { icon: Key, label: () => "Changed your password" },
+  "auth.password_reset_requested": { icon: Key, label: () => "Asked for a password reset link" },
+  "auth.password_reset": { icon: Key, label: () => "Reset your password from an email link" },
+  "auth.email_verified": { icon: CheckCircle, label: () => "Confirmed your email address" },
   "auth.session_revoked": { icon: SignOut, label: () => "Signed out a device" },
   "auth.other_sessions_revoked": {
     icon: SignOut,

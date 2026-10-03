@@ -213,6 +213,12 @@ export function LoginForm() {
         <Field label="Password" error={errors.password?.message}>
           <PasswordInput autoComplete="current-password" {...form.register("password")} />
         </Field>
+        <Link
+          to="/forgot-password"
+          className="tap -mt-2 justify-self-end text-sm font-medium text-accent hover:underline"
+        >
+          Forgot password?
+        </Link>
         <Button type="submit" className="mt-2 w-full" loading={login.isPending}>
           Sign in
         </Button>

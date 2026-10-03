@@ -33,6 +33,7 @@ from sqlalchemy import text
 from app.core.db import Base, SessionLocal, engine
 from app.core.ratelimit import reset_rate_limits
 from app.main import app
+from app.shared.mail import FakeMailer, set_mailer
 
 BASE_URL = "http://medspace.test"
 
@@ -45,6 +46,14 @@ async def _schema() -> AsyncIterator[None]:
         await conn.run_sync(Base.metadata.create_all)
     yield
     await engine.dispose()
+
+
+@pytest.fixture(autouse=True)
+def mailbox() -> FakeMailer:
+    """Every test gets an empty simulated outbox (ADR-030)."""
+    box = FakeMailer()
+    set_mailer(box)
+    return box
 
 
 @pytest.fixture(autouse=True)
@@ -90,3 +99,23 @@ async def signup(
 async def auth_client(client: httpx.AsyncClient) -> httpx.AsyncClient:
     await signup(client)
     return client
+
+
+def link_token(text: str, path: str) -> str:
+    """The token from the first `<path>?token=...` link in an email body."""
+    import re
+
+    match = re.search(rf"{re.escape(path)}\?token=([A-Za-z0-9_-]+)", text)
+    assert match, f"no {path} link in: {text}"
+    return match.group(1)
+
+
+async def confirm_email(client: httpx.AsyncClient, email: str) -> None:
+    """Follow the verification link from the outbox, as the address owner would."""
+    from app.shared.mail import get_mailer
+
+    message = next(m for m in get_mailer().latest(email) if "Confirm your email" in m.subject)
+    resp = await client.post(
+        "/api/auth/email/verify", json={"token": link_token(message.text, "/verify-email")}
+    )
+    assert resp.status_code == 200, resp.text

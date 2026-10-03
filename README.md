@@ -49,7 +49,7 @@ then into calendar reminders, to-dos, a health timeline and answers you can trac
 
 | | |
 |---|---|
-| **Account security** | Optional two-step verification with any authenticator app, one-time recovery codes, and a list of every device signed in to your account. Sign one out, or all of them, and it takes effect on that device's next request. |
+| **Account security** | Optional two-step verification with any authenticator app, one-time recovery codes, and a list of every device signed in to your account. Sign one out, or all of them, and it takes effect on that device's next request. Forgot your password? Reset it from an email link. You get an email whenever your password or two-step settings change. |
 | **Dose reminders** | A notification on your phone or computer when a dose is due, even with MedSpace closed. Tap Taken or Skip right on the notification. Doses you've already ticked aren't reminded. |
 | **Care circle** | Invite a family member or carer as a viewer or a helper. They switch to your records from their own account, helpers can tick doses and refills, every change shows in your activity log, and you can remove them at any time. |
 | **Install and use offline** | Add MedSpace to your home screen. Turn on offline access for a device and your medicines, schedule, labs and visit preps stay readable without a connection; dose ticks made offline sync when you're back. Nothing is kept on the device unless you choose it, and signing out deletes it. |

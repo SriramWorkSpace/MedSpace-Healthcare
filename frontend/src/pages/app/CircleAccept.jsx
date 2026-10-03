@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { LoadingRegion, Skeleton } from "@/components/ui/Skeleton";
 import { useAccept, useInvitePreview, useSwitchProfile } from "@/features/circle/api";
 import { useAuth } from "@/lib/auth";
+import { useResendVerification } from "@/features/auth/useResendVerification";
 
 const ROLE_TEXT = {
   viewer: "read their medicines, schedule, lab results, documents and visit preps",
@@ -19,6 +20,7 @@ export default function CircleAccept() {
   const preview = useInvitePreview(token);
   const accept = useAccept();
   const switchProfile = useSwitchProfile();
+  const resend = useResendVerification();
 
   if (preview.isPending) {
     return (
@@ -45,6 +47,7 @@ export default function CircleAccept() {
   const inv = preview.data;
   const wrongAccount = user && user.email.toLowerCase() !== inv.email.toLowerCase();
   const unusable = inv.status !== "pending";
+  const unverified = user && !user.email_verified;
 
   return (
     <div className="mx-auto max-w-lg pt-6">
@@ -70,6 +73,22 @@ export default function CircleAccept() {
             This invitation is for {inv.email}, but you're signed in as {user.email}. Sign in with
             that account to accept it.
           </p>
+        ) : unverified ? (
+          <div className="mt-6 rounded-[var(--radius-control)] bg-warn-soft p-3 text-sm text-warn-ink">
+            <p>
+              Confirm your email address first. We sent a link to {user.email}; open it, then come
+              back to this page.
+            </p>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="mt-3"
+              loading={resend.isPending}
+              onClick={() => resend.mutate()}
+            >
+              Resend link
+            </Button>
+          </div>
         ) : (
           <div className="mt-6 flex flex-wrap justify-center gap-2">
             <Button

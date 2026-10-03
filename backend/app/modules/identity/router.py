@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, Request, Response, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Request, Response, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
@@ -18,11 +18,13 @@ from app.core.security import (
 )
 from app.modules.audit import service as audit
 from app.modules.documents import service as documents
-from app.modules.identity import security, service
+from app.modules.identity import recovery, security, service
 from app.modules.identity.cookies import clear_auth_cookies, set_auth_cookies
 from app.modules.identity.schemas import (
+    Accepted,
     CodeIn,
     DeviceSessionOut,
+    ForgotPasswordIn,
     LoginIn,
     LoginResult,
     MfaDisableIn,
@@ -31,11 +33,14 @@ from app.modules.identity.schemas import (
     PasswordChangeIn,
     ProfileUpdate,
     RecoveryCodesOut,
+    ResetPasswordIn,
     SecurityOut,
     SignedOut,
     SignupIn,
+    TokenIn,
     UserOut,
 )
+from app.modules.notify import service as notify
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 profile_router = APIRouter(prefix="/me", tags=["profile"])
@@ -55,11 +60,19 @@ class SessionOut(BaseModel):
         Depends(rate_limit("auth:signup-hour", 20, 3600, by="ip")),
     ],
 )
-async def signup(data: SignupIn, request: Request, response: Response, session: DbSession):
+async def signup(
+    data: SignupIn,
+    request: Request,
+    response: Response,
+    session: DbSession,
+    background: BackgroundTasks,
+):
     user = await service.create_user(session, data)
     issued = await service.issue_session(session, user, request)
     await audit.record(session, action="auth.signup", user_id=user.id, request=request)
+    mail = await recovery.start_verification(session, user)
     await session.commit()
+    background.add_task(notify.send_verification, mail.to, mail.name, mail.token)
     csrf = set_auth_cookies(response, issued.access_token, issued.refresh_token)
     return SessionOut(user=UserOut.model_validate(user), csrf_token=csrf)
 
@@ -232,18 +245,34 @@ async def mfa_setup(user: CurrentUser, session: DbSession):
     response_model=RecoveryCodesOut,
     dependencies=[Depends(rate_limit("me:mfa", 10, 300))],
 )
-async def mfa_enable(data: CodeIn, request: Request, user: CurrentUser, session: DbSession):
+async def mfa_enable(
+    data: CodeIn,
+    request: Request,
+    user: CurrentUser,
+    session: DbSession,
+    background: BackgroundTasks,
+):
     codes = await security.enable(session, user, data.code, _current_session(request), request)
+    to, name = user.email, user.display_name
     await session.commit()
+    background.add_task(notify.send_security_alert, to, name, "mfa_enabled")
     return RecoveryCodesOut(codes=codes)
 
 
 @profile_router.post(
     "/mfa/disable", status_code=204, dependencies=[Depends(rate_limit("me:mfa", 10, 300))]
 )
-async def mfa_disable(data: MfaDisableIn, request: Request, user: CurrentUser, session: DbSession):
+async def mfa_disable(
+    data: MfaDisableIn,
+    request: Request,
+    user: CurrentUser,
+    session: DbSession,
+    background: BackgroundTasks,
+):
     await security.disable(session, user, data.password, data.code, data.recovery_code, request)
+    to, name = user.email, user.display_name
     await session.commit()
+    background.add_task(notify.send_security_alert, to, name, "mfa_disabled")
 
 
 @profile_router.post(
@@ -285,10 +314,80 @@ async def end_other_sessions(request: Request, user: CurrentUser, session: DbSes
     dependencies=[Depends(rate_limit("me:password", 5, 600))],
 )
 async def change_password(
-    data: PasswordChangeIn, request: Request, user: CurrentUser, session: DbSession
+    data: PasswordChangeIn,
+    request: Request,
+    user: CurrentUser,
+    session: DbSession,
+    background: BackgroundTasks,
 ):
+    had_password = user.has_password
     count = await security.change_password(
         session, user, data.current_password, data.new_password, _current_session(request), request
     )
+    to, name = user.email, user.display_name
     await session.commit()
+    if had_password:
+        background.add_task(notify.send_security_alert, to, name, "password_changed")
     return SignedOut(signed_out=count)
+
+
+# ---- Email verification and password reset (ADR-030) ------------------------------------------
+
+
+@router.post(
+    "/password/forgot",
+    response_model=Accepted,
+    status_code=202,
+    dependencies=[Depends(rate_limit("auth:forgot", 5, 900, by="ip"))],
+)
+async def forgot_password(
+    data: ForgotPasswordIn, request: Request, session: DbSession, background: BackgroundTasks
+):
+    """Always the same answer, whether or not the address has an account."""
+    attempt = await check("auth:forgot-account", data.email.strip().lower(), 3, 3600)
+    if not attempt.allowed:
+        return Accepted()  # quietly: telling them would confirm the account exists
+    mail = await recovery.request_reset(session, data.email, request)
+    await session.commit()
+    if mail:
+        background.add_task(notify.send_password_reset, mail.to, mail.name, mail.token)
+    return Accepted()
+
+
+@router.post(
+    "/password/reset",
+    response_model=Accepted,
+    dependencies=[Depends(rate_limit("auth:reset", 10, 900, by="ip"))],
+)
+async def reset_password(
+    data: ResetPasswordIn, request: Request, session: DbSession, background: BackgroundTasks
+):
+    user = await recovery.reset_password(session, data.token, data.new_password, request)
+    to, name = user.email, user.display_name
+    await session.commit()
+    background.add_task(notify.send_security_alert, to, name, "password_reset")
+    return Accepted()
+
+
+@router.post(
+    "/email/verify",
+    response_model=Accepted,
+    dependencies=[Depends(rate_limit("auth:verify", 20, 900, by="ip"))],
+)
+async def verify_email(data: TokenIn, request: Request, session: DbSession):
+    await recovery.verify_email(session, data.token, request)
+    await session.commit()
+    return Accepted()
+
+
+@profile_router.post(
+    "/email/verification",
+    response_model=Accepted,
+    status_code=202,
+    dependencies=[Depends(rate_limit("me:verify-email", 3, 600))],
+)
+async def resend_verification(user: CurrentUser, session: DbSession, background: BackgroundTasks):
+    mail = await recovery.start_verification(session, user)
+    await session.commit()
+    background.add_task(notify.send_verification, mail.to, mail.name, mail.token)
+    return Accepted()

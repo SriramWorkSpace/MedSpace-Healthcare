@@ -112,6 +112,16 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 - [x] Multi-stage web image (nginx + /api proxy), deployment guide (docs/deployment.md), README screenshots
 - [x] Final graphify update and docs sync
 
+## Phase 19: Email and account recovery
+
+- [x] Mail port: SMTP adapter and an in-memory outbox; dev-only `/api/dev/outbox` (ADR-030)
+- [x] `notify` module: confirmation, password reset, security alerts (password changed or reset, two-step on or off), care circle invitations; never to demo addresses, never health details
+- [x] One-time email links (`email_tokens`): hashed, single use, expiring, pinned to the address, newest link only
+- [x] Forgot and reset password: same answer for unknown addresses, per-address limit, sent after the response; reset signs out everywhere and keeps two-step verification
+- [x] Email confirmation at signup, app banner with resend, Settings chip; care circle invitations need a confirmed address and are emailed
+- [x] Security fix: Google sign-in reclaims an account whose address was never confirmed (removes the password, two-step setup and sessions someone else may have set)
+- [x] Tests: 15 backend (confirmation, single use and resend, other browser, demo never emailed, circle invitations, forgot and reset incl. enumeration, expiry, newest link, per-address limit, two-step kept, alerts, reclaim, SMTP adapter, outbox), 2 e2e (confirm, forgot and reset, with axe); e2e accessibility checks now wait for loading regions, which removed an intermittent failure
+
 ## Phase 18: Account security
 
 - [x] Two-step verification: TOTP (RFC 6238) with encrypted secrets, replay protection, QR setup, ten hashed one-time recovery codes (ADR-029)
@@ -211,6 +221,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 ---
 
 ## Change log
+
+- **2026-10-03**: Phase 19 shipped: email confirmation, forgot and reset password, security alert emails, emailed care circle invitations, and a fix for Google sign-in linking into accounts whose address was never confirmed (ADR-030).
 
 - **2026-10-03**: Theme switch reveals the new theme as a circle growing from the toggle (View Transitions API; instant with reduced motion or without browser support). Phone pass at 360, 390 and 412 wide, landscape and tablet: no horizontal overflow on any page; small links and icon buttons get 44px touch areas on touch screens (`.tap`); medication cards move the schedule chip below the name on narrow phones; strengths no longer split across lines; Ask shows four suggestions on phones.
 

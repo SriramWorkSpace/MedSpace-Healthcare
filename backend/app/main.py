@@ -31,6 +31,7 @@ from app.modules.identity.router import profile_router
 from app.modules.identity.router import router as auth_router
 from app.modules.integrations.router import auth_router as google_auth_router
 from app.modules.integrations.router import router as integrations_router
+from app.modules.notify.router import dev_router
 from app.modules.records.router import router as records_router
 from app.modules.reminders.router import router as reminders_router
 from app.modules.search.router import router as search_router
@@ -134,6 +135,8 @@ def create_app() -> FastAPI:
     api.include_router(google_auth_router)
     api.include_router(sharing_router)
     api.include_router(public_share_router)
+    if not settings.is_prod and settings.dev_outbox_enabled:
+        api.include_router(dev_router)  # simulated emails, for local testing and e2e
 
     @api.api_route("/health", methods=["GET", "HEAD"], tags=["ops"])
     async def health() -> dict[str, str]:

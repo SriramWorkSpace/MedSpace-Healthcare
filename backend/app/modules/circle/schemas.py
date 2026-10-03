@@ -47,6 +47,7 @@ class InviteCreated(BaseModel):
     link: CareLinkOut
     url: str
     token: str
+    emailed: bool = False  # also sent to their inbox (never from demo accounts)
 
 
 class InvitePreview(BaseModel):

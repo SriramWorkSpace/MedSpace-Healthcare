@@ -5,10 +5,11 @@ import { ThemeToggle } from "@/components/nav/ThemeToggle";
 import { useAuth } from "@/lib/auth";
 import { Skeleton } from "@/components/ui/Skeleton";
 
-export default function AuthLayout() {
+/** `open`: also shown to signed-in visitors (emailed links); otherwise they go to the app. */
+export default function AuthLayout({ open = false }) {
   const { user, isLoading } = useAuth();
   const [params] = useSearchParams();
-  if (user) return <Navigate to={params.get("next") || "/app"} replace />;
+  if (user && !open) return <Navigate to={params.get("next") || "/app"} replace />;
 
   return (
     <div className="grid grid-cols-1 min-h-[100dvh] lg:grid-cols-[1fr_1fr]">

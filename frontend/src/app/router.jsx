@@ -21,6 +21,15 @@ export const router = createBrowserRouter([
         children: [
           { path: "login", lazy: page(() => import("@/pages/auth/Login")) },
           { path: "signup", lazy: page(() => import("@/pages/auth/Signup")) },
+          { path: "forgot-password", lazy: page(() => import("@/pages/auth/ForgotPassword")) },
+        ],
+      },
+      {
+        // Emailed links: they must work whether or not this browser is signed in.
+        element: <AuthLayout open />,
+        children: [
+          { path: "reset-password", lazy: page(() => import("@/pages/auth/ResetPassword")) },
+          { path: "verify-email", lazy: page(() => import("@/pages/auth/VerifyEmail")) },
         ],
       },
       {

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, signUp, startDemo } from "./helpers";
+import { confirmEmail, expectAccessible, signUp, startDemo } from "./helpers";
 
 test("a helper switches to a family member's records and back", async ({ page }) => {
   await startDemo(page);
@@ -46,6 +46,7 @@ test("an invitation is accepted and gives read-only access", async ({ page, brow
   const other = await browser.newContext();
   const viewer = await other.newPage();
   await signUp(viewer, email);
+  await confirmEmail(viewer, email); // invitations need a confirmed address
   await viewer.goto(new URL(url).pathname);
   await expect(
     viewer.getByRole("heading", { name: /invited you to their care circle/ }),

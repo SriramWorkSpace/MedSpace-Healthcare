@@ -196,7 +196,11 @@ async def callback(
             action="auth.google_signup" if outcome == "created" else "auth.google_login",
             user_id=account.id,
             request=request,
-            meta={"linked": outcome == "linked", "reminders": sync_granted},
+            meta={
+                "linked": outcome in ("linked", "reclaimed"),
+                "reclaimed": outcome == "reclaimed",
+                "reminders": sync_granted,
+            },
         )
         if sync_granted:
             await service.save_connection(session, account, tokens, who.email, request)

@@ -58,6 +58,18 @@ class Settings(BaseSettings):
     # Inline mode has no worker: run the once-a-minute reminder tick inside the API process.
     reminder_loop_enabled: bool = True
 
+    # --- Email (ADR-030) ------------------------------------------------------
+    # auto: SMTP when SMTP_HOST is set, otherwise an in-memory outbox (dev, demo, CI).
+    mail_provider: Literal["auto", "fake", "smtp"] = "auto"
+    mail_from: str = "MedSpace <no-reply@medspace.example>"
+    smtp_host: str | None = None
+    smtp_port: int = 587
+    smtp_username: str | None = None
+    smtp_password: SecretStr | None = None
+    smtp_security: Literal["starttls", "ssl", "none"] = "starttls"
+    # Dev and CI only: GET /api/dev/outbox shows simulated emails (never enabled in prod).
+    dev_outbox_enabled: bool = True
+
     # --- Storage -------------------------------------------------------------
     storage_provider: Literal["local", "s3"] = "local"
     storage_local_dir: str = ".data/storage"

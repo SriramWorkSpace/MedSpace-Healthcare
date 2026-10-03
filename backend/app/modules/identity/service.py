@@ -22,6 +22,7 @@ from app.core.security import (
     verify_password,
 )
 from app.modules.audit import service as audit
+from app.modules.identity import security
 from app.modules.identity.models import RefreshToken, User
 from app.modules.identity.schemas import ProfileUpdate, SignupIn
 
@@ -55,6 +56,8 @@ async def create_user(
         display_name=data.display_name,
         timezone=data.timezone,
         is_demo=is_demo,
+        # Demo addresses are made up and never receive mail; nothing to confirm.
+        email_verified_at=utcnow() if is_demo else None,
     )
     session.add(user)
     await session.flush()
@@ -88,12 +91,18 @@ async def login_with_google(
 ) -> tuple[User, str]:
     """Find or create the account for a Google identity.
 
-    Returns (user, outcome) where outcome is "signed_in", "linked" or "created".
+    Returns (user, outcome) where outcome is "signed_in", "linked", "reclaimed" or "created".
     An existing password account is linked only when Google has verified the email address;
     otherwise the email stays with its current owner (prevents account takeover).
+
+    "reclaimed" (ADR-030): the existing account had never confirmed its email, so whoever set its
+    password (or two-step) never proved they own the address Google just vouched for. Those
+    credentials and sessions are removed; the Google owner continues with the records.
     """
     user = await session.scalar(select(User).where(User.google_sub == sub))
     if user:
+        if email_verified and not user.email_verified and user.email == email.lower():
+            user.email_verified_at = utcnow()
         return user, "signed_in"
 
     email = email.lower()
@@ -102,8 +111,15 @@ async def login_with_google(
         if not email_verified or existing.google_sub is not None:
             raise Conflict("An account with this email already exists. Sign in with your password.")
         existing.google_sub = sub
+        outcome = "linked"
+        if not existing.email_verified:
+            existing.password_hash = None
+            await security.clear_second_factor(session, existing)
+            await security.revoke_other_sessions(session, existing, None)
+            outcome = "reclaimed"
+        existing.email_verified_at = existing.email_verified_at or utcnow()
         await session.flush()
-        return existing, "linked"
+        return existing, outcome
 
     user = User(
         email=email,
@@ -111,6 +127,7 @@ async def login_with_google(
         google_sub=sub,
         display_name=(name or email.split("@")[0]).strip()[:80] or "MedSpace user",
         is_demo=is_demo,
+        email_verified_at=utcnow() if email_verified else None,
     )
     session.add(user)
     await session.flush()

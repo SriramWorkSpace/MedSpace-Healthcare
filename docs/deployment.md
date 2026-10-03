@@ -39,7 +39,7 @@ Environment (see `.env.example` for every option):
 
 | Variable | Value |
 |---|---|
-| `ENV` | `prod` (enables HSTS) |
+| `ENV` | `prod` (enables HSTS and turns off the dev email outbox) |
 | `DATABASE_URL` | Neon URL from step 1 |
 | `JWT_SECRET` | `python -c "import secrets; print(secrets.token_urlsafe(48))"` |
 | `TOKEN_ENCRYPTION_KEY` | `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"` |
@@ -55,6 +55,8 @@ Environment (see `.env.example` for every option):
 | `RATE_LIMIT_SCALE` | leave at `1` in production |
 | `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | for dose reminders by notification: generate once with `python -m app.shared.push` and keep them stable (changing them invalidates every device's subscription). Without them reminders are simulated. |
 | `VAPID_SUBJECT` | `mailto:` address push services can contact about your traffic |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USERNAME` / `SMTP_PASSWORD` | outgoing mail for confirmation, password reset and security alerts (any provider: Postmark, SES, Resend, Mailgun). `SMTP_SECURITY` is `starttls` (587) or `ssl` (465). Without a host, mail is simulated and nobody can reset a forgotten password. |
+| `MAIL_FROM` | sender, e.g. `MedSpace <no-reply@yourdomain>`; set up SPF and DKIM for that domain with your provider |
 
 With `QUEUE_MODE=arq`, run a second process from the same image:
 `arq app.worker.WorkerSettings` (it sends dose reminders every minute and purges expired demo accounts and stale share links). In inline mode the API process sends reminders itself.
@@ -94,3 +96,5 @@ scopes are sensitive: without Google verification, only listed test users can co
 - [ ] Response headers include HSTS and `X-Frame-Options: DENY`
 - [ ] API responses carry `RateLimit-Limit` / `RateLimit-Remaining`; eleven quick wrong-password sign-ins to one account return `429` with `Retry-After`
 - [ ] Sending a fake `X-Forwarded-For` does not reset a rate limit
+- [ ] Signing up delivers a confirmation email; "Forgot password?" delivers a reset link
+- [ ] `GET /api/dev/outbox?to=x` returns 404 (dev outbox is off in production)

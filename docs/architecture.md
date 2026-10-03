@@ -96,7 +96,7 @@ modules/<name>/
 
 | Module | Owns | Key responsibilities |
 |---|---|---|
-| `identity` | `users`, `refresh_tokens`, `recovery_codes` | Signup/login, optional Google sign-in (account matching and verified-email linking), Argon2 hashing, JWT access cookie bound to its session, rotating refresh tokens with reuse detection, CSRF, demo login; account security (`security.py`): two-step verification (TOTP, recovery codes, sign-in second step), signed-in devices, password changes (ADR-029) |
+| `identity` | `users`, `refresh_tokens`, `recovery_codes`, `email_tokens` | Signup/login, optional Google sign-in (account matching and verified-email linking), Argon2 hashing, JWT access cookie bound to its session, rotating refresh tokens with reuse detection, CSRF, demo login; account security (`security.py`): two-step verification (TOTP, recovery codes, sign-in second step), signed-in devices, password changes (ADR-029); email confirmation and password reset links (`recovery.py`, ADR-030) |
 | `documents` | `documents`, `document_pages` | Upload intake (type/size/magic-byte validation, SHA-256 dedupe), object storage, page text, processing status, signed preview streaming |
 | `extraction` | `extractions` | Pipeline: text-layer vs. scanned detection → Groq extraction → Pydantic validation → frequency normalization → draft extraction with per-field confidence + source page |
 | `records` | `prescriptions`, `medications`, `care_actions`, `diet_notes`, `lab_results` | Confirm drafts into official records, medication schedules, prescription reports, diet notes copied from documents (ADR-018), lab results and their trends (ADR-020) |
@@ -110,6 +110,7 @@ modules/<name>/
 | `assistant` | `document_chunks`, `chat_threads`, `chat_messages` | Chunking, embeddings, hybrid retrieval (pgvector + full-text, RRF fusion), grounded answers with citations, SSE streaming |
 | `integrations` | `oauth_connections`, `sync_links` | Google OAuth (incremental consent), encrypted tokens, Calendar recurring events, Tasks, idempotent sync/unsync |
 | `sharing` | `share_links`, `share_link_items` | Scoped temporary links, hashed tokens, expiry, revocation, view limits, public read endpoints |
+| `notify` | none | Transactional email wording (confirmation, reset, security alerts, circle invitations), sent through the mail port; never to demo addresses (ADR-030) |
 | `audit` | `audit_logs` | Append-only audit trail; `record()` used by every module for security-relevant actions |
 | `demo` | - | Synthetic data seeding (demo user, sample prescription PDFs) |
 
@@ -123,6 +124,7 @@ External dependencies are hidden behind small interfaces so the app runs fully o
 | `Embedder` | `FastEmbedEmbedder` (`BAAI/bge-small-en-v1.5`, 384-d, local ONNX) | `HashEmbedder` (deterministic hashing trick) |
 | `ObjectStorage` | `S3Storage` (SeaweedFS in dev, R2/S3 in prod) | `LocalStorage` (filesystem) |
 | `GoogleClient` | `HttpGoogleClient` (httpx → Calendar v3 / Tasks v1) | `FakeGoogleClient` (in-memory) |
+| `Mailer` | `SmtpMailer` (any SMTP provider, STARTTLS or TLS) | `FakeMailer` (in-memory outbox, `GET /api/dev/outbox` outside prod) |
 
 ## 4. Core flows
 
@@ -262,7 +264,7 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 
 | Area | Endpoints |
 |---|---|
-| Auth | `POST /auth/signup` · `POST /auth/login` (session, or `mfa_required` with a 5-minute token) · `POST /auth/login/mfa` · `POST /auth/demo` · `POST /auth/refresh` · `POST /auth/logout` · `GET /auth/me` · `GET /auth/session` · `GET /auth/google/start` · `GET /auth/google/providers` |
+| Auth | `POST /auth/signup` · `POST /auth/login` (session, or `mfa_required` with a 5-minute token) · `POST /auth/login/mfa` · `POST /auth/password/forgot` · `POST /auth/password/reset` · `POST /auth/email/verify` · `POST /auth/demo` · `POST /auth/refresh` · `POST /auth/logout` · `GET /auth/me` · `GET /auth/session` · `GET /auth/google/start` · `GET /auth/google/providers` |
 | Documents | `POST /documents` · `GET /documents` · `GET /documents/{id}` · `GET /documents/{id}/file` · `POST /documents/{id}/reprocess` · `DELETE /documents/{id}` |
 | Extraction | `GET /documents/{id}/extraction` · `POST /extractions/{id}/confirm` · `POST /extractions/{id}/discard` |
 | Records | `GET /prescriptions` · `GET /prescriptions/{id}` · `GET /medications?status=` · `PATCH /medications/{id}` · `GET /care-actions` · `PATCH /care-actions/{id}` · `GET /diet-notes` · `DELETE /diet-notes/{id}` |
@@ -278,7 +280,7 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 | Assistant | `POST /assistant/threads` · `GET /assistant/threads` · `POST /assistant/threads/{id}/messages` (SSE) |
 | Integrations | `GET /integrations/google/status` · `GET /integrations/google/connect` · `GET /integrations/google/callback` · `POST /integrations/google/sync` · `DELETE /integrations/google/sync/{link_id}` · `DELETE /integrations/google` |
 | Sharing | `POST /shares` · `GET /shares` · `DELETE /shares/{id}` (revoke) · `GET /public/shares/{token}` · `GET /public/shares/{token}/documents/{doc_id}/file` |
-| Account security | `GET /me/security` · `POST /me/mfa/setup` · `POST /me/mfa/enable` · `POST /me/mfa/disable` · `POST /me/mfa/recovery-codes` · `DELETE /me/sessions/{id}` · `POST /me/sessions/sign-out-others` · `POST /me/password` |
+| Account security | `POST /me/email/verification` (resend) · `GET /me/security` · `POST /me/mfa/setup` · `POST /me/mfa/enable` · `POST /me/mfa/disable` · `POST /me/mfa/recovery-codes` · `DELETE /me/sessions/{id}` · `POST /me/sessions/sign-out-others` · `POST /me/password` |
 | Audit | `GET /audit?cursor=` (user's own trail) |
 | Ops | `GET /health` · `GET /ready` |
 
@@ -289,6 +291,7 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 | Passwords | Argon2id (`argon2-cffi`) |
 | Session | Short-lived JWT access token (15 min) in `httpOnly; Secure; SameSite=Lax` cookie; opaque refresh token (14 days) in a path-scoped cookie, stored hashed, rotated on every use with **family reuse detection** (reuse ⇒ revoke family) |
 | Second factor | Optional TOTP two-step verification (ADR-029): Fernet-encrypted secret, one-step drift window, replay-protected; ten SHA-256-hashed one-time recovery codes. Password or Google sign-in then yields a 5-minute signed token, not a session. Disabling, regenerating codes and changing the password need fresh proof. |
+| Email links | Confirmation and password-reset links (ADR-030): SHA-256-hashed one-time tokens pinned to the address, 48 h / 30 min, newest only. Forgot password answers the same for every address and mails after the response. Reset signs out every session but keeps two-step verification. Care circle invitations need a confirmed address; Google sign-in reclaims accounts whose address was never confirmed. |
 | Sign-out | Access tokens carry their session (`sid`); each request checks the session is live, so revoking a device (or every other device) takes effect immediately |
 | CSRF | Double-submit token: readable `ms_csrf` cookie echoed in `X-CSRF-Token` for unsafe methods |
 | Authorization | Every query filters by `current_user.id`; resources fetched by `(id, user_id)` so foreign IDs return 404, not 403 |

@@ -248,6 +248,12 @@ async def accept(
         raise Forbidden(
             f"This invitation is for {link.invite_email}. Sign in with that account to accept it."
         )
+    if not user.email_verified:
+        # Invitations are bound to an address: only someone who proved they own it may accept.
+        raise Forbidden(
+            f"Confirm your email address ({user.email}) first, then accept the invitation.",
+            extra={"reason": "email_unverified"},
+        )
     link.caregiver_id = user.id
     link.status = "active"
     link.accepted_at = utcnow()

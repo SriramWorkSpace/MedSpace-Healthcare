@@ -6,11 +6,13 @@ from contextlib import asynccontextmanager
 
 import httpx
 
-from tests.conftest import BASE_URL, csrf
+from tests.conftest import BASE_URL, confirm_email, csrf
 
 
 @asynccontextmanager
-async def person(client: httpx.AsyncClient, email: str, name: str = "Eve Example"):
+async def person(
+    client: httpx.AsyncClient, email: str, name: str = "Eve Example", *, verified: bool = True
+):
     async with httpx.AsyncClient(
         transport=httpx.ASGITransport(app=client._transport.app), base_url=BASE_URL
     ) as other:
@@ -19,6 +21,8 @@ async def person(client: httpx.AsyncClient, email: str, name: str = "Eve Example
             json={"email": email, "password": "long-enough-pass", "display_name": name},
         )
         assert resp.status_code in (200, 201), resp.text
+        if verified:
+            await confirm_email(other, email)
         yield other
 
 

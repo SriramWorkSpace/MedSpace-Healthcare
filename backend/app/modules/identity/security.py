@@ -140,6 +140,11 @@ async def disable(
     if user.has_password and not (password and verify_password(user.password_hash, password)):
         raise Forbidden("That password isn't right.")
     await check_second_factor(session, user, code, recovery_code, Forbidden)
+    await clear_second_factor(session, user)
+    await audit.record(session, action="mfa.disabled", user_id=user.id, request=request)
+
+
+async def clear_second_factor(session: AsyncSession, user: User) -> None:
     user.totp_secret_enc = None
     user.totp_pending_enc = None
     user.totp_enabled_at = None
@@ -149,7 +154,6 @@ async def disable(
         .where(RecoveryCode.user_id == user.id, RecoveryCode.used_at.is_(None))
         .values(used_at=utcnow())
     )
-    await audit.record(session, action="mfa.disabled", user_id=user.id, request=request)
 
 
 async def regenerate_codes(

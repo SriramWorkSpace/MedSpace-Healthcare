@@ -111,6 +111,11 @@ function ProfileForm() {
         )}
         {user.has_password && <Chip>Email and password</Chip>}
         <span className="truncate text-ink-3">{user.email}</span>
+        {!user.is_demo && (
+          <Chip tone={user.email_verified ? "accent" : "warn"}>
+            {user.email_verified ? "Confirmed" : "Not confirmed"}
+          </Chip>
+        )}
       </div>
       <Field label="Name">
         <Input {...form.register("display_name", { required: true, maxLength: 80 })} />

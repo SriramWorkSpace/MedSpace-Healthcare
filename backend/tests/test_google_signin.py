@@ -11,7 +11,7 @@ from sqlalchemy import select
 from app.modules.identity.models import User
 from app.modules.integrations.google import FakeGoogleClient, GoogleIdentity
 from app.modules.integrations.models import OAuthConnection
-from tests.conftest import csrf, signup
+from tests.conftest import confirm_email, csrf, signup
 
 
 async def google_sign_in(
@@ -80,6 +80,7 @@ async def test_verified_google_email_links_existing_password_account(
     client: httpx.AsyncClient, monkeypatch: pytest.MonkeyPatch
 ):
     await signup(client, email="ada@example.com")
+    await confirm_email(client, "ada@example.com")
     original_id = (await client.get("/api/auth/me")).json()["id"]
     client.cookies.clear()
 

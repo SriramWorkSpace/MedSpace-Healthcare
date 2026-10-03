@@ -4,6 +4,7 @@ import { AppNav } from "@/components/nav/AppNav";
 import { useAuth } from "@/lib/auth";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { PageSkeleton } from "@/components/layout/PageSkeleton";
+import { VerifyEmailBanner } from "@/features/auth/VerifyEmailBanner";
 import { useGoogleWelcome } from "@/features/auth/useGoogleWelcome";
 import { SearchProvider } from "@/features/search/SearchProvider";
 import { OfflineBanner } from "@/features/offline/OfflineBanner";
@@ -66,6 +67,7 @@ export default function AppLayout() {
       <AppNav />
       <OfflineBanner />
       <ActingBanner />
+      <VerifyEmailBanner />
       {user.is_demo && (
         <aside
           aria-label="Demo account"

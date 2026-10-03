@@ -83,6 +83,7 @@ class UserOut(BaseModel):
     has_password: bool = True
     google_linked: bool = False
     mfa_enabled: bool = False
+    email_verified: bool = False
     created_at: datetime
 
 
@@ -145,3 +146,20 @@ class SecurityOut(BaseModel):
 
 class SignedOut(BaseModel):
     signed_out: int
+
+
+class ForgotPasswordIn(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordIn(BaseModel):
+    token: str = Field(min_length=20, max_length=200)
+    new_password: str = Field(min_length=10, max_length=128)
+
+
+class TokenIn(BaseModel):
+    token: str = Field(min_length=20, max_length=200)
+
+
+class Accepted(BaseModel):
+    ok: bool = True
