@@ -60,7 +60,7 @@ MedSpace/
 │   │   │   └── queue.py          # enqueue(): arq | inline
 │   │   └── modules/              # bounded contexts (see §3)
 │   │       ├── identity/  documents/  extraction/  records/
-│   │       ├── timeline/  search/  doses/  visits/  supply/  assistant/  integrations/  sharing/
+│   │       ├── timeline/  search/  doses/  visits/  supply/  circle/  assistant/  integrations/  sharing/
 │   │       └── audit/  demo/
 │   ├── migrations/               # Alembic
 │   └── tests/                    # pytest (unit + API integration against real Postgres)
@@ -104,6 +104,7 @@ modules/<name>/
 | `doses` | `dose_logs` | Taken/skipped marks per scheduled dose, history and streaks computed from the schedule in the user's timezone; unmarked doses are "not logged", never "missed" (ADR-021) |
 | `visits` | `visit_preps` | Visit prep: the user's questions plus a live brief (current medicines, changes, dose marks, new lab results, open to-dos, appointments) since the last visit; factual prompts to raise; shareable (ADR-022) |
 | `supply` | `medication_supplies` | The user's count per medicine; estimated units left (scheduled doses since the count, skipped ones excluded) and a projected run-out date; feeds the dashboard, visit prompts and Ask MedSpace (ADR-023) |
+| `circle` | `care_links` | Care circle: invitations, roles, revocation, and `resolve_acting`, the single check for caregiver requests (`X-Acting-For`) against role allow-lists (ADR-026) |
 | `search` | (read model, no tables) | Global search: escaped `ILIKE` on names, prefix full-text with `ts_headline` snippets on document chunks, grouped deep-link hits |
 | `assistant` | `document_chunks`, `chat_threads`, `chat_messages` | Chunking, embeddings, hybrid retrieval (pgvector + full-text, RRF fusion), grounded answers with citations, SSE streaming |
 | `integrations` | `oauth_connections`, `sync_links` | Google OAuth (incremental consent), encrypted tokens, Calendar recurring events, Tasks, idempotent sync/unsync |
@@ -240,6 +241,7 @@ erDiagram
   users ||--o{ sync_links : tracks
   users ||--o{ share_links : creates
   users ||--o{ visit_preps : prepares
+  users ||--o{ care_links : "owns / helps via"
   share_links ||--o{ share_link_items : scopes
   users ||--o{ chat_threads : asks
   chat_threads ||--o{ chat_messages : contains
@@ -267,6 +269,7 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 | Dashboard | `GET /dashboard` (today's doses, upcoming, needs-review queue, stats) |
 | Timeline | `GET /timeline?cursor=&types=` |
 | Doses | `PUT /doses` (mark taken or skipped) · `DELETE /doses?medication_id=&date=&time=` · `GET /adherence?days=` · `GET /adherence/{medication_id}?days=` |
+| Circle | `GET /circle` · `POST /circle/invites` · `GET /circle/invites/{token}` · `POST /circle/accept` · `PATCH /circle/{id}` (role) · `DELETE /circle/{id}` (revoke or leave) |
 | Supply | `GET /supply` · `PUT /supply/{medication_id}` (count on hand) · `POST /supply/{medication_id}/refill` · `DELETE /supply/{medication_id}` |
 | Visits | `POST /visits` · `GET /visits` · `GET /visits/{id}` · `PATCH /visits/{id}` (details, questions) · `DELETE /visits/{id}` · `GET /visits/{id}/brief` |
 | Search | `GET /search?q=` (grouped hits with deep links and highlighted snippets) |
@@ -325,7 +328,8 @@ Route map:
 /app/visits/:id         Questions, prompts from records, printable/shareable brief
 /app/ask                Ask MedSpace (RAG chat)
 /app/sharing            Share links manager
-/app/settings           Profile, integrations, audit log
+/app/settings           Profile, integrations, care circle, this device, audit log
+/app/circle/accept/:t   Accept a care circle invitation
 /s/:token               Public shared view
 *                       404 (with a pun)
 ```

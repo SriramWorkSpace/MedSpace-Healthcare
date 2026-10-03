@@ -25,6 +25,10 @@ import { useScrolled } from "./useScrolled";
 import { useEasterEggs, useRapidClicks } from "@/easter-eggs/EasterEggs";
 import { cn } from "@/lib/cn";
 import { useSearchPalette } from "@/features/search/searchContext";
+import { useActing } from "@/features/circle/api";
+
+// Hidden while viewing someone else's records (the server refuses them anyway).
+const OWNER_ONLY = new Set(["/app/ask", "/app/sharing"]);
 
 const IS_MAC = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
 
@@ -46,6 +50,8 @@ export function AppNav() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const { openSearch } = useSearchPalette();
+  const { isActing } = useActing();
+  const links = isActing ? APP_LINKS.filter((l) => !OWNER_ONLY.has(l.to)) : APP_LINKS;
   const { discover } = useEasterEggs();
   const onLogoSpree = useCallback(() => discover("logo"), [discover]);
   const countLogoClick = useRapidClicks(5, 2500, onLogoSpree);
@@ -66,7 +72,7 @@ export function AppNav() {
         </Link>
 
         <ul className="hidden items-center gap-0.5 lg:flex">
-          {APP_LINKS.map(({ to, label, end }) => (
+          {links.map(({ to, label, end }) => (
             <li key={to}>
               <NavLink to={to} end={end} className="navlink isolate">
                 {({ isActive }) => (
@@ -102,14 +108,16 @@ export function AppNav() {
             <span className="hidden xl:inline">Search…</span>
             <kbd className="kbd hidden xl:inline">{IS_MAC ? "⌘K" : "Ctrl K"}</kbd>
           </button>
-          <Button
-            size="sm"
-            className="hidden sm:inline-flex"
-            onClick={() => navigate("/app/documents?upload=1")}
-          >
-            <UploadSimple size={15} weight="bold" />
-            Upload
-          </Button>
+          {!isActing && (
+            <Button
+              size="sm"
+              className="hidden sm:inline-flex"
+              onClick={() => navigate("/app/documents?upload=1")}
+            >
+              <UploadSimple size={15} weight="bold" />
+              Upload
+            </Button>
+          )}
           <ThemeToggle />
           <UserMenu />
           <Button
@@ -134,7 +142,7 @@ export function AppNav() {
         hiddenFrom="lg:hidden"
       >
         <ul className="grid grid-cols-1 gap-1">
-          {APP_LINKS.map(({ to, label, icon: Icon, end }, i) => (
+          {links.map(({ to, label, icon: Icon, end }, i) => (
             <motion.li
               key={to}
               initial={reduce ? false : { opacity: 0, y: -6 }}
@@ -158,16 +166,18 @@ export function AppNav() {
             </motion.li>
           ))}
         </ul>
-        <Button
-          className="mt-4 w-full"
-          onClick={() => {
-            setOpen(false);
-            navigate("/app/documents?upload=1");
-          }}
-        >
-          <UploadSimple size={16} weight="bold" />
-          Upload a document
-        </Button>
+        {!isActing && (
+          <Button
+            className="mt-4 w-full"
+            onClick={() => {
+              setOpen(false);
+              navigate("/app/documents?upload=1");
+            }}
+          >
+            <UploadSimple size={16} weight="bold" />
+            Upload a document
+          </Button>
+        )}
       </MobileDrawer>
     </header>
   );

@@ -2,6 +2,7 @@
 
 from app.modules.assistant.models import ChatMessage, ChatThread, DocumentChunk
 from app.modules.audit.models import AuditLog
+from app.modules.circle.models import CareLink
 from app.modules.documents.models import Document, DocumentPage
 from app.modules.doses.models import DoseLog
 from app.modules.extraction.models import Extraction
@@ -21,6 +22,7 @@ from app.modules.visits.models import VisitPrep
 __all__ = [
     "AuditLog",
     "CareAction",
+    "CareLink",
     "ChatMessage",
     "ChatThread",
     "DietNote",

@@ -12,6 +12,7 @@ import { RangeNote } from "@/features/labs/RangeNote";
 import { TrendChart } from "@/features/labs/TrendChart";
 import { describeChange, resultLabel } from "@/features/labs/format";
 import { formatDate } from "@/lib/format";
+import { useActing } from "@/features/circle/api";
 
 function sourceHref(r) {
   return `/app/documents/${r.document_id}${r.source_page ? `?page=${r.source_page}` : ""}`;
@@ -44,6 +45,7 @@ function BackLink() {
 }
 
 export default function LabDetail() {
+  const { isActing } = useActing();
   const { key } = useParams();
   const { data, isPending, isError, error, refetch } = useLabTrend(key);
   const remove = useDeleteLabResult();
@@ -217,15 +219,17 @@ export default function LabDetail() {
                     </Link>
                   </td>
                   <td className="py-3 text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      icon
-                      aria-label={`Remove the ${formatDate(r.collected_on)} result`}
-                      onClick={() => onRemove(r)}
-                    >
-                      <Trash size={15} />
-                    </Button>
+                    {!isActing && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        icon
+                        aria-label={`Remove the ${formatDate(r.collected_on)} result`}
+                        onClick={() => onRemove(r)}
+                      >
+                        <Trash size={15} />
+                      </Button>
+                    )}
                   </td>
                 </tr>
               ))}

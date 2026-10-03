@@ -28,6 +28,7 @@ import { AdherenceLine } from "@/features/doses/AdherenceLine";
 import { useSupplies } from "@/features/supply/api";
 import { SupplyDialog } from "@/features/supply/SupplyDialog";
 import { SupplyLine } from "@/features/supply/SupplyLine";
+import { useActing } from "@/features/circle/api";
 
 const TABS = [
   { key: "active", label: "Active" },
@@ -137,6 +138,7 @@ function CourseProgress({ med }) {
 }
 
 function MedicationCard({ med, onEdit, index, focused, history, window, supply, onSupply }) {
+  const { isActing, readOnly } = useActing();
   const update = useUpdateMedication();
   const stopped = med.status === "stopped";
   return (
@@ -184,11 +186,11 @@ function MedicationCard({ med, onEdit, index, focused, history, window, supply, 
       {med.instructions && <p className="mt-3 text-sm text-ink-2">{med.instructions}</p>}
       <CourseProgress med={med} />
       {history && <AdherenceLine history={history} window={window} />}
-      {(med.status === "active" || med.status === "upcoming") && (
+      {(med.status === "active" || med.status === "upcoming") && !(readOnly && !supply) && (
         <SupplyLine
           supply={supply}
-          onCount={() => onSupply(med, "count")}
-          onRefill={() => onSupply(med, "refill")}
+          onCount={readOnly ? null : () => onSupply(med, "count")}
+          onRefill={readOnly ? null : () => onSupply(med, "refill")}
         />
       )}
       {med.status === "upcoming" && (
@@ -199,12 +201,12 @@ function MedicationCard({ med, onEdit, index, focused, history, window, supply, 
       )}
 
       <div className="mt-auto flex flex-wrap gap-1 pt-4">
-        {!med.as_needed && !stopped && (
+        {!isActing && !med.as_needed && !stopped && (
           <Button variant="ghost" size="sm" onClick={() => onEdit(med)}>
             <PencilSimple size={14} /> Edit times
           </Button>
         )}
-        {(med.status === "active" || stopped) && (
+        {!isActing && (med.status === "active" || stopped) && (
           <Button
             variant="ghost"
             size="sm"

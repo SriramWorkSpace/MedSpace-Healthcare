@@ -8,6 +8,7 @@ import {
   DownloadSimple,
   Egg,
   DeviceMobile,
+  UsersThree,
   GoogleLogo,
   LockSimple,
   ShieldCheck,
@@ -35,11 +36,13 @@ import {
 } from "@/features/integrations/api";
 import { describeAudit, deviceFrom, useAuditLog } from "@/features/settings/audit";
 import { DeviceSettings } from "@/features/offline/DeviceSettings";
+import { CareCircleSettings } from "@/features/circle/CareCircleSettings";
 
 const SECTIONS = [
   { id: "profile", label: "Profile", icon: User },
   { id: "integrations", label: "Integrations", icon: GoogleLogo },
   { id: "device", label: "This device", icon: DeviceMobile },
+  { id: "circle", label: "Care circle", icon: UsersThree },
   { id: "activity", label: "Activity", icon: ShieldCheck },
   { id: "eggs", label: "Easter eggs", icon: Egg },
   { id: "danger", label: "Account", icon: LockSimple },
@@ -444,6 +447,13 @@ export default function Settings() {
             description="Optional. Only confirmed records are ever synced."
           >
             <GoogleCard />
+          </Section>
+          <Section
+            id="circle"
+            title="Care circle"
+            description="Let a family member or carer see your records, or help by ticking doses. You can change or end access at any time."
+          >
+            <CareCircleSettings />
           </Section>
           <Section
             id="device"

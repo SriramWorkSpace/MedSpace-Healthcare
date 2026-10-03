@@ -37,22 +37,24 @@ export function SupplyLine({ supply, onCount, onRefill }) {
           <span className="block opacity-90">{runsOutLabel(supply)} (estimate)</span>
         </span>
       </p>
-      <span className="flex gap-1">
-        <button
-          type="button"
-          onClick={onCount}
-          className="rounded-full px-2.5 py-1 font-medium hover:bg-surface/60"
-        >
-          Update count
-        </button>
-        <button
-          type="button"
-          onClick={onRefill}
-          className="rounded-full bg-surface px-2.5 py-1 font-medium text-ink shadow-xs hover:bg-surface-2"
-        >
-          Refill
-        </button>
-      </span>
+      {onCount && (
+        <span className="flex gap-1">
+          <button
+            type="button"
+            onClick={onCount}
+            className="rounded-full px-2.5 py-1 font-medium hover:bg-surface/60"
+          >
+            Update count
+          </button>
+          <button
+            type="button"
+            onClick={onRefill}
+            className="rounded-full bg-surface px-2.5 py-1 font-medium text-ink shadow-xs hover:bg-surface-2"
+          >
+            Refill
+          </button>
+        </span>
+      )}
     </div>
   );
 }

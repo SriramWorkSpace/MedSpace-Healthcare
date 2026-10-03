@@ -45,6 +45,10 @@ export const router = createBrowserRouter([
           { path: "ask", lazy: page(() => import("@/pages/app/Ask")) },
           { path: "sharing", lazy: page(() => import("@/pages/app/Sharing")) },
           { path: "settings", lazy: page(() => import("@/pages/app/Settings")) },
+          {
+            path: "circle/accept/:token",
+            lazy: page(() => import("@/pages/app/CircleAccept")),
+          },
         ],
       },
       { path: "s/:token", lazy: page(() => import("@/pages/share/SharedView")) },

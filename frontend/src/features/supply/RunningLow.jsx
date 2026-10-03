@@ -4,7 +4,7 @@ import { SupplyDialog } from "./SupplyDialog";
 import { leftLabel, runsOutLabel } from "./format";
 
 /** Dashboard card: supplies estimated to run out within their warning window. */
-export function RunningLow({ items }) {
+export function RunningLow({ items, readOnly = false }) {
   const [refilling, setRefilling] = useState(null);
   if (!items?.length) return null;
   return (
@@ -28,13 +28,15 @@ export function RunningLow({ items }) {
                 {leftLabel(s)}. {runsOutLabel(s)} (estimate).
               </span>
             </span>
-            <button
-              type="button"
-              onClick={() => setRefilling(s)}
-              className="shrink-0 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium hover:border-line-strong"
-            >
-              Refill
-            </button>
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={() => setRefilling(s)}
+                className="shrink-0 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium hover:border-line-strong"
+              >
+                Refill
+              </button>
+            )}
           </li>
         ))}
       </ul>

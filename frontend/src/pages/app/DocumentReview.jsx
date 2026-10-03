@@ -31,6 +31,7 @@ import { ProcessingState } from "@/features/review/ProcessingState";
 import { ReviewForm } from "@/features/review/ReviewForm";
 import { ConfirmSuccess } from "@/features/review/ConfirmSuccess";
 import { formatBytes, formatDate } from "@/lib/format";
+import { useActing } from "@/features/circle/api";
 
 function ReviewSkeleton() {
   return (
@@ -53,6 +54,7 @@ function ReviewSkeleton() {
 }
 
 export default function DocumentReview() {
+  const { isActing } = useActing();
   const { id } = useParams();
   const navigate = useNavigate();
   const doc = useDocument(id);
@@ -171,7 +173,11 @@ export default function DocumentReview() {
           <SourceViewer doc={d} page={page} onPageChange={setPage} highlight={highlight} />
         </div>
         <div>
-          {isDraft ? (
+          {isDraft && isActing ? (
+            <div className="card p-6 text-sm text-ink-2">
+              This document is waiting for its owner to review it. Records appear once they confirm.
+            </div>
+          ) : isDraft ? (
             <ReviewForm
               key={ex.id}
               extraction={ex}

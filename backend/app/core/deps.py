@@ -20,7 +20,15 @@ def _extract_token(request: Request) -> str | None:
     return request.cookies.get(ACCESS_COOKIE)
 
 
+ACTING_HEADER = "x-acting-for"
+
+
 async def get_current_user(request: Request, session: AsyncSession = Depends(get_session)) -> User:
+    """The user whose records this request reads or changes.
+
+    Normally the signed-in user. With `X-Acting-For: <owner id>`, a caregiver in the owner's care
+    circle acts on the owner's records, limited to the routes their role allows (ADR-026).
+    """
     token = _extract_token(request)
     user_id = decode_access_token(token) if token else None
     if user_id is None:
@@ -28,6 +36,11 @@ async def get_current_user(request: Request, session: AsyncSession = Depends(get
     user = await session.get(User, user_id)
     if user is None:
         raise Unauthorized()
+    owner_ref = request.headers.get(ACTING_HEADER)
+    if owner_ref:
+        from app.modules.circle import service as circle
+
+        return await circle.resolve_acting(session, request, user, owner_ref)
     return user
 
 

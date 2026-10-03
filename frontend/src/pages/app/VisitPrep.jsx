@@ -20,6 +20,7 @@ import { LoadingRegion, Skeleton } from "@/components/ui/Skeleton";
 import { useDeleteVisit, useUpdateVisit, useVisitBrief } from "@/features/visits/api";
 import { VisitBrief } from "@/features/visits/VisitBrief";
 import { cn } from "@/lib/cn";
+import { useActing } from "@/features/circle/api";
 
 const newId = () => Math.random().toString(36).slice(2, 12);
 
@@ -262,6 +263,7 @@ function PrepSkeleton() {
 }
 
 export default function VisitPrep() {
+  const { isActing } = useActing();
   const { id } = useParams();
   const navigate = useNavigate();
   const { data, isPending, isError, error, refetch } = useVisitBrief(id);
@@ -307,21 +309,27 @@ export default function VisitPrep() {
           <Button variant="secondary" size="sm" onClick={() => window.print()}>
             <Printer size={15} /> Print
           </Button>
-          <Button as={Link} to={`/app/sharing?visit=${visit.id}`} variant="secondary" size="sm">
-            <ShareNetwork size={15} /> Share
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => setConfirming(true)}>
-            <Trash size={15} /> Delete
-          </Button>
+          {!isActing && (
+            <Button as={Link} to={`/app/sharing?visit=${visit.id}`} variant="secondary" size="sm">
+              <ShareNetwork size={15} /> Share
+            </Button>
+          )}
+          {!isActing && (
+            <Button variant="ghost" size="sm" onClick={() => setConfirming(true)}>
+              <Trash size={15} /> Delete
+            </Button>
+          )}
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] lg:items-start">
-        <div className="no-print grid grid-cols-1 content-start gap-4">
-          <Questions visit={visit} update={update} />
-          <Prompts prompts={data.prompts} visit={visit} update={update} />
-          <Details key={visit.id} visit={visit} update={update} />
-        </div>
+        {!isActing && (
+          <div className="no-print grid grid-cols-1 content-start gap-4">
+            <Questions visit={visit} update={update} />
+            <Prompts prompts={data.prompts} visit={visit} update={update} />
+            <Details key={visit.id} visit={visit} update={update} />
+          </div>
+        )}
         <VisitBrief brief={data} />
       </div>
 

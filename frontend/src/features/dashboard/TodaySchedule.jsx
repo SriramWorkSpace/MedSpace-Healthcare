@@ -18,10 +18,10 @@ const slotFor = (time) => SLOTS.find((s) => time < s.until)?.key ?? "night";
 /**
  * Ticks used to live in localStorage. Move today's leftovers to the account once, then forget them.
  */
-function useMigrateDeviceTicks(dateKey, doses, setDose) {
+function useMigrateDeviceTicks(dateKey, doses, setDose, skip) {
   const done = useRef(false);
   useEffect(() => {
-    if (done.current) return;
+    if (done.current || skip) return;
     done.current = true;
     const key = `ms-taken-${dateKey}`;
     let ids;
@@ -42,7 +42,7 @@ function useMigrateDeviceTicks(dateKey, doses, setDose) {
         });
       }
     }
-  }, [dateKey, doses, setDose]);
+  }, [dateKey, doses, setDose, skip]);
 }
 
 function nowHHMM() {
@@ -50,9 +50,9 @@ function nowHHMM() {
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
-export function TodaySchedule({ doses, dateKey }) {
+export function TodaySchedule({ doses, dateKey, readOnly = false }) {
   const setDose = useSetDose();
-  useMigrateDeviceTicks(dateKey, doses, setDose);
+  useMigrateDeviceTicks(dateKey, doses, setDose, readOnly);
   const [now] = useState(nowHHMM);
   const nextIndex = doses.findIndex((d) => d.time >= now && !d.status);
   const mark = (d, status) =>
@@ -115,6 +115,7 @@ export function TodaySchedule({ doses, dateKey }) {
                     <button
                       type="button"
                       onClick={() => mark(d, isTaken ? null : "taken")}
+                      disabled={readOnly}
                       aria-pressed={isTaken}
                       aria-label={`${isTaken ? "Taken: " : "Mark taken: "}${label}`}
                       className="flex min-w-0 flex-1 items-center gap-3 rounded-[var(--radius-control)] px-3.5 py-3 text-left transition-transform duration-150 active:scale-[0.99]"
@@ -170,7 +171,7 @@ export function TodaySchedule({ doses, dateKey }) {
                         </AnimatePresence>
                       </span>
                     </button>
-                    {!isTaken && (
+                    {!isTaken && !readOnly && (
                       <button
                         type="button"
                         onClick={() => mark(d, isSkipped ? null : "skipped")}

@@ -13,6 +13,7 @@ import { useMedicationAdherence, useSetDose } from "@/features/doses/api";
 import { STATE_LABELS, daySummary, percent } from "@/features/doses/states";
 import { cn } from "@/lib/cn";
 import { formatClock, formatDate } from "@/lib/format";
+import { useActing } from "@/features/circle/api";
 
 const RANGES = [
   { key: 28, label: "4 weeks" },
@@ -206,6 +207,7 @@ function HistorySkeleton() {
 }
 
 export default function MedicationHistory() {
+  const { readOnly } = useActing();
   const { id } = useParams();
   const [range, setRange] = useState(28);
   const [picked, setPicked] = useState(null);
@@ -316,7 +318,9 @@ export default function MedicationHistory() {
             onSelect={setPicked}
           />
         </section>
-        <DayPanel medicationId={med.medication_id} day={selectedDay} today={data.end} />
+        {!readOnly && (
+          <DayPanel medicationId={med.medication_id} day={selectedDay} today={data.end} />
+        )}
       </div>
 
       <p className="mt-6 flex items-start gap-2 text-sm text-ink-2">

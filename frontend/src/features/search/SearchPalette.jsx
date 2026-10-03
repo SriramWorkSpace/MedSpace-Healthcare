@@ -19,6 +19,7 @@ import {
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/cn";
 import { useSearch } from "./api";
+import { useActing } from "@/features/circle/api";
 
 const GROUPS = [
   { key: "medications", label: "Medications", icon: Pill },
@@ -90,6 +91,7 @@ export default function SearchPalette({ onClose }) {
   const { data, isFetching } = useSearch(debounced);
   const trimmed = q.trim();
   const searching = trimmed.length >= 2;
+  const askable = !useActing().isActing; // Ask MedSpace is the owner's
 
   // Flatten everything selectable into one list so arrow keys walk across groups.
   const items = useMemo(() => {
@@ -100,6 +102,7 @@ export default function SearchPalette({ onClose }) {
         out.push({ ...hit, kind: "hit", group: g, header: n === 0 ? g.label : null }),
       );
     }
+    if (!askable) return out;
     out.push({
       kind: "ask",
       title: `Ask MedSpace about "${trimmed}"`,
@@ -107,7 +110,7 @@ export default function SearchPalette({ onClose }) {
       icon: ChatsCircle,
     });
     return out;
-  }, [searching, data, trimmed]);
+  }, [searching, data, trimmed, askable]);
 
   const safeActive = Math.min(active, items.length - 1);
 

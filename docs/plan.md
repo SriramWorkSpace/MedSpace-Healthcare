@@ -112,6 +112,15 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 - [x] Multi-stage web image (nginx + /api proxy), deployment guide (docs/deployment.md), README screenshots
 - [x] Final graphify update and docs sync
 
+## Phase 16: Care circle (caregiver access)
+
+- [x] `care_links` table and `circle` module: email-bound one-time invitations (hashed, 7-day expiry), accept, change role, revoke or leave (ADR-026)
+- [x] Central access check: `X-Acting-For` resolved in `get_current_user`; role allow-lists (viewer reads; helper also ticks doses, completes to-dos, updates supply); everything else refused; personal routes ignore the header
+- [x] Helper changes audited in the owner's activity log
+- [x] Frontend: Care circle settings (invite, copy link, roles, remove, leave), accept page, profile switcher in the account menu, acting banner, role-aware UI, auto switch-back on revocation, no offline copy while acting
+- [x] Demo: every demo account helps a fictional family member with her own records
+- [x] Tests: 6 backend (flow, roles, audit, out-of-bounds routes, one-time email-bound invites, revocation, demo), 2 e2e (with axe)
+
 ## Phase 15: Installable app and offline access
 
 - [x] Web app manifest, icons (any + maskable, generated from the favicon by `scripts/icons.mjs`), shortcuts (ADR-025)
@@ -185,6 +194,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 ---
 
 ## Change log
+
+- **2026-10-03**: Phase 16 shipped: care circle with role-limited caregiver access (ADR-026). The access tests caught a prefix-matching bug ("/medications" treated as "/me") before release.
 
 - **2026-10-03**: Phase 15 shipped: installable app with opt-in offline access (ADR-025).
 

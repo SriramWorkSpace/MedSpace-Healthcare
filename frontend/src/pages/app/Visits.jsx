@@ -14,6 +14,7 @@ import { useDashboard } from "@/features/records/api";
 import { useCreateVisit, useVisits } from "@/features/visits/api";
 import { clinicianFrom } from "@/features/visits/clinician";
 import { formatDate, formatRelativeDay } from "@/lib/format";
+import { useActing } from "@/features/circle/api";
 
 function NewVisitDialog({ open, onClose, initial }) {
   const navigate = useNavigate();
@@ -159,6 +160,7 @@ function VisitsSkeleton() {
 }
 
 export default function Visits() {
+  const { isActing } = useActing();
   const { data, isPending, isError, refetch } = useVisits();
   const dashboard = useDashboard();
   const [dialog, setDialog] = useState(null); // null | { title?, date?, clinician? }
@@ -178,9 +180,11 @@ export default function Visits() {
         title="Visits"
         description="Get ready for appointments: your questions, plus a one-page brief of what changed since last time."
         actions={
-          <Button onClick={() => setDialog({})}>
-            <Plus size={15} weight="bold" /> New visit prep
-          </Button>
+          isActing ? undefined : (
+            <Button onClick={() => setDialog({})}>
+              <Plus size={15} weight="bold" /> New visit prep
+            </Button>
+          )
         }
       />
 

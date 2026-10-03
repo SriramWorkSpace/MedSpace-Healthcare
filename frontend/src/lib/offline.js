@@ -7,6 +7,7 @@
  * or when the setting is turned off. The service worker never stores health data.
  */
 import { dehydrate, hydrate } from "@tanstack/react-query";
+import { getActing } from "./acting";
 
 const DB = "medspace-offline";
 const STORE = "kv";
@@ -92,7 +93,8 @@ function currentUserId(queryClient) {
 
 async function saveNow(queryClient) {
   const userId = currentUserId(queryClient);
-  if (!userId || !isOfflineEnabled()) return;
+  // Someone else's records (care circle) are never written to this device.
+  if (!userId || !isOfflineEnabled() || getActing()) return;
   const state = dehydrate(queryClient, {
     shouldDehydrateQuery: (q) => q.state.status === "success" && PERSISTED.has(q.queryKey[0]),
     shouldDehydrateMutation: (m) => m.state.isPaused && m.options.mutationKey?.[0] === "dose",

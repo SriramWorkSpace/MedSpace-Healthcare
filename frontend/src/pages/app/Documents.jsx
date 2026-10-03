@@ -15,6 +15,7 @@ import { UploadQueue } from "@/features/documents/UploadQueue";
 import { useUploadQueue } from "@/features/documents/useUploadQueue";
 import { FILTERS } from "@/features/documents/status";
 import { cn } from "@/lib/cn";
+import { useActing } from "@/features/circle/api";
 
 const ACCEPT = {
   "application/pdf": [".pdf"],
@@ -31,7 +32,9 @@ export default function Documents() {
   const { items: uploads, enqueue, remove } = useUploadQueue();
   const [rejections, setRejections] = useState([]);
 
+  const { isActing } = useActing();
   const { getRootProps, getInputProps, open, isDragActive } = useDropzone({
+    disabled: isActing,
     accept: ACCEPT,
     maxSize: MAX_BYTES,
     noClick: true,
@@ -89,7 +92,7 @@ export default function Documents() {
       />
 
       {/* Drop target / hint */}
-      {!isEmpty && (
+      {!isEmpty && !isActing && (
         <button
           type="button"
           onClick={open}
@@ -140,9 +143,11 @@ export default function Documents() {
           title="No documents yet"
           description="Drag a prescription onto this page, or pick a file. Try one of the synthetic samples in the repo's /samples folder."
           action={
-            <Button onClick={open}>
-              <UploadSimple size={15} weight="bold" /> Choose files
-            </Button>
+            isActing ? undefined : (
+              <Button onClick={open}>
+                <UploadSimple size={15} weight="bold" /> Choose files
+              </Button>
+            )
           }
           quip={EMPTY_QUIPS.documents}
         />

@@ -1,11 +1,11 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect } from "@playwright/test";
 
-export async function signUp(page) {
+export async function signUp(page, email) {
   const unique = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
   await page.goto("/signup");
   await page.getByLabel("Name").fill("Mira Castellanos");
-  await page.getByLabel("Email").fill(`mira-${unique}@example.com`);
+  await page.getByLabel("Email").fill(email ?? `mira-${unique}@example.com`);
   await page.getByLabel("Password", { exact: true }).fill("a-long-enough-password");
   await page.getByRole("button", { name: "Create account" }).click();
   await page.waitForURL("**/app");

@@ -10,6 +10,7 @@ import { OfflineBanner } from "@/features/offline/OfflineBanner";
 import { useOnline } from "@/features/offline/hooks";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { CloudSlash } from "@phosphor-icons/react";
+import { ActingBanner } from "@/features/circle/ActingBanner";
 
 function ShellSkeleton() {
   return (
@@ -62,6 +63,7 @@ export default function AppLayout() {
       </a>
       <AppNav />
       <OfflineBanner />
+      <ActingBanner />
       {user.is_demo && (
         <aside
           aria-label="Demo account"

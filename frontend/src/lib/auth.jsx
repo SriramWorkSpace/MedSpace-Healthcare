@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo } from "reac
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, readCookie, refreshSession, setSessionExpiredHandler } from "./api";
 import { clearOfflineCopy } from "./offline";
+import { setActing } from "./acting";
 
 const AuthContext = createContext(null);
 export const meKey = ["auth", "me"];
@@ -38,6 +39,7 @@ export function AuthProvider({ children }) {
     mutationFn: () => api.post("/api/auth/logout"),
     onSettled: () => {
       clearOfflineCopy();
+      setActing(null);
       qc.clear();
       qc.setQueryData(meKey, null);
     },

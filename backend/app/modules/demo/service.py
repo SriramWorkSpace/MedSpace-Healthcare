@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.core.db import utcnow
 from app.modules.assistant import service as assistant
+from app.modules.circle.models import CareLink
 from app.modules.demo import samples
 from app.modules.documents import service as documents
 from app.modules.documents.models import DocumentStatus
@@ -120,6 +121,65 @@ async def seed(session: AsyncSession, user: User) -> None:
         await assistant.index_document(session, d.id)
 
 
+async def seed_family(session: AsyncSession, user: User, handle: str) -> None:
+    """A fictional family member who added the demo user to her care circle as a helper.
+
+    Lighter than the main seed: her diabetes prescription, two lab panels, dose history and a
+    supply count, so the profile switcher has something real to show.
+    """
+    family = await identity.create_user(
+        session,
+        SignupIn(
+            email=f"demo-{handle}-family@demo.medspace.dev",
+            password=secrets.token_urlsafe(24),
+            display_name="Rosa Lindqvist",
+            timezone=user.timezone,
+        ),
+        is_demo=True,
+    )
+    today = date.today()
+    sc = samples.SCENARIOS[1]
+    doc = await _ingest(
+        session,
+        family,
+        f"rx-{sc.slug}.pdf",
+        samples.build_pdf(sc, today),
+        samples.issued(sc, today),
+    )
+    texts = await _page_texts(session, doc.id)
+    payload, method, model = await extraction.extract_document(
+        doc, texts, family.dose_times, offline=True
+    )
+    draft = await extraction.save_draft(session, doc, payload, method, model)
+    await extraction.confirm(session, family, draft.id, extraction.payload_to_confirm(payload))
+    for lab in [r for r in samples.LAB_REPORTS if "diabetes" in r.slug]:
+        lab_date = today - timedelta(days=lab.days_ago)
+        doc = await _ingest(
+            session, family, f"lab-{lab.slug}.pdf", samples.build_lab_pdf(lab, today), lab_date
+        )
+        doc.title = lab.title.capitalize()
+        texts = await _page_texts(session, doc.id)
+        payload, method, model = await extraction.extract_document(
+            doc, texts, family.dose_times, offline=True
+        )
+        draft = await extraction.save_draft(session, doc, payload, method, model)
+        await extraction.confirm(session, family, draft.id, extraction.payload_to_confirm(payload))
+    await doses.seed_history(session, family)
+    await supply.seed_demo(session, family)
+    session.add(
+        CareLink(
+            owner_id=family.id,
+            caregiver_id=user.id,
+            invite_email=user.email,
+            role="helper",
+            status="active",
+            expires_at=utcnow(),
+            accepted_at=utcnow(),
+        )
+    )
+    await session.flush()
+
+
 async def seed_quietly(session: AsyncSession, user: User) -> None:
     """Seed demo records for a new simulated account; never let seeding block a sign-in."""
     try:
@@ -151,6 +211,11 @@ async def create_demo_account(session: AsyncSession) -> User:
             await seed(session, user)
     except Exception:  # an empty demo is better than no demo
         logger.exception("demo seeding failed for %s", user.id)
+    try:
+        async with session.begin_nested():
+            await seed_family(session, user, handle)
+    except Exception:
+        logger.exception("demo family seeding failed for %s", user.id)
     return user
 
 

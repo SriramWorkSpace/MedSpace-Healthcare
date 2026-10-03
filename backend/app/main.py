@@ -19,6 +19,7 @@ from app.core.logging import configure_logging
 from app.core.middleware import CSRFMiddleware, RequestLogMiddleware, SecurityHeadersMiddleware
 from app.modules.assistant.router import router as assistant_router
 from app.modules.audit.router import router as audit_router
+from app.modules.circle.router import router as circle_router
 from app.modules.demo.router import router as demo_router
 from app.modules.documents.router import router as documents_router
 from app.modules.doses.router import router as doses_router
@@ -66,7 +67,13 @@ def create_app() -> FastAPI:
         allow_origins=settings.cors_origins,
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-        allow_headers=["content-type", "x-csrf-token", "x-request-id", "authorization"],
+        allow_headers=[
+            "content-type",
+            "x-csrf-token",
+            "x-request-id",
+            "authorization",
+            "x-acting-for",
+        ],
         expose_headers=["x-request-id", "retry-after"],
     )
     app.add_middleware(RequestLogMiddleware)
@@ -85,6 +92,7 @@ def create_app() -> FastAPI:
     api.include_router(doses_router)
     api.include_router(visits_router)
     api.include_router(supply_router)
+    api.include_router(circle_router)
     api.include_router(assistant_router)
     api.include_router(integrations_router)
     api.include_router(google_auth_router)

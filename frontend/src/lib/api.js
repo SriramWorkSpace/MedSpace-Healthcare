@@ -5,6 +5,8 @@
  * - On 401, performs ONE shared refresh attempt and retries the request.
  */
 
+import { getActing } from "./acting";
+
 const BASE = import.meta.env.VITE_API_URL ?? "";
 const UNSAFE = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 const NO_REFRESH = ["/api/auth/login", "/api/auth/signup", "/api/auth/demo", "/api/auth/refresh"];
@@ -66,6 +68,8 @@ export async function api(path, opts = {}) {
 
   const doFetch = () => {
     const headers = { Accept: "application/json", ...opts.headers };
+    const acting = getActing();
+    if (acting) headers["X-Acting-For"] = acting.id;
     if (opts.body !== undefined && !isForm) headers["Content-Type"] = "application/json";
     if (UNSAFE.has(method)) headers["X-CSRF-Token"] = readCookie("ms_csrf") ?? "";
     return fetch(`${BASE}${path}`, {

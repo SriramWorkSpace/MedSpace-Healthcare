@@ -19,6 +19,7 @@ import { EMPTY_QUIPS } from "@/easter-eggs/puns";
 import { useDashboard, useDietNotes } from "@/features/records/api";
 import { TodaySchedule } from "@/features/dashboard/TodaySchedule";
 import { RunningLow } from "@/features/supply/RunningLow";
+import { useActing } from "@/features/circle/api";
 import {
   AsNeededList,
   ComingUp,
@@ -56,6 +57,7 @@ function DashboardSkeleton() {
 }
 
 export default function Dashboard() {
+  const { acting, isActing, readOnly } = useActing();
   const { user } = useAuth();
   const { data, isPending, isError, refetch } = useDashboard();
   const diet = useDietNotes();
@@ -84,7 +86,9 @@ export default function Dashboard() {
     <>
       <motion.div {...stagger(0)} className="mb-8">
         <h1 className="text-3xl font-semibold tracking-tight sm:text-[34px]">
-          {greeting()}, {firstName(user.display_name)}.
+          {isActing
+            ? `${firstName(acting.name)}'s day`
+            : `${greeting()}, ${firstName(user.display_name)}.`}
         </h1>
         <p className="mt-2 text-ink-2">{format(parseISO(data.today), "EEEE, MMMM d")}</p>
       </motion.div>
@@ -104,8 +108,8 @@ export default function Dashboard() {
       ) : (
         <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] lg:items-start">
           <motion.div {...stagger(1)} className="grid grid-cols-1 min-w-0 gap-4">
-            <NeedsReview items={data.needs_review} processing={data.processing} />
-            <RunningLow items={data.running_low} />
+            {!isActing && <NeedsReview items={data.needs_review} processing={data.processing} />}
+            <RunningLow items={data.running_low} readOnly={readOnly} />
             <Panel
               title="Today's doses"
               action={
@@ -118,7 +122,7 @@ export default function Dashboard() {
               }
             >
               {data.doses_today.length ? (
-                <TodaySchedule doses={data.doses_today} dateKey={data.today} />
+                <TodaySchedule doses={data.doses_today} dateKey={data.today} readOnly={readOnly} />
               ) : (
                 <p className="text-sm text-ink-2">{EMPTY_QUIPS.medications}</p>
               )}

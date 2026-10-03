@@ -19,6 +19,7 @@ import { EMPTY_QUIPS } from "@/easter-eggs/puns";
 import { useDeleteDietNote, useDietNotes } from "@/features/records/api";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { useActing } from "@/features/circle/api";
 
 const GROUPS = [
   { key: "avoid", title: "Avoid", icon: Prohibit, tone: "bg-danger-soft text-danger-ink" },
@@ -81,16 +82,18 @@ function NoteGroup({ group, notes, onRemove, index }) {
                 <p className="text-[15px]">{n.text}</p>
                 <Source note={n} />
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                icon
-                aria-label={`Remove note: ${n.text}`}
-                onClick={() => onRemove(n)}
-                className="opacity-60 group-hover:opacity-100 focus-visible:opacity-100"
-              >
-                <Trash size={15} />
-              </Button>
+              {onRemove && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon
+                  aria-label={`Remove note: ${n.text}`}
+                  onClick={() => onRemove(n)}
+                  className="opacity-60 group-hover:opacity-100 focus-visible:opacity-100"
+                >
+                  <Trash size={15} />
+                </Button>
+              )}
             </motion.li>
           ))}
         </AnimatePresence>
@@ -161,6 +164,7 @@ function DietSkeleton() {
 }
 
 export default function Diet() {
+  const { isActing } = useActing();
   const { data, isPending, isError, refetch } = useDietNotes();
   const remove = useDeleteDietNote();
 
@@ -210,7 +214,13 @@ export default function Diet() {
           <div className="grid grid-cols-1 gap-4">
             {groups.length ? (
               groups.map((g, i) => (
-                <NoteGroup key={g.key} group={g} notes={g.notes} onRemove={onRemove} index={i} />
+                <NoteGroup
+                  key={g.key}
+                  group={g}
+                  notes={g.notes}
+                  onRemove={isActing ? null : onRemove}
+                  index={i}
+                />
               ))
             ) : (
               <p className="card card--flat p-5 text-sm text-ink-2">

@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { GearSix, SignOut, ShieldCheck } from "@phosphor-icons/react";
+import { Check, GearSix, SignOut, ShieldCheck, UsersThree } from "@phosphor-icons/react";
 import { useAuth } from "@/lib/auth";
+import { useActing, useCircle, useSwitchProfile } from "@/features/circle/api";
 
 function initials(name = "") {
   return name
@@ -18,6 +19,10 @@ export function UserMenu() {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const navigate = useNavigate();
+  const circle = useCircle();
+  const { acting } = useActing();
+  const switchProfile = useSwitchProfile();
+  const caringFor = circle.data?.caring_for ?? [];
 
   useEffect(() => {
     if (!open) return;
@@ -62,6 +67,34 @@ export function UserMenu() {
                 {user.is_demo ? "Demo account · synthetic data" : user.email}
               </p>
             </div>
+            {caringFor.length > 0 && (
+              <>
+                <div className="my-1 h-px bg-line" />
+                <p className="px-3 pb-1 pt-1.5 text-xs font-medium text-ink-3">Records</p>
+                {[
+                  { id: null, name: "Your records" },
+                  ...caringFor.map((c) => ({ ...c.person, role: c.role })),
+                ].map((p) => {
+                  const current = (acting?.id ?? null) === p.id;
+                  return (
+                    <MenuItem
+                      key={p.id ?? "me"}
+                      icon={p.id ? UsersThree : Check}
+                      aria-current={current ? "true" : undefined}
+                      onClick={() => {
+                        setOpen(false);
+                        if (current) return;
+                        switchProfile(p.id ? p : null);
+                        navigate("/app");
+                      }}
+                    >
+                      <span className="min-w-0 flex-1 truncate">{p.name}</span>
+                      {current && <Check size={14} weight="bold" className="text-accent" />}
+                    </MenuItem>
+                  );
+                })}
+              </>
+            )}
             <div className="my-1 h-px bg-line" />
             <MenuItem as={Link} to="/app/settings" icon={GearSix} onClick={() => setOpen(false)}>
               Settings
