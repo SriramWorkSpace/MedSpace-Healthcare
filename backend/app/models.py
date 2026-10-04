@@ -15,7 +15,12 @@ from app.modules.records.models import (
     Medication,
     Prescription,
 )
-from app.modules.reminders.models import PushSubscription, ReminderLog, ReminderSettings
+from app.modules.reminders.models import (
+    CaregiverReminderLog,
+    PushSubscription,
+    ReminderLog,
+    ReminderSettings,
+)
 from app.modules.sharing.models import ShareLink, ShareLinkItem
 from app.modules.supply.models import MedicationSupply
 from app.modules.visits.models import VisitPrep
@@ -24,6 +29,7 @@ __all__ = [
     "AuditLog",
     "CareAction",
     "CareLink",
+    "CaregiverReminderLog",
     "ChatMessage",
     "ChatThread",
     "DietNote",

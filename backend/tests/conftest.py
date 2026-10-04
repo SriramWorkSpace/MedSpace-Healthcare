@@ -48,6 +48,17 @@ async def _schema() -> AsyncIterator[None]:
     await engine.dispose()
 
 
+@pytest.fixture
+def sender():
+    """A recording push sender (ADR-028) for tests that check notifications."""
+    from app.shared.push import FakePushSender, set_push_sender
+
+    fake = FakePushSender()
+    set_push_sender(fake)
+    yield fake
+    set_push_sender(None)
+
+
 @pytest.fixture(autouse=True)
 def mailbox() -> FakeMailer:
     """Every test gets an empty simulated outbox (ADR-030)."""

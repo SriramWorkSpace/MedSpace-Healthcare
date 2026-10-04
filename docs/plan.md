@@ -112,6 +112,14 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 - [x] Multi-stage web image (nginx + /api proxy), deployment guide (docs/deployment.md), README screenshots
 - [x] Final graphify update and docs sync
 
+## Phase 22: Dose alerts for caregivers
+
+- [x] Per-person opt-in for caregivers: when a dose is due, or if it isn't ticked 30 or 60 minutes after (ADR-032); owner sees who gets alerts, and changes are in their activity log
+- [x] Minute tick: caregiver alerts in the owner's timezone, only for doses still open, once per link and dose, on the caregiver's devices, respecting their reminders switch
+- [x] Helpers can tick Taken / Skip from the alert; the link is re-checked when used (revoking access disables sent buttons) and the change is audited for the owner; viewers get the alert only
+- [x] Alert links open the right person's records (`/app?for=`), only for someone you actively help
+- [x] Tests: 7 backend (off by default, when due with actions, not-ticked-yet timing and ticked doses, viewers, revocation, audit, who may change it, caregiver's own switch), 1 e2e (with axe); push test fixture moved to conftest
+
 ## Phase 21: Show records on the page
 
 - [x] Records (medicines, to-dos, diet notes, lab results) keep `source_ref`, the item of the confirmed reading they came from; the review form sends it, confirming as-is (demo) fills it, the API validates it
@@ -237,6 +245,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 ---
 
 ## Change log
+
+- **2026-10-04**: Phase 22 shipped: dose alerts for caregivers (ADR-032).
 
 - **2026-10-04**: Phase 21 shipped: records' Source links open the document with their line highlighted (ADR-031 update).
 

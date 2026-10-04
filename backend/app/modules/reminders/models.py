@@ -54,3 +54,24 @@ class ReminderLog(IdMixin, Base):
     due_date: Mapped[date] = mapped_column(Date)
     due_time: Mapped[str] = mapped_column(String(5))
     sent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class CaregiverReminderLog(IdMixin, Base):
+    """A dose a caregiver was already alerted about (ADR-032): each link hears about it once."""
+
+    __tablename__ = "caregiver_reminder_logs"
+    __table_args__ = (
+        UniqueConstraint(
+            "care_link_id", "medication_id", "due_date", "due_time", name="uq_caregiver_reminder"
+        ),
+    )
+
+    care_link_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("care_links.id", ondelete="CASCADE"), index=True
+    )
+    medication_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("medications.id", ondelete="CASCADE")
+    )
+    due_date: Mapped[date] = mapped_column(Date)
+    due_time: Mapped[str] = mapped_column(String(5))
+    sent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

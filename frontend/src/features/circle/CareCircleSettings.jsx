@@ -7,7 +7,15 @@ import { Dialog } from "@/components/ui/Dialog";
 import { Field, Input, Select } from "@/components/ui/Field";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { formatDate } from "@/lib/format";
-import { useCircle, useInvite, useRemoveLink, useSetRole } from "./api";
+import { useCircle, useInvite, useRemoveLink, useSetAlerts, useSetRole } from "./api";
+
+const ALERT_OPTIONS = [
+  ["off", "No dose alerts"],
+  ["0", "When a dose is due"],
+  ["30", "If not ticked 30 min after"],
+  ["60", "If not ticked 1 hour after"],
+];
+const ALERT_CHIP = { 0: "Dose alerts", 30: "Alerts after 30 min", 60: "Alerts after 1 hour" };
 
 const ROLE_HELP = {
   viewer: "Can read your medicines, schedule, labs, documents and visit preps.",
@@ -60,6 +68,7 @@ export function CareCircleSettings() {
   const invite = useInvite();
   const setRole = useSetRole();
   const remove = useRemoveLink();
+  const setAlerts = useSetAlerts();
   const [email, setEmail] = useState("");
   const [role, setRoleChoice] = useState("viewer");
   const [created, setCreated] = useState(null);
@@ -118,6 +127,11 @@ export function CareCircleSettings() {
               <div className="min-w-0 flex-1">
                 <p className="flex flex-wrap items-center gap-2 font-medium">
                   <span className="truncate">{c.person.name}</span>
+                  {c.alert_minutes != null && (
+                    <span className="chip" title="They chose to be told about your doses">
+                      {ALERT_CHIP[c.alert_minutes]}
+                    </span>
+                  )}
                   <span className={c.status === "active" ? "chip chip--accent" : "chip"}>
                     {c.status === "pending"
                       ? "Invited"
@@ -172,16 +186,61 @@ export function CareCircleSettings() {
           <p className="text-sm font-medium">You help</p>
           <ul className="mt-2 grid grid-cols-1 gap-2">
             {caringFor.map((c) => (
-              <li key={c.id} className="flex items-center justify-between gap-3 text-sm">
-                <span>
+              <li
+                key={c.id}
+                className="flex flex-col gap-2 text-sm sm:flex-row sm:items-center sm:justify-between"
+              >
+                <span className="min-w-0">
                   {c.person.name}{" "}
                   <span className="text-ink-3">
                     as a {c.role}. Switch to their records from your account menu.
                   </span>
                 </span>
-                <Button variant="ghost" size="sm" onClick={() => setRemoving(c)}>
-                  Leave
-                </Button>
+                <div className="flex items-end gap-2">
+                  <div className="grid grid-cols-1 gap-1">
+                    <label htmlFor={`alerts-${c.id}`} className="text-xs font-medium text-ink-2">
+                      Dose alerts<span className="sr-only"> about {c.person.name}</span>
+                    </label>
+                    <Select
+                      id={`alerts-${c.id}`}
+                      value={c.alert_minutes == null ? "off" : String(c.alert_minutes)}
+                      disabled={c.status !== "active"}
+                      onChange={(e) =>
+                        setAlerts.mutate(
+                          {
+                            id: c.id,
+                            minutes: e.target.value === "off" ? null : Number(e.target.value),
+                          },
+                          {
+                            onSuccess: (link) =>
+                              toast(
+                                link.alert_minutes == null
+                                  ? `No more dose alerts about ${c.person.name}`
+                                  : `You'll get dose alerts about ${c.person.name}`,
+                                link.alert_minutes == null
+                                  ? undefined
+                                  : {
+                                      description:
+                                        "On devices where reminders are on (This device, below).",
+                                    },
+                              ),
+                            onError: (err) => toast.error(err.message),
+                          },
+                        )
+                      }
+                      className="w-56"
+                    >
+                      {ALERT_OPTIONS.map(([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => setRemoving(c)}>
+                    Leave
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>

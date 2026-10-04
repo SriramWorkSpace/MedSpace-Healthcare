@@ -5,11 +5,9 @@ from __future__ import annotations
 from datetime import UTC, datetime, time, timedelta
 
 import httpx
-import pytest
 
 from app.core.db import SessionLocal
 from app.modules.reminders import service as reminders
-from app.shared.push import FakePushSender, set_push_sender
 from tests.conftest import BASE_URL, csrf
 from tests.test_doses import _medicine, _today
 
@@ -23,14 +21,6 @@ SUB = {
         "auth": "tBHItJI5svbpez7KI4CCXg",
     },
 }
-
-
-@pytest.fixture
-def sender():
-    fake = FakePushSender()
-    set_push_sender(fake)
-    yield fake
-    set_push_sender(None)
 
 
 async def _subscribe(client: httpx.AsyncClient, sub: dict = SUB) -> dict:

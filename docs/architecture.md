@@ -104,8 +104,8 @@ modules/<name>/
 | `doses` | `dose_logs` | Taken/skipped marks per scheduled dose, history and streaks computed from the schedule in the user's timezone; unmarked doses are "not logged", never "missed" (ADR-021) |
 | `visits` | `visit_preps` | Visit prep: the user's questions plus a live brief (current medicines, changes, dose marks, new lab results, open to-dos, appointments) since the last visit; factual prompts to raise; shareable (ADR-022) |
 | `supply` | `medication_supplies` | The user's count per medicine; estimated units left (scheduled doses since the count, skipped ones excluded) and a projected run-out date; feeds the dashboard, visit prompts and Ask MedSpace (ADR-023) |
-| `circle` | `care_links` | Care circle: invitations, roles, revocation, and `resolve_acting`, the single check for caregiver requests (`X-Acting-For`) against role allow-lists (ADR-026) |
-| `reminders` | `push_subscriptions`, `reminder_settings`, `reminder_logs` | Web Push dose reminders: subscriptions, lead time, a once-a-minute tick, signed action tokens for notification buttons (ADR-028) |
+| `circle` | `care_links` | Care circle: invitations, roles, revocation, and `resolve_acting`, the single check for caregiver requests (`X-Acting-For`) against role allow-lists (ADR-026); caregivers' dose-alert choice per link (ADR-032) |
+| `reminders` | `push_subscriptions`, `reminder_settings`, `reminder_logs`, `caregiver_reminder_logs` | Web Push dose reminders: subscriptions, lead time, a once-a-minute tick, signed action tokens for notification buttons (ADR-028); caregiver alerts (when due or not ticked after 30/60 min) with link-checked action tokens (ADR-032) |
 | `search` | (read model, no tables) | Global search: escaped `ILIKE` on names, prefix full-text with `ts_headline` snippets on document chunks, grouped deep-link hits |
 | `assistant` | `document_chunks`, `chat_threads`, `chat_messages` | Chunking, embeddings, hybrid retrieval (pgvector + full-text, RRF fusion), grounded answers with citations, SSE streaming |
 | `integrations` | `oauth_connections`, `sync_links` | Google OAuth (incremental consent), encrypted tokens, Calendar recurring events, Tasks, idempotent sync/unsync |
@@ -273,7 +273,7 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 | Timeline | `GET /timeline?cursor=&types=` |
 | Doses | `PUT /doses` (mark taken or skipped) · `DELETE /doses?medication_id=&date=&time=` · `GET /adherence?days=` · `GET /adherence/{medication_id}?days=` |
 | Push | `GET /push/config` · `GET/POST/DELETE /push/subscriptions` · `GET/PUT /push/settings` · `POST /push/test` · `POST /push/actions` (token-authenticated, from notifications) |
-| Circle | `GET /circle` · `POST /circle/invites` · `GET /circle/invites/{token}` · `POST /circle/accept` · `PATCH /circle/{id}` (role) · `DELETE /circle/{id}` (revoke or leave) |
+| Circle | `GET /circle` · `POST /circle/invites` · `GET /circle/invites/{token}` · `POST /circle/accept` · `PATCH /circle/{id}` (role) · `DELETE /circle/{id}` (revoke or leave) · `PUT /circle/{id}/alerts` (caregiver's dose alerts) |
 | Supply | `GET /supply` · `PUT /supply/{medication_id}` (count on hand) · `POST /supply/{medication_id}/refill` · `DELETE /supply/{medication_id}` |
 | Visits | `POST /visits` · `GET /visits` · `GET /visits/{id}` · `PATCH /visits/{id}` (details, questions) · `DELETE /visits/{id}` · `GET /visits/{id}/brief` |
 | Search | `GET /search?q=` (grouped hits with deep links and highlighted snippets) |

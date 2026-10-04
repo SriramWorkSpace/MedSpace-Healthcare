@@ -5,8 +5,8 @@ import { getActing, onActingChange, setActing } from "@/lib/acting";
 
 export const circleKeys = { all: ["circle"], invite: (token) => ["circle", "invite", token] };
 
-export function useCircle() {
-  return useQuery({ queryKey: circleKeys.all, queryFn: () => api.get("/api/circle") });
+export function useCircle({ enabled = true } = {}) {
+  return useQuery({ queryKey: circleKeys.all, queryFn: () => api.get("/api/circle"), enabled });
 }
 
 export function useInvitePreview(token) {
@@ -31,6 +31,9 @@ export const useAccept = () =>
 export const useSetRole = () =>
   useCircleMutation(({ id, role }) => api.patch(`/api/circle/${id}`, { role }));
 export const useRemoveLink = () => useCircleMutation((id) => api.delete(`/api/circle/${id}`));
+/** Dose alerts about someone you help (ADR-032): null, 0 (when due), 30 or 60 minutes. */
+export const useSetAlerts = () =>
+  useCircleMutation(({ id, minutes }) => api.put(`/api/circle/${id}/alerts`, { minutes }));
 
 /**
  * The profile this tab is showing. `readOnly` for viewers, `canHelp` for helpers; both false

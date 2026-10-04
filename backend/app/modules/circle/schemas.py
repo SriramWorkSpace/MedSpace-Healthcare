@@ -36,6 +36,11 @@ class CareLinkOut(BaseModel):
     created_at: datetime
     accepted_at: datetime | None
     expires_at: datetime
+    alert_minutes: int | None = None  # dose alerts the caregiver chose (ADR-032)
+
+
+class AlertsIn(BaseModel):
+    minutes: Literal[0, 30, 60] | None = None
 
 
 class CircleOut(BaseModel):

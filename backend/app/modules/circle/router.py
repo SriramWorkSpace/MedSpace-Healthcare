@@ -9,6 +9,7 @@ from app.core.ratelimit import rate_limit
 from app.modules.circle import service
 from app.modules.circle.schemas import (
     AcceptIn,
+    AlertsIn,
     CareLinkOut,
     CircleOut,
     InviteCreated,
@@ -84,3 +85,14 @@ async def set_role(link_id: uuid.UUID, data: RoleIn, user: CurrentUser, session:
 async def revoke(link_id: uuid.UUID, request: Request, user: CurrentUser, session: DbSession):
     await service.revoke(session, user, link_id, request)
     await session.commit()
+
+
+@router.put("/{link_id}/alerts", response_model=CareLinkOut)
+async def set_alerts(
+    link_id: uuid.UUID, data: AlertsIn, request: Request, user: CurrentUser, session: DbSession
+):
+    """Dose alerts about someone you help: off, when due, or if not ticked after 30/60 min."""
+    link = await service.set_alerts(session, user, link_id, data.minutes, request)
+    owner = await session.get(User, link.owner_id)
+    await session.commit()
+    return service.to_out(link, owner)

@@ -17,6 +17,7 @@ import {
   Sparkle,
   Trash,
   UserPlus,
+  UsersThree,
   XCircle,
 } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
@@ -57,6 +58,15 @@ export const AUDIT = {
     label: () => "Turned off two-step verification",
   },
   "mfa.recovery_codes_regenerated": { icon: Key, label: () => "Made new recovery codes" },
+  "circle.alerts_changed": {
+    icon: UsersThree,
+    label: (m) =>
+      m.minutes == null
+        ? `${m.caregiver} turned off dose alerts about you`
+        : m.minutes === 0
+          ? `${m.caregiver} will be told when your doses are due`
+          : `${m.caregiver} will be told if a dose isn't ticked ${m.minutes === 60 ? "an hour" : `${m.minutes} minutes`} after it's due`,
+  },
   "auth.password_changed": { icon: Key, label: () => "Changed your password" },
   "auth.password_reset_requested": { icon: Key, label: () => "Asked for a password reset link" },
   "auth.password_reset": { icon: Key, label: () => "Reset your password from an email link" },

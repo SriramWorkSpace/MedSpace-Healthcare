@@ -68,3 +68,31 @@ test("an invitation is accepted and gives read-only access", async ({ page, brow
   await page.getByRole("button", { name: "Remove", exact: true }).last().click();
   await expect(list).toHaveCount(0);
 });
+
+test("a helper chooses dose alerts, and the alert link opens the right records", async ({
+  page,
+}) => {
+  await startDemo(page);
+  await page.goto("/app/settings#circle");
+  const alerts = page.getByLabel("Dose alerts about Rosa Lindqvist");
+  await expect(alerts).toHaveValue("off");
+  await alerts.selectOption("30");
+  await expect(page.getByText("You'll get dose alerts about Rosa Lindqvist")).toBeVisible();
+  await expectAccessible(page);
+  await page.reload();
+  await expect(page.getByLabel("Dose alerts about Rosa Lindqvist")).toHaveValue("30");
+
+  // The link on an alert notification switches to Rosa's records.
+  const circle = await (await page.request.get("/api/circle")).json();
+  const rosa = circle.caring_for[0].person.id;
+  await page.goto(`/app?for=${rosa}`);
+  const banner = page.getByRole("complementary", { name: "Viewing someone else's records" });
+  await expect(banner).toContainText("Rosa Lindqvist");
+  await expect(page).not.toHaveURL(/for=/);
+
+  // A link for someone you don't help is ignored.
+  await banner.getByRole("button", { name: "Back to your records" }).click();
+  await page.goto("/app?for=00000000-0000-0000-0000-000000000000");
+  await expect(page).not.toHaveURL(/for=/);
+  await expect(banner).toBeHidden();
+});

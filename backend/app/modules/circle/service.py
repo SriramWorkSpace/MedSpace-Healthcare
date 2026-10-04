@@ -15,6 +15,7 @@ from datetime import timedelta
 from fastapi import Request
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased
 
 from app.core.config import get_settings
 from app.core.db import utcnow
@@ -143,6 +144,7 @@ def to_out(link: CareLink, other: User | None) -> CareLinkOut:
         created_at=link.created_at,
         accepted_at=link.accepted_at,
         expires_at=link.expires_at,
+        alert_minutes=link.alert_minutes if link_status(link) == "active" else None,
     )
 
 
@@ -308,3 +310,64 @@ async def revoke(
         entity_id=link.id,
         meta={"by": "owner" if link.owner_id == user.id else "caregiver"},
     )
+
+
+# ---- Dose alerts for caregivers (ADR-032) ------------------------------------------------------
+
+
+async def set_alerts(
+    session: AsyncSession,
+    user: User,
+    link_id: uuid.UUID,
+    minutes: int | None,
+    request: Request | None = None,
+) -> CareLink:
+    """The caregiver chooses whether (and when) to hear about the owner's doses."""
+    link = await session.scalar(
+        select(CareLink).where(CareLink.id == link_id, CareLink.caregiver_id == user.id)
+    )
+    if link is None or link_status(link) != "active":
+        raise NotFound("That care circle link doesn't exist.")
+    if link.alert_minutes != minutes:
+        link.alert_minutes = minutes
+        # The owner can see who is told about their doses.
+        await audit.record(
+            session,
+            action="circle.alerts_changed",
+            user_id=link.owner_id,
+            request=request,
+            entity_type="care_link",
+            entity_id=link.id,
+            meta={"caregiver": user.display_name, "minutes": minutes},
+        )
+    await session.flush()
+    return link
+
+
+async def alert_links(session: AsyncSession) -> list[tuple[CareLink, User, User]]:
+    """Active links whose caregiver asked for dose alerts: (link, owner, caregiver)."""
+    owner = aliased(User)
+    caregiver = aliased(User)
+    rows = await session.execute(
+        select(CareLink, owner, caregiver)
+        .join(owner, owner.id == CareLink.owner_id)
+        .join(caregiver, caregiver.id == CareLink.caregiver_id)
+        .where(CareLink.status == "active", CareLink.alert_minutes.is_not(None))
+    )
+    return [(link, o, c) for link, o, c in rows.all() if link_status(link) == "active"]
+
+
+async def active_helper_link(
+    session: AsyncSession, link_id: uuid.UUID, owner_id: uuid.UUID, caregiver_id: uuid.UUID
+) -> CareLink | None:
+    """The link, if it still lets this caregiver change this owner's doses."""
+    link = await session.get(CareLink, link_id)
+    if (
+        link is None
+        or link_status(link) != "active"
+        or link.role != "helper"
+        or link.owner_id != owner_id
+        or link.caregiver_id != caregiver_id
+    ):
+        return None
+    return link

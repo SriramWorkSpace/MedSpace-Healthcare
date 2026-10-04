@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { PageSkeleton } from "@/components/layout/PageSkeleton";
 import { VerifyEmailBanner } from "@/features/auth/VerifyEmailBanner";
+import { useOpenForParam } from "@/features/circle/useOpenForParam";
 import { useGoogleWelcome } from "@/features/auth/useGoogleWelcome";
 import { SearchProvider } from "@/features/search/SearchProvider";
 import { OfflineBanner } from "@/features/offline/OfflineBanner";
@@ -37,6 +38,7 @@ export default function AppLayout() {
   const location = useLocation();
   const online = useOnline();
   useGoogleWelcome();
+  useOpenForParam(Boolean(user));
 
   if (isLoading) return <ShellSkeleton />;
   if (!user && !online) {
