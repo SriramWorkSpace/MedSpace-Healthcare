@@ -66,7 +66,21 @@ describe("review mapping", () => {
     });
     expect(body.care_actions[0].due_on).toBeNull();
     expect(body.diet_notes).toEqual([
-      { text: "Avoid alcohol.", category: "avoid", source_page: 1 },
+      { text: "Avoid alcohol.", category: "avoid", source_page: 1, source_ref: "diet_notes.0" },
+    ]);
+    // Each record remembers which item of the reading it came from (for highlights).
+    expect(body.medications.map((m) => m.source_ref)).toEqual(["medications.0", "medications.1"]);
+    expect(body.care_actions[0].source_ref).toBe("care_actions.0");
+  });
+
+  it("keeps original positions through validation, and none for added items", () => {
+    const form = payloadToForm(payload);
+    form.medications.splice(0, 1); // the reviewer removed the first medicine
+    form.medications.push({ ...form.medications[0], _ev: undefined, name: "Added" });
+    const parsed = reviewSchema.parse(form);
+    expect(formToConfirm(parsed).medications.map((m) => m.source_ref)).toEqual([
+      "medications.1",
+      null,
     ]);
   });
 

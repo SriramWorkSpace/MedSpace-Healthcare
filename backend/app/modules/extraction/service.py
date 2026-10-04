@@ -324,10 +324,28 @@ async def latest_for_document(
 
 
 async def evidence_for_document(
-    session: AsyncSession, user_id: uuid.UUID, doc_id: uuid.UUID
+    session: AsyncSession, user_id: uuid.UUID, doc_id: uuid.UUID, *, confirmed: bool = False
 ) -> tuple[Extraction, dict]:
-    """Field locations for the latest extraction, computed once per extraction (ADR-031)."""
-    extraction = await latest_for_document(session, user_id, doc_id)
+    """Field locations for the latest extraction, computed once per extraction (ADR-031).
+
+    `confirmed`: use the reading the records came from, even if the document was read again
+    since (records' `source_ref` points into that one).
+    """
+    if confirmed:
+        extraction = await session.scalar(
+            select(Extraction)
+            .where(
+                Extraction.document_id == doc_id,
+                Extraction.user_id == user_id,
+                Extraction.status == ExtractionStatus.CONFIRMED,
+            )
+            .order_by(Extraction.version.desc())
+            .limit(1)
+        )
+        if extraction is None:
+            raise NotFound("No confirmed reading for this document.")
+    else:
+        extraction = await latest_for_document(session, user_id, doc_id)
     cached = extraction.evidence
     if cached and cached.get("version") == evidence.VERSION:
         return extraction, cached
@@ -450,8 +468,9 @@ def payload_to_confirm(payload: ExtractionPayload) -> ConfirmIn:
                 duration_days=m.duration_days,
                 instructions=m.instructions,
                 source_page=m.source_page,
+                source_ref=f"medications.{i}",
             )
-            for m in payload.medications
+            for i, m in enumerate(payload.medications)
         ],
         care_actions=[
             ConfirmCareAction(
@@ -460,12 +479,18 @@ def payload_to_confirm(payload: ExtractionPayload) -> ConfirmIn:
                 due_on=a.due_on,
                 notes=a.notes,
                 source_page=a.source_page,
+                source_ref=f"care_actions.{i}",
             )
-            for a in payload.care_actions
+            for i, a in enumerate(payload.care_actions)
         ],
         diet_notes=[
-            ConfirmDietNote(text=n.text, category=n.category, source_page=n.source_page)
-            for n in payload.diet_notes
+            ConfirmDietNote(
+                text=n.text,
+                category=n.category,
+                source_page=n.source_page,
+                source_ref=f"diet_notes.{i}",
+            )
+            for i, n in enumerate(payload.diet_notes)
         ],
         lab_results=[
             ConfirmLabResult(
@@ -475,7 +500,8 @@ def payload_to_confirm(payload: ExtractionPayload) -> ConfirmIn:
                 ref_range=r.ref_range,
                 flag=r.flag,
                 source_page=r.source_page,
+                source_ref=f"lab_results.{i}",
             )
-            for r in payload.lab_results
+            for i, r in enumerate(payload.lab_results)
         ],
     )

@@ -50,6 +50,7 @@ export const reviewSchema = z.object({
       start_date: z.string().optional(),
       instructions: z.string().max(500).optional(),
       source_page: z.number(),
+      _ev: z.string().optional(),
       confidence: z.number().optional(),
       uncertain_fields: z.array(z.string()).optional(),
       needs_attention: z.boolean().optional(),
@@ -62,6 +63,7 @@ export const reviewSchema = z.object({
       due_on: z.string().optional(),
       notes: z.string().max(500).optional(),
       source_page: z.number().nullable().optional(),
+      _ev: z.string().optional(),
     }),
   ),
   diet_notes: z.array(
@@ -69,6 +71,7 @@ export const reviewSchema = z.object({
       text: z.string().trim().min(1, "Write the note or remove it").max(300),
       category: z.enum(["avoid", "limit", "include", "timing", "general"]),
       source_page: z.number().nullable().optional(),
+      _ev: z.string().optional(),
     }),
   ),
   lab_results: z.array(
@@ -79,6 +82,7 @@ export const reviewSchema = z.object({
       ref_range: z.string().max(60).optional(),
       flag: z.enum(["high", "low", "normal"]).nullable().optional(),
       source_page: z.number().nullable().optional(),
+      _ev: z.string().optional(),
     }),
   ),
 });
@@ -217,6 +221,7 @@ export function formToConfirm(v) {
       duration_days: num(m.duration_days),
       instructions: blank(m.instructions),
       source_page: m.source_page,
+      source_ref: m._ev ?? null,
     })),
     care_actions: v.care_actions.map((a) => ({
       kind: a.kind,
@@ -224,11 +229,13 @@ export function formToConfirm(v) {
       due_on: blank(a.due_on),
       notes: blank(a.notes),
       source_page: a.source_page ?? null,
+      source_ref: a._ev ?? null,
     })),
     diet_notes: (v.diet_notes ?? []).map((n) => ({
       text: n.text.trim(),
       category: n.category,
       source_page: n.source_page ?? null,
+      source_ref: n._ev ?? null,
     })),
     lab_results: (v.lab_results ?? []).map((r) => ({
       name: r.name.trim(),
@@ -237,6 +244,7 @@ export function formToConfirm(v) {
       ref_range: blank(r.ref_range?.trim()),
       flag: r.flag ?? null,
       source_page: r.source_page ?? null,
+      source_ref: r._ev ?? null,
     })),
   };
 }

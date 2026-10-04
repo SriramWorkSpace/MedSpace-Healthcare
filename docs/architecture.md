@@ -266,7 +266,7 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 |---|---|
 | Auth | `POST /auth/signup` · `POST /auth/login` (session, or `mfa_required` with a 5-minute token) · `POST /auth/login/mfa` · `POST /auth/password/forgot` · `POST /auth/password/reset` · `POST /auth/email/verify` · `POST /auth/demo` · `POST /auth/refresh` · `POST /auth/logout` · `GET /auth/me` · `GET /auth/session` · `GET /auth/google/start` · `GET /auth/google/providers` |
 | Documents | `POST /documents` · `GET /documents` · `GET /documents/{id}` · `GET /documents/{id}/file` · `POST /documents/{id}/reprocess` · `DELETE /documents/{id}` |
-| Extraction | `GET /documents/{id}/extraction` · `GET /documents/{id}/evidence` (where each field is printed) · `POST /extractions/{id}/confirm` · `POST /extractions/{id}/discard` |
+| Extraction | `GET /documents/{id}/extraction` · `GET /documents/{id}/evidence[?confirmed=true]` (where each field is printed; records link to it by `source_ref`) · `POST /extractions/{id}/confirm` · `POST /extractions/{id}/discard` |
 | Records | `GET /prescriptions` · `GET /prescriptions/{id}` · `GET /medications?status=` · `PATCH /medications/{id}` · `GET /care-actions` · `PATCH /care-actions/{id}` · `GET /diet-notes` · `DELETE /diet-notes/{id}` |
 | Labs | `GET /labs` (one trend per test, newest report first) · `GET /labs/{key}` (every result plus a chartable series) · `DELETE /lab-results/{id}` |
 | Dashboard | `GET /dashboard` (today's doses, upcoming, needs-review queue, stats) |

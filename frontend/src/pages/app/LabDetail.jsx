@@ -13,9 +13,10 @@ import { TrendChart } from "@/features/labs/TrendChart";
 import { describeChange, resultLabel } from "@/features/labs/format";
 import { formatDate } from "@/lib/format";
 import { useActing } from "@/features/circle/api";
+import { sourceLink } from "@/features/documents/links";
 
 function sourceHref(r) {
-  return `/app/documents/${r.document_id}${r.source_page ? `?page=${r.source_page}` : ""}`;
+  return sourceLink(r);
 }
 
 function DetailSkeleton() {

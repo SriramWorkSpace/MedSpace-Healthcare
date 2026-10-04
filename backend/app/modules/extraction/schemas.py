@@ -144,6 +144,9 @@ class ConfirmMedication(BaseModel):
     duration_days: int | None = Field(None, ge=1, le=3650)
     instructions: str | None = Field(None, max_length=500)
     source_page: int = Field(1, ge=1)
+    source_ref: str | None = Field(
+        None, pattern=r"^(medications|care_actions|diet_notes|lab_results)\.\d{1,3}$"
+    )
 
 
 class ConfirmCareAction(BaseModel):
@@ -152,12 +155,18 @@ class ConfirmCareAction(BaseModel):
     due_on: date | None = None
     notes: str | None = Field(None, max_length=500)
     source_page: int | None = None
+    source_ref: str | None = Field(
+        None, pattern=r"^(medications|care_actions|diet_notes|lab_results)\.\d{1,3}$"
+    )
 
 
 class ConfirmDietNote(BaseModel):
     text: str = Field(min_length=1, max_length=300)
     category: DietCategory = "general"
     source_page: int | None = None
+    source_ref: str | None = Field(
+        None, pattern=r"^(medications|care_actions|diet_notes|lab_results)\.\d{1,3}$"
+    )
 
 
 class ConfirmLabResult(BaseModel):
@@ -167,6 +176,9 @@ class ConfirmLabResult(BaseModel):
     ref_range: str | None = Field(None, max_length=60)
     flag: LabFlag | None = None  # as printed on the report; the printed range takes precedence
     source_page: int | None = None
+    source_ref: str | None = Field(
+        None, pattern=r"^(medications|care_actions|diet_notes|lab_results)\.\d{1,3}$"
+    )
 
     def normalized(self) -> dict:
         """Columns derived deterministically from what the user confirmed."""

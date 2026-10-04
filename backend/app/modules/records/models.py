@@ -67,6 +67,8 @@ class Medication(IdMixin, TimestampMixin, Base):
     duration_days: Mapped[int | None] = mapped_column(Integer)
     instructions: Mapped[str | None] = mapped_column(Text)
     source_page: Mapped[int] = mapped_column(Integer, default=1)
+    # Item of the confirmed reading it came from ("medications.2"), for highlights (ADR-031).
+    source_ref: Mapped[str | None] = mapped_column(String(32))
     stopped_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     prescription: Mapped[Prescription] = relationship(back_populates="medications")
@@ -92,6 +94,8 @@ class DietNote(IdMixin, TimestampMixin, Base):
     text: Mapped[str] = mapped_column(String(300))
     category: Mapped[str] = mapped_column(String(16), default="general")
     source_page: Mapped[int | None] = mapped_column(Integer)
+    # Item of the confirmed reading it came from ("medications.2"), for highlights (ADR-031).
+    source_ref: Mapped[str | None] = mapped_column(String(32))
 
 
 class LabResult(IdMixin, TimestampMixin, Base):
@@ -123,6 +127,8 @@ class LabResult(IdMixin, TimestampMixin, Base):
     collected_on: Mapped[date] = mapped_column(Date)
     position: Mapped[int] = mapped_column(Integer, default=0)
     source_page: Mapped[int | None] = mapped_column(Integer)
+    # Item of the confirmed reading it came from ("medications.2"), for highlights (ADR-031).
+    source_ref: Mapped[str | None] = mapped_column(String(32))
 
 
 class CareAction(IdMixin, TimestampMixin, Base):
@@ -140,5 +146,7 @@ class CareAction(IdMixin, TimestampMixin, Base):
     due_on: Mapped[date | None] = mapped_column(Date, index=True)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     source_page: Mapped[int | None] = mapped_column(Integer)
+    # Item of the confirmed reading it came from ("medications.2"), for highlights (ADR-031).
+    source_ref: Mapped[str | None] = mapped_column(String(32))
 
     prescription: Mapped[Prescription | None] = relationship(back_populates="care_actions")

@@ -96,6 +96,7 @@ async def replace_for_document(
                 collected_on=collected_on,
                 position=position,
                 source_page=r.source_page,
+                source_ref=r.source_ref,
                 **r.normalized(),
             )
         )
@@ -110,6 +111,7 @@ async def replace_for_document(
                     text=n.text.strip(),
                     category=n.category,
                     source_page=n.source_page,
+                    source_ref=n.source_ref,
                 )
             )
 
@@ -156,6 +158,7 @@ async def replace_for_document(
                 duration_days=m.duration_days,
                 instructions=m.instructions,
                 source_page=m.source_page,
+                source_ref=m.source_ref,
             )
         )
     for a in data.care_actions:
@@ -167,6 +170,7 @@ async def replace_for_document(
                 notes=a.notes,
                 due_on=a.due_on,
                 source_page=a.source_page,
+                source_ref=a.source_ref,
             )
         )
     session.add(prescription)
@@ -354,6 +358,7 @@ def medication_food_notes(meds_with_doc: list[tuple[Medication, uuid.UUID | None
                     category="avoid" if phrase.lower().startswith(("avoid", "no ")) else "timing",
                     document_id=document_id,
                     source_page=med.source_page,
+                    source_ref=med.source_ref,
                 )
             )
     return out

@@ -55,22 +55,34 @@ function ReviewSkeleton() {
   );
 }
 
+/** "Metformin" for "medications.1", from the reading the record came from. */
+function recordLabel(ref, payload) {
+  const [collection, index] = ref.split(".");
+  const item = payload?.[collection]?.[Number(index)];
+  return item?.name || item?.title || item?.text || "From your records";
+}
+
 export default function DocumentReview() {
   const { isActing } = useActing();
   const { id } = useParams();
   const navigate = useNavigate();
   const doc = useDocument(id);
+  const [searchParams] = useSearchParams();
   const status = doc.data?.status;
   const extraction = useExtraction(id, {
     enabled: status === "needs_review" || status === "confirmed",
   });
   const evidence = useEvidence(id, { enabled: Boolean(extraction.data) });
+  // Arriving from a record ("Source" on a medicine, lab result or diet note): show its line in
+  // the reading it was confirmed from, until the user looks at something else.
+  const show = searchParams.get("show");
+  const shownEvidence = useEvidence(id, { enabled: Boolean(show), confirmed: true });
+  const [showDismissed, setShowDismissed] = useState(false);
   const confirm = useConfirmExtraction();
   const discard = useDiscardExtraction();
   const reprocess = useReprocessDocument();
   const del = useDeleteDocument();
 
-  const [searchParams] = useSearchParams();
   const [page, setPage] = useState(() => Number(searchParams.get("page")) || 1);
   const [highlight, setHighlight] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -94,10 +106,20 @@ export default function DocumentReview() {
   }
 
   const d = doc.data;
+  const shownSpot = show && !showDismissed ? shownEvidence.data?.items?.[show] : null;
+  const fromRecord = shownSpot
+    ? {
+        label: recordLabel(show, extraction.data?.payload),
+        page: shownSpot.page,
+        boxes: shownSpot.boxes,
+        status: "found",
+      }
+    : null;
   const meta = STATUS_META[d.status] ?? STATUS_META.queued;
 
   // Evidence highlights (ADR-031): a focused field (or the "p.N" button) shows its spot.
   const locate = ({ keys, page: fallbackPage, label, explicit }) => {
+    setShowDismissed(true);
     const ev = evidence.data;
     const spot = findSpot(ev, keys);
     if (spot) {
@@ -189,8 +211,11 @@ export default function DocumentReview() {
             doc={d}
             page={page}
             onPageChange={setPage}
-            highlight={highlight}
-            onClearHighlight={() => setHighlight(null)}
+            highlight={highlight ?? fromRecord}
+            onClearHighlight={() => {
+              setHighlight(null);
+              setShowDismissed(true);
+            }}
           />
         </div>
         <div>

@@ -12,6 +12,7 @@ import { RangeNote } from "@/features/labs/RangeNote";
 import { Sparkline } from "@/features/labs/Sparkline";
 import { describeChange } from "@/features/labs/format";
 import { formatDate } from "@/lib/format";
+import { sourceLink } from "@/features/documents/links";
 
 function TrendCard({ trend, index }) {
   const reduce = useReducedMotion();
@@ -125,7 +126,7 @@ export default function Labs() {
                   {group.latest.document_title}
                 </h2>
                 <Link
-                  to={`/app/documents/${group.id}${group.latest.source_page ? `?page=${group.latest.source_page}` : ""}`}
+                  to={sourceLink({ ...group.latest, document_id: group.id })}
                   className="tap text-sm text-ink-3 hover:text-accent hover:underline"
                 >
                   Collected {formatDate(group.latest.collected_on)}. View report

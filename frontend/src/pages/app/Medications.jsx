@@ -29,6 +29,7 @@ import { useSupplies } from "@/features/supply/api";
 import { SupplyDialog } from "@/features/supply/SupplyDialog";
 import { SupplyLine } from "@/features/supply/SupplyLine";
 import { useActing } from "@/features/circle/api";
+import { sourceLink } from "@/features/documents/links";
 
 const TABS = [
   { key: "active", label: "Active" },
@@ -228,7 +229,7 @@ function MedicationCard({ med, onEdit, index, focused, history, window, supply, 
           </Button>
         )}
         {med.document_id && (
-          <Button as={Link} to={`/app/documents/${med.document_id}`} variant="ghost" size="sm">
+          <Button as={Link} to={sourceLink(med)} variant="ghost" size="sm">
             <ArrowSquareOut size={14} /> Source
           </Button>
         )}

@@ -37,3 +37,27 @@ test("focusing a field highlights where it is printed on the page", async ({ pag
   await page.getByRole("button", { name: "Clear highlight" }).click();
   await expect(viewer.locator("[data-highlight]")).toHaveCount(0);
 });
+
+test("a record's Source link opens its document with the line highlighted", async ({ page }) => {
+  await startDemo(page);
+  await page.goto("/app/medications");
+  const card = page.locator("[data-med-id]").first();
+  const name = (await card.locator("p.font-semibold").first().innerText()).split(" ")[0];
+  await card.getByRole("link", { name: "Source" }).click();
+  await expect(page).toHaveURL(/\/app\/documents\/.+show=medications\.\d+/);
+
+  const viewer = page.getByRole("region", { name: /Source document/ });
+  await expect(page.getByRole("status").filter({ hasText: "Showing" })).toContainText(name);
+  await expect(viewer.locator("[data-highlight]").first()).toBeVisible();
+  await expectAccessible(page);
+
+  await page.getByRole("button", { name: "Clear highlight" }).click();
+  await expect(viewer.locator("[data-highlight]")).toHaveCount(0);
+
+  // Lab results link to their row the same way.
+  await page.goto("/app/labs");
+  await page.getByRole("link", { name: /HbA1c/ }).first().click();
+  await page.getByRole("link", { name: /^Open .+, page \d+$/ }).click();
+  await expect(page).toHaveURL(/show=lab_results\.\d+/);
+  await expect(viewer.locator("[data-highlight]").first()).toBeVisible();
+});

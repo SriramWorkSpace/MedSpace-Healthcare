@@ -29,6 +29,7 @@ class MedicationOut(BaseModel):
     duration_days: int | None
     instructions: str | None
     source_page: int
+    source_ref: str | None = None
     stopped_at: datetime | None
     status: MedicationStatus = "active"
     day_of_course: int | None = None
@@ -47,6 +48,7 @@ class CareActionOut(BaseModel):
     due_on: date | None
     completed_at: datetime | None
     source_page: int | None
+    source_ref: str | None = None
 
 
 class DietNoteOut(BaseModel):
@@ -56,6 +58,7 @@ class DietNoteOut(BaseModel):
     text: str
     category: str
     source_page: int | None
+    source_ref: str | None = None
     document_id: uuid.UUID
     document_title: str | None = None
     prescriber_name: str | None = None
@@ -73,6 +76,7 @@ class MedicationFoodNote(BaseModel):
     category: str
     document_id: uuid.UUID | None
     source_page: int
+    source_ref: str | None = None
 
 
 class DietNotesOut(BaseModel):
@@ -95,6 +99,7 @@ class LabResultOut(BaseModel):
     flag: str | None
     collected_on: date
     source_page: int | None
+    source_ref: str | None = None
     document_id: uuid.UUID
     document_title: str | None = None
 

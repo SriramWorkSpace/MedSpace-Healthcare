@@ -20,6 +20,7 @@ import { useDeleteDietNote, useDietNotes } from "@/features/records/api";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { useActing } from "@/features/circle/api";
+import { sourceLink } from "@/features/documents/links";
 
 const GROUPS = [
   { key: "avoid", title: "Avoid", icon: Prohibit, tone: "bg-danger-soft text-danger-ink" },
@@ -40,7 +41,7 @@ function Source({ note }) {
     note.prescriber_name,
     note.issued_on && formatDate(note.issued_on, "MMM d"),
   ].filter(Boolean);
-  const href = `/app/documents/${note.document_id}${note.source_page ? `?page=${note.source_page}` : ""}`;
+  const href = sourceLink(note);
   return (
     <Link
       to={href}

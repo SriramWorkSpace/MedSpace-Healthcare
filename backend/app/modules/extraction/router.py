@@ -22,9 +22,14 @@ async def get_latest_extraction(doc_id: uuid.UUID, user: CurrentUser, session: D
     response_model=EvidenceOut,
     dependencies=[Depends(rate_limit("documents:evidence", 60, 60))],
 )
-async def get_evidence(doc_id: uuid.UUID, user: CurrentUser, session: DbSession):
-    """Where each field of the latest draft or confirmed reading is printed on the page."""
-    extraction, found = await service.evidence_for_document(session, user.id, doc_id)
+async def get_evidence(
+    doc_id: uuid.UUID, user: CurrentUser, session: DbSession, confirmed: bool = False
+):
+    """Where each field of the latest reading (or, with `confirmed`, the confirmed one) is
+    printed on the page."""
+    extraction, found = await service.evidence_for_document(
+        session, user.id, doc_id, confirmed=confirmed
+    )
     await session.commit()
     return EvidenceOut(
         extraction_id=extraction.id,

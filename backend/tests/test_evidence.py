@@ -79,7 +79,9 @@ def test_letterhead_and_dates_are_found():
     ev = evidence.locate(data, "application/pdf", payload)
     assert "Tomas Varga" in text_in(data, ev["fields"]["prescriber.name"])
     assert payload.prescriber.clinic in text_in(data, ev["fields"]["prescriber.clinic"])
-    assert "August 23, 2026" in text_in(data, ev["fields"]["issued_on"])
+    d = payload.issued_on  # samples are dated relative to today
+    printed = f"{d.strftime('%B')} {d.day}, {d.year}"
+    assert printed in text_in(data, ev["fields"]["issued_on"])
     assert "Review in 3 months" in text_in(data, ev["fields"]["follow_up.date"])
 
 
@@ -145,3 +147,70 @@ async def test_scans_report_no_text(auth_client: httpx.AsyncClient):
     resp = await auth_client.get(f"/api/documents/{doc['id']}/evidence")
     assert resp.status_code == 200
     assert resp.json()["available"] is False and resp.json()["reason"] == "no_text"
+
+
+# ---- Records point back to their spot -----------------------------------------------------------
+
+
+async def test_confirmed_records_keep_their_item_reference(auth_client: httpx.AsyncClient):
+    from tests.test_documents_flow import confirm_body
+
+    doc = (await upload(auth_client, build_pdf(SCENARIOS[1]))).json()
+    await drain()
+    extraction = (await auth_client.get(f"/api/documents/{doc['id']}/extraction")).json()
+    body = confirm_body(extraction["payload"])
+    # The reviewer removed the first medicine; the others keep their original positions.
+    body["medications"] = [
+        {**m, "source_ref": f"medications.{i}"} for i, m in enumerate(body["medications"])
+    ][1:]
+    body["diet_notes"] = [
+        {"text": n["text"], "category": n["category"], "source_page": n["source_page"],
+         "source_ref": f"diet_notes.{i}"}
+        for i, n in enumerate(extraction["payload"]["diet_notes"])
+    ]  # fmt: skip
+    resp = await auth_client.post(
+        f"/api/extractions/{extraction['id']}/confirm", json=body, headers=csrf(auth_client)
+    )
+    assert resp.status_code == 200, resp.text
+
+    meds = (await auth_client.get("/api/medications")).json()
+    refs = {m["name"]: m["source_ref"] for m in meds}
+    assert refs == {"Atorvastatin": "medications.1", "Cholecalciferol": "medications.2"}
+    notes = (await auth_client.get("/api/diet-notes")).json()["notes"]
+    assert {n["source_ref"] for n in notes} == {"diet_notes.0", "diet_notes.1", "diet_notes.2"}
+
+    # Reading the document again makes a new draft; records still resolve in the confirmed one.
+    await auth_client.post(f"/api/documents/{doc['id']}/reprocess", headers=csrf(auth_client))
+    await drain()
+    ev = (await auth_client.get(f"/api/documents/{doc['id']}/evidence?confirmed=true")).json()
+    assert ev["extraction_id"] == extraction["id"]
+    assert "Atorvastatin" in text_in(build_pdf(SCENARIOS[1]), ev["items"]["medications.1"])
+
+
+async def test_source_refs_are_validated(auth_client: httpx.AsyncClient):
+    from tests.test_documents_flow import confirm_body
+
+    doc = (await upload(auth_client, build_pdf(SCENARIOS[0]))).json()
+    await drain()
+    extraction = (await auth_client.get(f"/api/documents/{doc['id']}/extraction")).json()
+    body = confirm_body(extraction["payload"])
+    body["medications"][0]["source_ref"] = "../../etc"
+    resp = await auth_client.post(
+        f"/api/extractions/{extraction['id']}/confirm", json=body, headers=csrf(auth_client)
+    )
+    assert resp.status_code == 422
+
+
+async def test_confirmed_evidence_needs_a_confirmed_reading(auth_client: httpx.AsyncClient):
+    doc = (await upload(auth_client, build_pdf(SCENARIOS[0]))).json()
+    await drain()
+    resp = await auth_client.get(f"/api/documents/{doc['id']}/evidence?confirmed=true")
+    assert resp.status_code == 404
+
+
+async def test_demo_records_link_to_their_lines(client: httpx.AsyncClient):
+    await client.post("/api/auth/demo")
+    meds = (await client.get("/api/medications")).json()
+    assert meds and all((m["source_ref"] or "").startswith("medications.") for m in meds)
+    labs = (await client.get("/api/labs")).json()
+    assert labs

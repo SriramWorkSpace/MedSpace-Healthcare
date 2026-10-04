@@ -112,6 +112,14 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 - [x] Multi-stage web image (nginx + /api proxy), deployment guide (docs/deployment.md), README screenshots
 - [x] Final graphify update and docs sync
 
+## Phase 21: Show records on the page
+
+- [x] Records (medicines, to-dos, diet notes, lab results) keep `source_ref`, the item of the confirmed reading they came from; the review form sends it, confirming as-is (demo) fills it, the API validates it
+- [x] `GET /documents/{id}/evidence?confirmed=true`: evidence from the confirmed reading, so links still resolve after the document is read again
+- [x] "Source" links on medicines (now also with the page), lab results and diet notes open the document with that line highlighted; dismissing it or focusing another field takes over
+- [x] Fixed on the way: an evidence test assumed a fixed sample date (samples are dated relative to today)
+- [x] Tests: 4 backend (references kept through removal, diet notes, re-read safety, validation, confirmed-only evidence, demo), 1 unit, 1 e2e (medicine and lab links, with axe)
+
 ## Phase 20: Evidence highlights
 
 - [x] Locator: every extracted value found in the PDF text layer, boxes as fractions of the page; anchored to the item's line so repeated values resolve correctly; fallbacks for wrapped and lightly normalised values (ADR-031)
@@ -229,6 +237,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 ---
 
 ## Change log
+
+- **2026-10-04**: Phase 21 shipped: records' Source links open the document with their line highlighted (ADR-031 update).
 
 - **2026-10-03**: Phase 20 shipped: evidence highlights in the review workspace (ADR-031).
 
