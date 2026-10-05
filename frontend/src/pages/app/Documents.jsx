@@ -141,7 +141,7 @@ export default function Documents() {
         <EmptyState
           icon={FileText}
           title="No documents yet"
-          description="Drag a prescription onto this page, or pick a file. Try one of the synthetic samples in the repo's /samples folder."
+          description="Drag a prescription or lab report onto this page, or pick a file. PDFs and photos both work."
           action={
             isActing ? undefined : (
               <Button onClick={open}>

@@ -43,7 +43,8 @@ test("dashboard, medications and timeline for a seeded demo", async ({ page }) =
 test("Ask MedSpace answers with citations and refuses advice", async ({ page }) => {
   await startDemo(page);
   await page.goto("/app/ask");
-  await page.getByRole("button", { name: "How often do I take Amoxicillin?" }).click();
+  await page.locator("#ask-input").fill("How often do I take Amoxicillin?");
+  await page.keyboard.press("Enter");
   await expect(page.getByText(/twice daily at 8:00 AM and 8:00 PM/).first()).toBeVisible();
   await expect(
     page.getByRole("button", { name: /Amoxicillin \(confirmed record\)/ }).first(),

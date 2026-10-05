@@ -169,7 +169,7 @@ function GoogleCard() {
   return (
     <div className="card card--flat flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-start gap-4">
-        <span className="grid grid-cols-1 size-11 shrink-0 place-items-center rounded-2xl bg-surface-2">
+        <span className="grid grid-cols-1 size-11 shrink-0 place-items-center rounded-xl bg-surface-2">
           <GoogleLogo size={22} weight="bold" />
         </span>
         <div>

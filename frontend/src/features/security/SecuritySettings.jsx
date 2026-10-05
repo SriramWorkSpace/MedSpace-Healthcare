@@ -258,8 +258,8 @@ function TwoStepCard({ state }) {
         <span
           className={
             on
-              ? "grid size-10 shrink-0 place-items-center rounded-full bg-accent-soft text-accent"
-              : "grid size-10 shrink-0 place-items-center rounded-full bg-surface-2 text-ink-3"
+              ? "grid size-10 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent-soft-ink"
+              : "grid size-10 shrink-0 place-items-center rounded-xl bg-surface-2 text-ink-3"
           }
         >
           {on ? <ShieldCheck size={20} weight="duotone" /> : <ShieldSlash size={20} />}

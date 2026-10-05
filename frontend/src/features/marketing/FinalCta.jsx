@@ -7,7 +7,7 @@ export function FinalCta() {
   const demo = useDemoLogin();
   return (
     <section className="shell shell--marketing pb-20 lg:pb-28">
-      <Reveal className="relative overflow-hidden rounded-[28px] bg-[oklch(0.25_0.035_165)] px-6 py-16 text-[oklch(0.97_0.01_160)] ring-1 ring-line sm:px-12 lg:py-24">
+      <Reveal className="relative overflow-hidden rounded-[28px] bg-panel-brand px-6 py-16 text-panel-ink ring-1 ring-line sm:px-12 lg:py-24">
         <div className="pointer-events-none absolute -right-24 -top-24 size-[420px] rounded-full bg-[radial-gradient(closest-side,color-mix(in_oklch,var(--accent),transparent_55%),transparent)]" />
         <div className="relative max-w-2xl">
           <h2 className="text-3xl font-semibold tracking-tight sm:text-5xl">

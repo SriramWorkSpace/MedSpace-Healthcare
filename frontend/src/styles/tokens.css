@@ -5,6 +5,9 @@
  * Palette: cool off-white / evergreen ink neutrals with a single evergreen accent.
  * Shape rule: interactive controls are pills (--radius-pill); surfaces use --radius-card (16px);
  * inputs and small chips use --radius-control (10px). Nothing else.
+ * Icon tiles (an icon on a tinted square) scale their corners with size: up to 32px
+ * rounded-lg, 36-44px rounded-xl, 48px and up rounded-2xl. Squares, never circles; circles are
+ * for avatars and tick buttons.
  */
 
 :root {
@@ -28,6 +31,12 @@
   --accent-ink: oklch(0.99 0.004 160);
   --accent-soft: oklch(0.948 0.034 163);
   --accent-soft-ink: oklch(0.38 0.08 163);
+  /* Overlays and brand panels look the same in both themes. */
+  --scrim: oklch(0.2 0.02 165 / 0.4); /* behind dialogs and the mobile menu */
+  --scrim-soft: oklch(0.2 0.02 165 / 0.28); /* behind search, which also blurs */
+  --panel-brand: oklch(0.25 0.035 165); /* dark evergreen panels (sign-in, final CTA) */
+  --panel-accent: oklch(0.36 0.075 163); /* the accent tile in the feature grid */
+  --panel-ink: oklch(0.97 0.01 160);
   --logo-cross: oklch(0.6 0.22 27);
   --brand-med: #c00000; /* sampled from the logo mark */
   --brand-space: #111111;

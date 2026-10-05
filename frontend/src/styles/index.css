@@ -29,6 +29,12 @@
   --color-danger-soft: var(--danger-soft);
   --color-danger-ink: var(--danger-ink);
 
+  --color-scrim: var(--scrim);
+  --color-scrim-soft: var(--scrim-soft);
+  --color-panel-brand: var(--panel-brand);
+  --color-panel-accent: var(--panel-accent);
+  --color-panel-ink: var(--panel-ink);
+
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
   --font-brand: var(--font-brand);

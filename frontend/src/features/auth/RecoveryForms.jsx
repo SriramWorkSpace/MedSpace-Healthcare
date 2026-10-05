@@ -1,18 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle, EnvelopeSimple, WarningCircle } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/Field";
 import { PasswordInput } from "@/components/ui/PasswordInput";
+import { LoadingRegion, Skeleton } from "@/components/ui/Skeleton";
 import { api } from "@/lib/api";
 import { meKey, useAuth } from "@/lib/auth";
 
 function Notice({ icon: Icon, tone = "accent", title, children }) {
-  const color = tone === "danger" ? "bg-danger-soft text-danger-ink" : "bg-accent-soft text-accent";
+  const color =
+    tone === "danger" ? "bg-danger-soft text-danger-ink" : "bg-accent-soft text-accent-soft-ink";
   return (
     <div>
-      <span className={`grid size-12 place-items-center rounded-full ${color}`}>
+      <span className={`grid size-12 place-items-center rounded-2xl ${color}`}>
         <Icon size={24} weight="duotone" />
       </span>
       <h1 className="mt-5 text-3xl font-semibold tracking-tight">{title}</h1>
@@ -102,8 +104,26 @@ export function ResetPasswordForm() {
     mutationFn: () => api.post("/api/auth/password/reset", { token, new_password: password }),
     onSuccess: () => refetch(), // any session in this browser was just signed out
   });
+  // Say up front when a link has expired, rather than after a new password is typed.
+  const link = useQuery({
+    queryKey: ["reset-link", token],
+    queryFn: () => api.post("/api/auth/password/reset/check", { token }),
+    enabled: Boolean(token),
+    staleTime: Infinity,
+    retry: false,
+  });
 
-  if (!token || reset.error?.status === 410)
+  if (token && link.isPending)
+    return (
+      <LoadingRegion label="Checking your link" className="grid grid-cols-1 gap-4">
+        <Skeleton className="h-9 w-3/4" />
+        <Skeleton className="h-4 w-1/2" />
+        <Skeleton className="mt-6 h-11 w-full" />
+        <Skeleton className="h-11 w-full" />
+      </LoadingRegion>
+    );
+
+  if (!reset.isSuccess && (!token || link.data?.valid === false || reset.error?.status === 410))
     return (
       <>
         <Notice icon={WarningCircle} tone="danger" title="This link has expired">

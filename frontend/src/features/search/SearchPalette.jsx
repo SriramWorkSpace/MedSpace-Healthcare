@@ -166,7 +166,7 @@ export default function SearchPalette({ onClose }) {
       {/* The page behind stays put and blurs; only opacity and transform animate, which the
           browser runs on the compositor, so the motion stays smooth while React renders. */}
       <motion.div
-        className="absolute inset-0 bg-[oklch(0.2_0.02_165/0.28)] backdrop-blur-[6px]"
+        className="absolute inset-0 bg-scrim-soft backdrop-blur-[6px]"
         style={{ willChange: "opacity" }}
         onClick={onClose}
         initial={{ opacity: 0 }}

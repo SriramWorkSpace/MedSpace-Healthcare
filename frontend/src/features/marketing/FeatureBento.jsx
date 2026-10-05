@@ -23,8 +23,7 @@ function Cell({ className, title, body, icon: Icon, children, delay = 0, tone = 
       className={cn(
         "card card--interactive relative flex flex-col overflow-hidden p-6",
         // Fixed deep evergreen in both themes so the translucent chips keep AA contrast.
-        tone === "accent" &&
-          "border-transparent bg-[oklch(0.36_0.075_163)] text-[oklch(0.97_0.01_160)]",
+        tone === "accent" && "border-transparent bg-panel-accent text-panel-ink",
         tone === "sunken" && "bg-surface-2",
         className,
       )}

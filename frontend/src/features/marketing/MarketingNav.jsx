@@ -47,7 +47,7 @@ export function MarketingNav() {
         <Link to="/" onClick={countClick} aria-label="MedSpace home" className="rounded-lg">
           <Logo />
         </Link>
-        <ul className="hidden items-center gap-1 md:flex">
+        <ul className="hidden items-center gap-1 lg:flex">
           {LINKS.map((l) => (
             <li key={l.href}>
               <a href={l.href} className="navlink">
@@ -63,7 +63,7 @@ export function MarketingNav() {
             variant="ghost"
             size="sm"
             icon
-            className="md:hidden"
+            className="lg:hidden"
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             aria-controls="marketing-mobile-nav"
@@ -73,7 +73,12 @@ export function MarketingNav() {
           </Button>
         </div>
       </nav>
-      <MobileDrawer id="marketing-mobile-nav" open={open} onClose={() => setOpen(false)}>
+      <MobileDrawer
+        id="marketing-mobile-nav"
+        open={open}
+        onClose={() => setOpen(false)}
+        hiddenFrom="lg:hidden"
+      >
         <ul className="grid grid-cols-1 gap-1">
           {LINKS.map((l) => (
             <li key={l.href}>

@@ -306,3 +306,24 @@ async def test_dev_outbox_shows_simulated_mail(client: httpx.AsyncClient):
     assert resp.status_code == 200
     [message] = resp.json()
     assert message["links"][0].startswith("http://localhost:5173/verify-email?token=")
+
+
+async def test_reset_links_can_be_checked_without_using_them(
+    client: httpx.AsyncClient, mailbox: FakeMailer
+):
+    await signup(client)
+    await forgot(client)
+    token = reset_token(mailbox)
+
+    async def check(t: str) -> bool:
+        resp = await client.post("/api/auth/password/reset/check", json={"token": t})
+        assert resp.status_code == 200
+        return resp.json()["valid"]
+
+    assert await check(token) is True
+    assert await check(token) is True  # checking doesn't use it up
+    assert await check("x" * 40) is False
+    await client.post(
+        "/api/auth/password/reset", json={"token": token, "new_password": NEW_PASSWORD}
+    )
+    assert await check(token) is False

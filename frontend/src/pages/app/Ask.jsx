@@ -30,10 +30,11 @@ import {
 import { AnswerText } from "@/features/assistant/AnswerText";
 
 const SUGGESTIONS = [
-  "What medications am I taking right now?",
-  "How often do I take Amoxicillin?",
+  // General on purpose: they make sense for anyone's records, not just the demo's.
+  "What medicines am I taking right now?",
   "When is my next follow-up?",
-  "What did my lipid panel show?",
+  "How often do I take each medicine?",
+  "What did my latest lab report show?",
   "What did my doctors say about food?",
   "Summarize my latest prescription",
 ];
@@ -298,7 +299,7 @@ export default function Ask() {
       <section className="flex min-h-[calc(100dvh-var(--nav-h)-120px)] flex-col">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Ask MedSpace</h1>
+            <h1 className="text-3xl font-semibold tracking-tight sm:text-[34px]">Ask MedSpace</h1>
             <p className="flex items-center gap-1.5 text-sm text-ink-3">
               <ShieldCheck size={14} weight="bold" /> Sourced from your records. Not medical advice.
             </p>

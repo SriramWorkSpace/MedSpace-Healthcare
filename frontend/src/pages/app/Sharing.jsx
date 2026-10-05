@@ -264,13 +264,13 @@ function ShareCard({ link, onRevoke, index }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: Math.min(index, 6) * 0.04, ease: [0.23, 1, 0.32, 1] }}
       className={cn(
-        "card flex flex-col gap-4 p-5 sm:flex-row sm:items-center",
+        "card flex flex-wrap items-center gap-x-4 gap-y-3 p-5 sm:flex-nowrap",
         !active && "opacity-75",
       )}
     >
       <span
         className={cn(
-          "grid size-11 shrink-0 place-items-center rounded-2xl",
+          "grid size-11 shrink-0 place-items-center rounded-xl",
           active ? "bg-accent-soft text-accent-soft-ink" : "bg-surface-2 text-ink-3",
         )}
       >
@@ -301,7 +301,12 @@ function ShareCard({ link, onRevoke, index }) {
         </p>
       </div>
       {active && (
-        <Button variant="secondary" size="sm" onClick={() => onRevoke(link)}>
+        <Button
+          variant="secondary"
+          size="sm"
+          className="max-sm:w-full"
+          onClick={() => onRevoke(link)}
+        >
           <LinkBreak size={14} /> Revoke
         </Button>
       )}

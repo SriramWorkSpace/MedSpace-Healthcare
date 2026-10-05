@@ -25,7 +25,7 @@ export function MobileDrawer({ open, onClose, children, id, hiddenFrom = "md:hid
       {open && (
         <>
           <motion.div
-            className={`fixed inset-0 top-[var(--nav-h)] bg-[oklch(0.2_0.02_165/0.3)] ${hiddenFrom}`}
+            className={`fixed inset-0 top-[var(--nav-h)] bg-scrim ${hiddenFrom}`}
             style={{ zIndex: "var(--z-drawer)" }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

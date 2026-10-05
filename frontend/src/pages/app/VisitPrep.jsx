@@ -251,7 +251,7 @@ function PrepSkeleton() {
     <LoadingRegion label="Loading visit prep">
       <Skeleton className="mb-3 h-4 w-24" />
       <Skeleton className="mb-8 h-9 w-72" />
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
         <div className="grid grid-cols-1 content-start gap-4">
           <Skeleton className="h-64 rounded-card" />
           <Skeleton className="h-48 rounded-card" />
@@ -322,7 +322,7 @@ export default function VisitPrep() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] lg:items-start">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] xl:items-start">
         {!isActing && (
           <div className="no-print grid grid-cols-1 content-start gap-4">
             <Questions visit={visit} update={update} />

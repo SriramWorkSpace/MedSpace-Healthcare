@@ -357,6 +357,14 @@ async def forgot_password(
 
 
 @router.post(
+    "/password/reset/check",
+    dependencies=[Depends(rate_limit("auth:reset-check", 30, 900, by="ip"))],
+)
+async def check_reset_link(data: TokenIn, session: DbSession) -> dict[str, bool]:
+    return {"valid": await recovery.reset_link_is_valid(session, data.token)}
+
+
+@router.post(
     "/password/reset",
     response_model=Accepted,
     dependencies=[Depends(rate_limit("auth:reset", 10, 900, by="ip"))],

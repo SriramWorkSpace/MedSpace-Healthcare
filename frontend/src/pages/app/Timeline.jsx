@@ -11,6 +11,7 @@ import {
   Pill,
   Prescription,
   Stethoscope,
+  UploadSimple,
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -195,7 +196,11 @@ export default function Timeline() {
               <Button variant="secondary" onClick={() => setActive(new Set())}>
                 Clear filters
               </Button>
-            ) : undefined
+            ) : (
+              <Button as={Link} to="/app/documents">
+                <UploadSimple size={15} weight="bold" /> Upload a document
+              </Button>
+            )
           }
           quip={active.size ? undefined : EMPTY_QUIPS.timeline}
         />

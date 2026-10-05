@@ -111,6 +111,16 @@ async def request_reset(session: AsyncSession, email: str, request: Request) -> 
     return Outgoing(user.email, user.display_name, token)
 
 
+async def reset_link_is_valid(session: AsyncSession, raw: str) -> bool:
+    """Whether a reset link still works, without using it (so the page can say so up front)."""
+    row = await session.scalar(
+        select(EmailToken).where(
+            EmailToken.token_hash == sha256_hex(raw), EmailToken.purpose == "reset"
+        )
+    )
+    return row is not None and row.used_at is None and row.expires_at > utcnow()
+
+
 async def reset_password(
     session: AsyncSession, raw: str, new_password: str, request: Request
 ) -> User:

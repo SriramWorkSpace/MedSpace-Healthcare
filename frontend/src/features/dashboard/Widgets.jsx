@@ -19,7 +19,7 @@ export function Panel({ title, action, children, className }) {
   return (
     <section className={cn("card p-5 sm:p-6", className)}>
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="text-[15px] font-semibold">{title}</h2>
+        <h2 className="font-semibold">{title}</h2>
         {action}
       </div>
       {children}
@@ -70,7 +70,9 @@ export function ComingUp({ items }) {
                 <Icon size={17} weight="duotone" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-medium">{e.title}</span>
+                <span className="line-clamp-2 block text-sm font-medium break-words">
+                  {e.title}
+                </span>
                 {e.subtitle && (
                   <span className="block truncate text-xs text-ink-3">{e.subtitle}</span>
                 )}

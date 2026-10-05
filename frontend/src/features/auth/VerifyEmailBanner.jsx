@@ -22,7 +22,7 @@ export function VerifyEmailBanner() {
         disabled={resend.isPending}
         onClick={() => resend.mutate()}
       >
-        {resend.isPending ? "Sending..." : "Resend link"}
+        {resend.isPending ? "Sending…" : "Resend link"}
       </button>
     </aside>
   );

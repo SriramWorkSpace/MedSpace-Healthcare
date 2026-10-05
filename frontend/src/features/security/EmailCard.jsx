@@ -91,7 +91,7 @@ export function EmailCard({ state }) {
   return (
     <div className="card card--flat p-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-surface-2 text-ink-3">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-surface-2 text-ink-3">
           <EnvelopeSimple size={20} />
         </span>
         <div className="min-w-0 flex-1">

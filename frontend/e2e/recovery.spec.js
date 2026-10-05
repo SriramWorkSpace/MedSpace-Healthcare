@@ -49,10 +49,8 @@ test("forgot password: reset by email, then sign in with the new password", asyn
   await page.getByRole("button", { name: "Sign in" }).click();
   await page.waitForURL("**/app");
 
-  // The link worked once.
+  // The link worked once: opening it again says so straight away, before any typing.
   await page.goto(await emailLink(page, email, "/reset-password"));
-  await page.getByLabel("New password").fill("another-new-password");
-  await page.getByRole("button", { name: "Set new password" }).click();
   await expect(page.getByRole("heading", { name: "This link has expired" })).toBeVisible();
 });
 

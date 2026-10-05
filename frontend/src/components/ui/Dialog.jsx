@@ -62,7 +62,7 @@ export function Dialog({ open, onClose, title, description, children, footer, si
           style={{ zIndex: "var(--z-dialog)" }}
         >
           <motion.div
-            className="absolute inset-0 bg-[oklch(0.2_0.02_165/0.42)] backdrop-blur-[2px]"
+            className="absolute inset-0 bg-scrim backdrop-blur-[2px]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.15 } }}

@@ -101,7 +101,7 @@ function MfaStep({ token, onCancel }) {
 
   return (
     <>
-      <span className="grid size-12 place-items-center rounded-full bg-accent-soft text-accent">
+      <span className="grid size-12 place-items-center rounded-2xl bg-accent-soft text-accent-soft-ink">
         <ShieldCheck size={24} weight="duotone" />
       </span>
       <h1 className="mt-5 text-3xl font-semibold tracking-tight">Check your phone</h1>

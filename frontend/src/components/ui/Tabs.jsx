@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useEffect, useId, useRef } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/cn";
 
@@ -6,12 +6,47 @@ import { cn } from "@/lib/cn";
 export function SegmentedTabs({ items, value, onChange, label, className }) {
   const id = useId();
   const reduce = useReducedMotion();
+  const strip = useRef(null);
+
+  // On narrow screens the strip scrolls: fade whichever edge has more tabs behind it. Data
+  // attributes, not state, so scrolling never re-renders.
+  useEffect(() => {
+    const el = strip.current;
+    if (!el) return;
+    const update = () => {
+      const max = el.scrollWidth - el.clientWidth;
+      el.dataset.fadeStart = String(el.scrollLeft > 2);
+      el.dataset.fadeEnd = String(el.scrollLeft < max - 2);
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    el.addEventListener("scroll", update, { passive: true });
+    return () => {
+      ro.disconnect();
+      el.removeEventListener("scroll", update);
+    };
+  }, []);
+
+  // The chosen tab is always fully visible.
+  useEffect(() => {
+    const el = strip.current;
+    const tab = el?.querySelector('[aria-selected="true"]');
+    if (!el || !tab) return;
+    const left = tab.offsetLeft - 28;
+    const right = tab.offsetLeft + tab.offsetWidth + 28 - el.clientWidth;
+    if (el.scrollLeft > left) el.scrollTo({ left, behavior: reduce ? "auto" : "smooth" });
+    else if (el.scrollLeft < right)
+      el.scrollTo({ left: right, behavior: reduce ? "auto" : "smooth" });
+  }, [value, reduce]);
+
   return (
     <div
+      ref={strip}
       role="tablist"
       aria-label={label}
       className={cn(
-        "inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-full border border-line bg-surface-2 p-1 [scrollbar-width:none]",
+        "fade-x inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-full border border-line bg-surface-2 p-1 [scrollbar-width:none]",
         className,
       )}
     >

@@ -262,6 +262,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 
 ## Change log
 
+- **2026-10-05**: UI consistency pass. Audited 23 routes at 4 widths in both themes (`scripts/ui-audit.mjs`): 0 console errors, failed requests, overflow, broken images or axe issues after fixes. Fixed: sign-in pages' header and footer landmarks; one heading scale (page titles 34px everywhere, card titles 16px); icon tiles one shape rule (squares, corner radius by size, soft-accent ink); overlay scrims and brand panels as tokens; landing nav wrapped on tablets (menu below lg); visit prep cramped at 1024 (stacks below xl); dashboard "Coming up" titles wrap instead of cutting off; phone filter tabs fade the edge with more tabs and keep the chosen one in view; Sharing rows on phones; expired reset links say so before any typing (new `POST /auth/password/reset/check`); developer text removed from the Documents empty state; Ask suggestions general rather than demo-specific; Timeline empty state gets an action. Keyboard focus rings verified on every tab stop.
+
 - **2026-10-05**: Polish pass (Phase 24): Lighthouse recorded and its findings fixed, README screenshots regenerated, plan tidied.
 
 - **2026-10-05**: Phase 23 shipped: change account email (ADR-033).

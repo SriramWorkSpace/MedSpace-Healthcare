@@ -355,6 +355,7 @@ Navigation is a **top bar on every screen size**; below `lg` it collapses into a
 | Frontend unit | Vitest + Testing Library | API client (CSRF, refresh), review form mapping, formatters, easter eggs |
 | End to end | Playwright (desktop + Pixel 7) + axe-core | Core journeys, WCAG 2.1 AA scans, phone overflow guard |
 | CI | GitHub Actions | Ruff, ESLint, all suites above, dependency audit, Docker image builds (dev + prod targets) |
+| UI audit (manual) | `frontend/scripts/ui-audit.mjs`: 23 routes x 4 widths x 2 themes | Console errors, failed requests, horizontal overflow, broken images, axe (all severities incl. best practices), and computed button/input/card/heading styles to spot inconsistencies |
 | Performance (manual) | Lighthouse via `frontend/scripts/lighthouse.mjs` on the production build | Performance, accessibility, best practices and SEO for public and signed-in pages, mobile and desktop (results in plan Phase 24) |
 
 Fakes (`LLM_PROVIDER=fake`, `EMBEDDING_PROVIDER=hash`, `GOOGLE_PROVIDER=fake`, local storage, inline queue) make every suite deterministic and keyless.

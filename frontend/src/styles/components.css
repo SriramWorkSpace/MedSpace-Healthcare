@@ -320,6 +320,23 @@
     }
   }
 
+  /* Horizontal scrollers (SegmentedTabs): fade the edge that has more content behind it. */
+  .fade-x[data-fade-end="true"] {
+    mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+  }
+  .fade-x[data-fade-start="true"] {
+    mask-image: linear-gradient(to right, transparent, #000 32px);
+  }
+  .fade-x[data-fade-start="true"][data-fade-end="true"] {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 32px,
+      #000 calc(100% - 32px),
+      transparent
+    );
+  }
+
   /* Page gutters. The nav bar spans the window (.shell); app pages share its gutters and
      stop growing at --page-max (.shell--page), so they line up with the nav up to that width. */
   .shell {
