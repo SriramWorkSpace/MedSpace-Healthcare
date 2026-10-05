@@ -16603,7 +16603,7 @@
       "file_type": "code",
       "norm_label": "confirmemail()",
       "source_file": "frontend/e2e/helpers.js",
-      "source_location": "L64"
+      "source_location": "L69"
     },
     {
       "id": "frontend_e2e_helpers_emaillink",
@@ -16615,7 +16615,7 @@
       "file_type": "code",
       "norm_label": "emaillink()",
       "source_file": "frontend/e2e/helpers.js",
-      "source_location": "L49"
+      "source_location": "L54"
     },
     {
       "id": "frontend_e2e_helpers_expectaccessible",
@@ -48208,7 +48208,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "frontend/e2e/helpers.js",
-      "source_location": "L65",
+      "source_location": "L70",
       "weight": 1.0
     },
     {
@@ -92076,7 +92076,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "frontend/e2e/helpers.js",
-      "source_location": "L49",
+      "source_location": "L54",
       "weight": 1.0
     },
     {
@@ -92087,7 +92087,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "frontend/e2e/helpers.js",
-      "source_location": "L64",
+      "source_location": "L69",
       "weight": 1.0
     },
     {
@@ -110503,5 +110503,5 @@
       "source_file": "docker-compose.yml"
     }
   ],
-  "built_at_commit": "34ef5e06698f15c4cf010932336315cffe8dfc22"
+  "built_at_commit": "489a39dcbcce7fe8e109d4fd1ceac2bd986d9541"
 }

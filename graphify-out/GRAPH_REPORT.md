@@ -1,7 +1,7 @@
 # Graph Report - MedSpace  (2026-10-05)
 
 ## Corpus Check
-- 341 files · ~149,751 words
+- 341 files · ~149,823 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `34ef5e06`
+- Built from commit: `489a39dc`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -230,8 +230,8 @@
 ## God Nodes (most connected - your core abstractions)
 1. `csrf()` - 96 edges
 2. `User` - 92 edges
-3. `get_settings()` - 62 edges
-4. `utcnow()` - 62 edges
+3. `utcnow()` - 62 edges
+4. `get_settings()` - 62 edges
 5. `signup()` - 52 edges
 6. `record()` - 44 edges
 7. `NotFound` - 38 edges
@@ -242,12 +242,12 @@
 ## Surprising Connections (you probably didn't know these)
 - `CI Backend job (ruff + pytest on pgvector Postgres)` --semantically_similar_to--> `postgres service (pgvector/pgvector:pg17)`  [INFERRED] [semantically similar]
   .github/workflows/ci.yml → docker-compose.yml
-- `_issue()` --calls--> `new_opaque_token()`  [INFERRED]
-  backend/app/modules/identity/recovery.py → backend/app/core/security.py
-- `_issue()` --calls--> `sha256_hex()`  [INFERRED]
-  backend/app/modules/identity/recovery.py → backend/app/core/security.py
-- `_issue()` --calls--> `EmailToken`  [INFERRED]
-  backend/app/modules/identity/recovery.py → backend/app/modules/identity/models.py
+- `apply_action()` --calls--> `DoseLogIn`  [INFERRED]
+  backend/app/modules/reminders/service.py → backend/app/modules/doses/schemas.py
+- `accept()` --calls--> `Gone`  [INFERRED]
+  backend/app/modules/circle/service.py → backend/app/core/errors.py
+- `confirm_email_change()` --calls--> `Gone`  [INFERRED]
+  backend/app/modules/identity/recovery.py → backend/app/core/errors.py
 - `_consume()` --calls--> `Gone`  [INFERRED]
   backend/app/modules/identity/recovery.py → backend/app/core/errors.py
 
@@ -753,19 +753,19 @@ Cohesion: 0.50
 Nodes (4): Who am I, without a 401 for anonymous visitors (the SPA calls this on boot). A…, session_state(), SessionState, OptionalUser
 
 ## Knowledge Gaps
-- **263 isolated node(s):** `1. System overview`, `2. Repository layout`, `3.1 Ports and adapters`, `4.1 Upload → Extract → Review → Organize → Act`, `4.2 Extraction pipeline details` (+258 more)
+- **263 isolated node(s):** `WorkerSettings`, `Faq`, `s3 service (SeaweedFS)`, `web service (Vite dev)`, `STEPS` (+258 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **88 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `get_settings()` connect `get_settings` to `integrations/service.py`, `integrations/router.py`, `HttpGoogleClient`, `documents/router.py`, `ratelimit.py`, `embeddings.py`, `documents/service.py`, `push.py`, `test_ratelimit.py`, `db.py`, `demo/router.py`, `config.py`, `test_timeline_dashboard.py`, `Settings`, `worker.py`, `identity/service.py`, `llm.py`, `assistant/service.py`, `demo/service.py`, `notify/service.py`, `MemoryStore`, `sharing/service.py`?**
+- **Why does `csrf()` connect `csrf` to `test_auth.py`, `build_pdf`, `test_ratelimit.py`, `timedelta`, `test_labs.py`, `test_assistant.py`, `test_doses.py`, `signup`, `test_sharing.py`, `test_google_signin.py`, `test_circle.py`, `conftest.py`, `test_timeline_dashboard.py`, `AsyncClient`, `test_caregiver_reminders.py`, `test_integrations.py`?**
   _High betweenness centrality (0.045) - this node is a cross-community bridge._
 - **Why does `User` connect `User` to `timeline/service.py`, `records/service.py`, `timedelta`, `assistant/service.py`, `deps.py`, `identity/security.py`, `demo/service.py`, `doses/service.py`, `integrations/router.py`, `identity/service.py`, `integrations/service.py`, `signup`, `test_google_signin.py`, `sharing/service.py`, `visits/service.py`, `extraction/jobs.py`?**
-  _High betweenness centrality (0.036) - this node is a cross-community bridge._
-- **Why does `csrf()` connect `csrf` to `test_auth.py`, `build_pdf`, `test_ratelimit.py`, `timedelta`, `test_labs.py`, `test_assistant.py`, `test_doses.py`, `signup`, `test_sharing.py`, `test_google_signin.py`, `test_circle.py`, `conftest.py`, `test_timeline_dashboard.py`, `AsyncClient`, `test_caregiver_reminders.py`, `test_integrations.py`?**
-  _High betweenness centrality (0.031) - this node is a cross-community bridge._
+  _High betweenness centrality (0.045) - this node is a cross-community bridge._
+- **Why does `get_settings()` connect `get_settings` to `integrations/service.py`, `integrations/router.py`, `HttpGoogleClient`, `documents/router.py`, `ratelimit.py`, `embeddings.py`, `documents/service.py`, `push.py`, `test_ratelimit.py`, `db.py`, `demo/router.py`, `config.py`, `test_timeline_dashboard.py`, `Settings`, `worker.py`, `identity/service.py`, `llm.py`, `assistant/service.py`, `demo/service.py`, `notify/service.py`, `MemoryStore`, `sharing/service.py`?**
+  _High betweenness centrality (0.041) - this node is a cross-community bridge._
 - **Are the 11 inferred relationships involving `csrf()` (e.g. with `change()` and `test_change_needs_the_password_and_a_code_with_two_step_on()`) actually correct?**
   _`csrf()` has 11 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 22 inferred relationships involving `User` (e.g. with `begin_setup()` and `change_password()`) actually correct?**

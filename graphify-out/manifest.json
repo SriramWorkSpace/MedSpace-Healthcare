@@ -450,10 +450,10 @@
     "semantic_hash": "7b46b0b899a7fa5fac80f9f8e8ff1a36"
   },
   "frontend/src/app/providers.jsx": {
-    "mtime": 1790878386.5759623,
-    "seen": 1790880449.7582593,
-    "ast_hash": "0a81055ae7d38ddcdbffdcf5cfcbfc53",
-    "semantic_hash": "0a81055ae7d38ddcdbffdcf5cfcbfc53"
+    "mtime": 1791217874.6067767,
+    "seen": 1791220086.317919,
+    "ast_hash": "2f643e4e75ea86076ce15a4893c3b202",
+    "semantic_hash": ""
   },
   "frontend/src/app/router.jsx": {
     "mtime": 1791190037.3794515,
@@ -1044,9 +1044,9 @@
     "semantic_hash": ""
   },
   "frontend/e2e/helpers.js": {
-    "mtime": 1791039307.6350598,
-    "seen": 1791039909.7289927,
-    "ast_hash": "b2d703b9ae75fab46d8d44e12da22447",
+    "mtime": 1791216913.6075745,
+    "seen": 1791220086.3177183,
+    "ast_hash": "e3b5b44e593e6e7f6087fa18d00ee686",
     "semantic_hash": ""
   },
   "frontend/e2e/marketing.spec.js": {
