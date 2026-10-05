@@ -39,13 +39,14 @@ import { describeAudit, deviceFrom, useAuditLog } from "@/features/settings/audi
 import { DeviceSettings } from "@/features/offline/DeviceSettings";
 import { CareCircleSettings } from "@/features/circle/CareCircleSettings";
 import { SecuritySettings } from "@/features/security/SecuritySettings";
+import { SettingsNav } from "@/features/settings/SettingsNav";
 
 const SECTIONS = [
   { id: "profile", label: "Profile", icon: User },
   { id: "security", label: "Security", icon: Key },
   { id: "integrations", label: "Integrations", icon: GoogleLogo },
-  { id: "device", label: "This device", icon: DeviceMobile },
   { id: "circle", label: "Care circle", icon: UsersThree },
+  { id: "device", label: "This device", icon: DeviceMobile },
   { id: "activity", label: "Activity", icon: ShieldCheck },
   { id: "eggs", label: "Easter eggs", icon: Egg },
   { id: "danger", label: "Account", icon: LockSimple },
@@ -61,7 +62,12 @@ const SLOTS = [
 function Section({ id, title, description, children }) {
   return (
     <section id={id} className="scroll-mt-[calc(var(--nav-h)+24px)]">
-      <h2 className="text-lg font-semibold">{title}</h2>
+      <h2
+        tabIndex={-1}
+        className="text-lg font-semibold outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded"
+      >
+        {title}
+      </h2>
       {description && <p className="mt-1 text-sm text-ink-2">{description}</p>}
       <div className="mt-4">{children}</div>
     </section>
@@ -431,20 +437,7 @@ export default function Settings() {
         description="Your profile, connections and a record of everything that happened."
       />
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[200px_minmax(0,1fr)]">
-        <nav aria-label="Settings sections" className="hidden lg:block">
-          <ul className="sticky top-[calc(var(--nav-h)+24px)] grid grid-cols-1 gap-0.5">
-            {SECTIONS.map(({ id, label, icon: Icon }) => (
-              <li key={id}>
-                <a
-                  href={`#${id}`}
-                  className="flex items-center gap-2.5 rounded-[var(--radius-control)] px-3 py-2 text-sm text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
-                >
-                  <Icon size={16} /> {label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        <SettingsNav sections={SECTIONS} />
         <div className="grid grid-cols-1 max-w-5xl gap-12">
           <Section id="profile" title="Profile">
             <ProfileForm />

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { startTransition, useState } from "react";
 import { useMotionValueEvent, useScroll } from "motion/react";
 
 /** True once the page has scrolled past `threshold` px (via motion's scroll observer, no listeners). */
@@ -7,7 +7,8 @@ export function useScrolled(threshold = 8) {
   const [scrolled, setScrolled] = useState(false);
   useMotionValueEvent(scrollY, "change", (y) => {
     const next = y > threshold;
-    setScrolled((prev) => (prev === next ? prev : next));
+    // Only a border colour: never let it take a frame from the scroll itself.
+    startTransition(() => setScrolled((prev) => (prev === next ? prev : next)));
   });
   return scrolled;
 }
