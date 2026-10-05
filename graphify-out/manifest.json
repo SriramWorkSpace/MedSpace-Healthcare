@@ -66,9 +66,9 @@
     "semantic_hash": "c5ce9fba63b0d0d5b13010eace155c53"
   },
   "backend/app/main.py": {
-    "mtime": 1791038035.8882077,
-    "seen": 1791039909.7282934,
-    "ast_hash": "c740601982934664c5e7af9566823676",
+    "mtime": 1791190045.4817104,
+    "seen": 1791191829.5263932,
+    "ast_hash": "5d0ff3b019012e05eb41b79d4eade679",
     "semantic_hash": ""
   },
   "backend/app/models.py": {
@@ -456,9 +456,9 @@
     "semantic_hash": "0a81055ae7d38ddcdbffdcf5cfcbfc53"
   },
   "frontend/src/app/router.jsx": {
-    "mtime": 1791182477.125734,
-    "seen": 1791183488.0507638,
-    "ast_hash": "76c0801b1555fb968ce78031cb0aab03",
+    "mtime": 1791190037.3794515,
+    "seen": 1791191829.5269814,
+    "ast_hash": "25be9329d22779e2b7727fd7f5581043",
     "semantic_hash": ""
   },
   "frontend/src/components/layout/ComingSoon.jsx": {
@@ -474,9 +474,9 @@
     "semantic_hash": ""
   },
   "frontend/src/components/nav/AppNav.jsx": {
-    "mtime": 1791029871.5346754,
-    "seen": 1791029902.9115074,
-    "ast_hash": "4c783db5160012ce332a2eb3b940d119",
+    "mtime": 1791190037.4856052,
+    "seen": 1791191829.5269914,
+    "ast_hash": "13c988273c1ab7342d88a3e8b307fc88",
     "semantic_hash": ""
   },
   "frontend/src/components/nav/MobileDrawer.jsx": {
@@ -492,9 +492,9 @@
     "semantic_hash": ""
   },
   "frontend/src/components/nav/UserMenu.jsx": {
-    "mtime": 1791007934.1070745,
-    "seen": 1791009580.28506,
-    "ast_hash": "6940f764927e791f65d41037a3f7d0a9",
+    "mtime": 1791190037.4176788,
+    "seen": 1791191829.5270019,
+    "ast_hash": "b0e9cfb82121b82acaa0690d2e3b78f8",
     "semantic_hash": ""
   },
   "frontend/src/components/nav/useScrolled.js": {
@@ -792,9 +792,9 @@
     "semantic_hash": ""
   },
   "frontend/src/pages/app/DocumentReview.jsx": {
-    "mtime": 1791133108.3053582,
-    "seen": 1791134095.247527,
-    "ast_hash": "7528272a577fbfcde0d692863be8d033",
+    "mtime": 1791190770.8189564,
+    "seen": 1791191829.5272815,
+    "ast_hash": "b6cdaf3e2d8631e917048a6e371fae75",
     "semantic_hash": ""
   },
   "frontend/src/pages/app/Documents.jsx": {
@@ -894,9 +894,9 @@
     "semantic_hash": ""
   },
   "docs/architecture.md": {
-    "mtime": 1791183468.005269,
-    "seen": 1791183488.0511515,
-    "ast_hash": "c6c5dba45b6a1eabfb72918eb50fe778",
+    "mtime": 1791191063.6935117,
+    "seen": 1791191829.527359,
+    "ast_hash": "024258b799c2d6f8216d9fece60893bd",
     "semantic_hash": ""
   },
   "docs/decisions.md": {
@@ -906,9 +906,9 @@
     "semantic_hash": ""
   },
   "docs/plan.md": {
-    "mtime": 1791183467.959293,
-    "seen": 1791183488.0511587,
-    "ast_hash": "81256f39614931607e3558df1a41eac8",
+    "mtime": 1791191056.6409364,
+    "seen": 1791191829.527367,
+    "ast_hash": "bfb4026f9fccc9f962969f6cf564358f",
     "semantic_hash": ""
   },
   "backend/app/modules/assistant/__init__.py": {
@@ -1080,9 +1080,9 @@
     "semantic_hash": "d233aeb49331759af3fe72261b563f59"
   },
   "frontend/src/features/dashboard/TodaySchedule.jsx": {
-    "mtime": 1791035656.337852,
-    "seen": 1791036689.2314994,
-    "ast_hash": "3e9f77fe66fdf13cf9cd66e01629a5bd",
+    "mtime": 1791190037.4176788,
+    "seen": 1791191829.5270793,
+    "ast_hash": "4839dd62dde4454c2516e2213936ff2b",
     "semantic_hash": ""
   },
   "frontend/src/features/dashboard/Widgets.jsx": {
@@ -1614,9 +1614,9 @@
     "semantic_hash": ""
   },
   "frontend/e2e/offline.spec.js": {
-    "mtime": 1790968691.650432,
-    "seen": 1790969463.7789607,
-    "ast_hash": "74a42d21d9e9acda0f87e59ae9a90c34",
+    "mtime": 1791190097.4795976,
+    "seen": 1791191829.526934,
+    "ast_hash": "bd9e2ae2d9701f58ee0a0ac79777061b",
     "semantic_hash": ""
   },
   "frontend/src/features/doses/request.js": {
@@ -1710,9 +1710,9 @@
     "semantic_hash": ""
   },
   "frontend/e2e/circle.spec.js": {
-    "mtime": 1791136524.3779328,
-    "seen": 1791137282.0668175,
-    "ast_hash": "46a85cb7357e7e0c5122cc029808d329",
+    "mtime": 1791190097.4784799,
+    "seen": 1791191829.5269067,
+    "ast_hash": "fcd9da5c9acec7d0697f8a678c77a7d2",
     "semantic_hash": ""
   },
   "frontend/src/features/circle/ActingBanner.jsx": {
