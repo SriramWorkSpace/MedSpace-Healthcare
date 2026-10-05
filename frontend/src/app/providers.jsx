@@ -34,8 +34,9 @@ export function Providers({ children }) {
         <AuthProvider>
           <MotionConfig reducedMotion="user">
             <EasterEggProvider>
-              {children}
+              {/* Before the pages, so it listens before any page's first effect fires a toast. */}
               <ThemedToaster />
+              {children}
             </EasterEggProvider>
           </MotionConfig>
         </AuthProvider>

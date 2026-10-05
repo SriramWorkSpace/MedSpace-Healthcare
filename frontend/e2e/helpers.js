@@ -31,7 +31,12 @@ export async function expectAccessible(page, { exclude = [] } = {}) {
         .every((a) => a.playState !== "running" || a.effect?.getTiming().iterations === Infinity) &&
       [...document.querySelectorAll('[style*="opacity"]')].every((el) => {
         const o = parseFloat(el.style.opacity);
-        return Number.isNaN(o) || o === 0 || o === 1;
+        if (Number.isNaN(o) || o === 1) return true;
+        // Opacity 0 is settled only off screen (sections that reveal on scroll); on screen it is
+        // about to fade in, and a scan mid-fade measures blended, too-light colours.
+        const r = el.getBoundingClientRect();
+        const onScreen = r.bottom > 0 && r.top < innerHeight && r.width > 0 && r.height > 0;
+        return o === 0 && !onScreen;
       }),
     null,
     { timeout: 8_000 },
