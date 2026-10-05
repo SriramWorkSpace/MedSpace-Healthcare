@@ -24,6 +24,7 @@ from app.modules.identity.schemas import (
     Accepted,
     CodeIn,
     DeviceSessionOut,
+    EmailChangeIn,
     ForgotPasswordIn,
     LoginIn,
     LoginResult,
@@ -222,6 +223,7 @@ async def _security_out(session, user, request: Request) -> SecurityOut:
     sessions = await security.list_sessions(session, user, _current_session(request))
     return SecurityOut(
         mfa_enabled=user.mfa_enabled,
+        pending_email=await recovery.pending_email_change(session, user),
         recovery_codes_left=await security.recovery_codes_left(session, user),
         has_password=user.has_password,
         sessions=[DeviceSessionOut(**vars(s)) for s in sessions],
@@ -390,4 +392,50 @@ async def resend_verification(user: CurrentUser, session: DbSession, background:
     mail = await recovery.start_verification(session, user)
     await session.commit()
     background.add_task(notify.send_verification, mail.to, mail.name, mail.token)
+    return Accepted()
+
+
+@profile_router.post(
+    "/email/change",
+    response_model=Accepted,
+    status_code=202,
+    dependencies=[Depends(rate_limit("me:email-change", 5, 3600))],
+)
+async def request_email_change(
+    data: EmailChangeIn,
+    request: Request,
+    user: CurrentUser,
+    session: DbSession,
+    background: BackgroundTasks,
+):
+    """Start moving the account to another address; it happens when that address confirms."""
+    change = await recovery.start_email_change(
+        session, user, data.new_email, data.password, data.code, request
+    )
+    await session.commit()
+    background.add_task(notify.send_email_change_link, change.new_email, change.name, change.token)
+    background.add_task(
+        notify.send_email_change_notice, change.old_email, change.name, change.new_email, False
+    )
+    return Accepted()
+
+
+@profile_router.delete("/email/change", status_code=204)
+async def cancel_email_change(request: Request, user: CurrentUser, session: DbSession):
+    await recovery.cancel_email_change(session, user, request)
+    await session.commit()
+
+
+@router.post(
+    "/email/change/confirm",
+    response_model=Accepted,
+    dependencies=[Depends(rate_limit("auth:email-change", 20, 900, by="ip"))],
+)
+async def confirm_email_change(
+    data: TokenIn, request: Request, session: DbSession, background: BackgroundTasks
+):
+    user, old = await recovery.confirm_email_change(session, data.token, request)
+    name, new = user.display_name, user.email
+    await session.commit()
+    background.add_task(notify.send_email_change_notice, old, name, new, True)
     return Accepted()

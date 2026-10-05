@@ -16,14 +16,15 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import utcnow
-from app.core.errors import Conflict, Gone
-from app.core.security import hash_password, new_opaque_token, sha256_hex
+from app.core.errors import Conflict, Forbidden, Gone, Unprocessable
+from app.core.security import hash_password, new_opaque_token, sha256_hex, verify_password
 from app.modules.audit import service as audit
 from app.modules.identity import security
 from app.modules.identity.models import EmailToken, User
 
 VERIFY_HOURS = 48
 RESET_MINUTES = 30
+CHANGE_HOURS = 24
 _EXPIRED = "This link has expired or was already used. Ask for a new one."
 
 
@@ -36,7 +37,9 @@ class Outgoing:
     token: str
 
 
-async def _issue(session: AsyncSession, user: User, purpose: str, ttl: timedelta) -> str:
+async def _issue(
+    session: AsyncSession, user: User, purpose: str, ttl: timedelta, email: str | None = None
+) -> str:
     await session.execute(
         update(EmailToken)
         .where(
@@ -51,7 +54,7 @@ async def _issue(session: AsyncSession, user: User, purpose: str, ttl: timedelta
         EmailToken(
             user_id=user.id,
             purpose=purpose,
-            email=user.email,
+            email=email or user.email,
             token_hash=sha256_hex(raw),
             expires_at=utcnow() + ttl,
         )
@@ -124,3 +127,121 @@ async def reset_password(
         meta={"sessions_signed_out": signed_out},
     )
     return user
+
+
+# ---- Changing the account email -----------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class EmailChange:
+    """What to send once committed: a link to the new address, a heads-up to the old one."""
+
+    old_email: str
+    new_email: str
+    name: str
+    token: str
+
+
+async def start_email_change(
+    session: AsyncSession,
+    user: User,
+    new_email: str,
+    password: str | None,
+    code: str | None,
+    request: Request,
+) -> EmailChange:
+    """Needs fresh proof (password, plus a code with two-step on) and a link to the new address.
+
+    Nothing changes until that link is opened, and the current address hears about it first.
+    """
+    new_email = new_email.strip().lower()
+    if user.is_demo:
+        raise Forbidden("Demo accounts can't change their email address.")
+    if not user.has_password:
+        raise Unprocessable("Add a password in Security first, then change your email.")
+    if not (password and verify_password(user.password_hash, password)):
+        raise Forbidden("That password isn't right.")
+    if user.mfa_enabled:
+        await security.check_second_factor(session, user, code, None, Forbidden)
+    if new_email == user.email:
+        raise Unprocessable("That's already your email address.")
+    taken = await session.scalar(select(User.id).where(User.email == new_email))
+    if taken:
+        raise Conflict("Another account already uses that address.")
+    token = await _issue(session, user, "change", timedelta(hours=CHANGE_HOURS), email=new_email)
+    await audit.record(
+        session,
+        action="auth.email_change_requested",
+        user_id=user.id,
+        request=request,
+        meta={"new_email": new_email},
+    )
+    return EmailChange(user.email, new_email, user.display_name, token)
+
+
+async def pending_email_change(session: AsyncSession, user: User) -> str | None:
+    row = await session.scalar(
+        select(EmailToken)
+        .where(
+            EmailToken.user_id == user.id,
+            EmailToken.purpose == "change",
+            EmailToken.used_at.is_(None),
+            EmailToken.expires_at > utcnow(),
+        )
+        .order_by(EmailToken.created_at.desc())
+        .limit(1)
+    )
+    return row.email if row else None
+
+
+async def cancel_email_change(session: AsyncSession, user: User, request: Request) -> None:
+    result = await session.execute(
+        update(EmailToken)
+        .where(
+            EmailToken.user_id == user.id,
+            EmailToken.purpose == "change",
+            EmailToken.used_at.is_(None),
+        )
+        .values(used_at=utcnow())
+    )
+    if result.rowcount:
+        await audit.record(
+            session, action="auth.email_change_cancelled", user_id=user.id, request=request
+        )
+
+
+async def confirm_email_change(
+    session: AsyncSession, raw: str, request: Request
+) -> tuple[User, str]:
+    """Open the link sent to the new address: the account moves to it. Returns (user, old)."""
+    row = await session.scalar(
+        select(EmailToken).where(
+            EmailToken.token_hash == sha256_hex(raw), EmailToken.purpose == "change"
+        )
+    )
+    if row is None or row.used_at is not None or row.expires_at <= utcnow():
+        raise Gone(_EXPIRED)
+    user = await session.get(User, row.user_id)
+    if user is None:
+        raise Gone(_EXPIRED)
+    taken = await session.scalar(select(User.id).where(User.email == row.email, User.id != user.id))
+    if taken:  # someone registered it while the link was waiting
+        raise Conflict("Another account now uses that address. Try a different one.")
+    old = user.email
+    row.used_at = utcnow()
+    user.email = row.email
+    user.email_verified_at = utcnow()  # opening the link proved this inbox
+    # Links sent to the old address (confirm, reset) no longer match the account: they're void.
+    await session.execute(
+        update(EmailToken)
+        .where(EmailToken.user_id == user.id, EmailToken.used_at.is_(None))
+        .values(used_at=utcnow())
+    )
+    await audit.record(
+        session,
+        action="auth.email_changed",
+        user_id=user.id,
+        request=request,
+        meta={"old_email": old, "new_email": user.email},
+    )
+    return user, old

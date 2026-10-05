@@ -34,3 +34,7 @@ export const useEndOtherSessions = () =>
   useSecurityMutation(() => api.post("/api/me/sessions/sign-out-others"));
 export const useChangePassword = () =>
   useSecurityMutation((body) => api.post("/api/me/password", body));
+export const useRequestEmailChange = () =>
+  useSecurityMutation((body) => api.post("/api/me/email/change", body));
+export const useCancelEmailChange = () =>
+  useSecurityMutation(() => api.delete("/api/me/email/change"));

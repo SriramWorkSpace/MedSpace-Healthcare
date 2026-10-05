@@ -228,3 +228,59 @@ export function VerifyEmailResult() {
     </div>
   );
 }
+
+/** Lands from the link sent to a new address: the account moves to it (ADR-033). */
+export function ConfirmEmailChangeResult() {
+  const [params] = useSearchParams();
+  const token = params.get("token") ?? "";
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  const started = useRef(false);
+  const confirm = useMutation({
+    mutationFn: () => api.post("/api/auth/email/change/confirm", { token }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: meKey }),
+  });
+  const { mutate } = confirm;
+
+  useEffect(() => {
+    if (started.current || !token) return; // links work once: guard StrictMode's double effect
+    started.current = true;
+    mutate();
+  }, [token, mutate]);
+
+  const next = user ? "/app/settings#security" : "/login";
+  const cta = user ? "Back to settings" : "Sign in";
+  if (confirm.isSuccess)
+    return (
+      <>
+        <Notice icon={CheckCircle} title="Email changed">
+          <p>Your account now uses this address. Sign in with it from now on.</p>
+        </Notice>
+        <Button as={Link} to={next} className="mt-8 w-full">
+          {cta}
+        </Button>
+      </>
+    );
+  if (!token || confirm.isError)
+    return (
+      <>
+        <Notice icon={WarningCircle} tone="danger" title="Your email wasn't changed">
+          <p>
+            {confirm.error?.status === 409
+              ? confirm.error.message
+              : "This link has expired, was already used, or the change was cancelled. Start again from Settings, Security."}
+          </p>
+        </Notice>
+        <Button as={Link} to={next} className="mt-8 w-full">
+          {cta}
+        </Button>
+      </>
+    );
+  return (
+    <div role="status" aria-live="polite">
+      <Notice icon={EnvelopeSimple} title="Changing your email">
+        <p>One moment.</p>
+      </Notice>
+    </div>
+  );
+}

@@ -25,6 +25,7 @@ CSRF_EXEMPT_PREFIXES = (
     "/api/auth/demo",
     "/api/auth/password/",  # forgot (anyone may ask) and reset (the emailed token is the proof)
     "/api/auth/email/verify",  # the emailed token is the proof
+    "/api/auth/email/change/confirm",  # likewise
     "/api/public/",
 )
 

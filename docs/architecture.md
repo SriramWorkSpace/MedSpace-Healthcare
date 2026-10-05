@@ -264,7 +264,7 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 
 | Area | Endpoints |
 |---|---|
-| Auth | `POST /auth/signup` · `POST /auth/login` (session, or `mfa_required` with a 5-minute token) · `POST /auth/login/mfa` · `POST /auth/password/forgot` · `POST /auth/password/reset` · `POST /auth/email/verify` · `POST /auth/demo` · `POST /auth/refresh` · `POST /auth/logout` · `GET /auth/me` · `GET /auth/session` · `GET /auth/google/start` · `GET /auth/google/providers` |
+| Auth | `POST /auth/signup` · `POST /auth/login` (session, or `mfa_required` with a 5-minute token) · `POST /auth/login/mfa` · `POST /auth/password/forgot` · `POST /auth/password/reset` · `POST /auth/email/verify` · `POST /auth/email/change/confirm` · `POST /auth/demo` · `POST /auth/refresh` · `POST /auth/logout` · `GET /auth/me` · `GET /auth/session` · `GET /auth/google/start` · `GET /auth/google/providers` |
 | Documents | `POST /documents` · `GET /documents` · `GET /documents/{id}` · `GET /documents/{id}/file` · `POST /documents/{id}/reprocess` · `DELETE /documents/{id}` |
 | Extraction | `GET /documents/{id}/extraction` · `GET /documents/{id}/evidence[?confirmed=true]` (where each field is printed; records link to it by `source_ref`) · `POST /extractions/{id}/confirm` · `POST /extractions/{id}/discard` |
 | Records | `GET /prescriptions` · `GET /prescriptions/{id}` · `GET /medications?status=` · `PATCH /medications/{id}` · `GET /care-actions` · `PATCH /care-actions/{id}` · `GET /diet-notes` · `DELETE /diet-notes/{id}` |
@@ -280,7 +280,7 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 | Assistant | `POST /assistant/threads` · `GET /assistant/threads` · `POST /assistant/threads/{id}/messages` (SSE) |
 | Integrations | `GET /integrations/google/status` · `GET /integrations/google/connect` · `GET /integrations/google/callback` · `POST /integrations/google/sync` · `DELETE /integrations/google/sync/{link_id}` · `DELETE /integrations/google` |
 | Sharing | `POST /shares` · `GET /shares` · `DELETE /shares/{id}` (revoke) · `GET /public/shares/{token}` · `GET /public/shares/{token}/documents/{doc_id}/file` |
-| Account security | `POST /me/email/verification` (resend) · `GET /me/security` · `POST /me/mfa/setup` · `POST /me/mfa/enable` · `POST /me/mfa/disable` · `POST /me/mfa/recovery-codes` · `DELETE /me/sessions/{id}` · `POST /me/sessions/sign-out-others` · `POST /me/password` |
+| Account security | `POST /me/email/verification` (resend) · `POST/DELETE /me/email/change` (ADR-033) · `GET /me/security` · `POST /me/mfa/setup` · `POST /me/mfa/enable` · `POST /me/mfa/disable` · `POST /me/mfa/recovery-codes` · `DELETE /me/sessions/{id}` · `POST /me/sessions/sign-out-others` · `POST /me/password` |
 | Audit | `GET /audit?cursor=` (user's own trail) |
 | Ops | `GET /health` · `GET /ready` |
 

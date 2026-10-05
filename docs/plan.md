@@ -112,6 +112,14 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 - [x] Multi-stage web image (nginx + /api proxy), deployment guide (docs/deployment.md), README screenshots
 - [x] Final graphify update and docs sync
 
+## Phase 23: Change account email
+
+- [x] Request with fresh proof (password, plus code with two-step on); Google-only accounts add a password first; demo accounts can't (ADR-033)
+- [x] Confirmation by the new inbox (one-time 24-hour link); old address told when it's requested and when it's done; pending change shown, cancellable
+- [x] On confirm: address re-checked, account moved and confirmed, old links voided, audited
+- [x] Settings, Security: Email address card; confirmation page
+- [x] Tests: 8 backend (happy path and sign-in, proof incl. two-step, taken and unchanged addresses, race, single use, expiry, cancel, old links voided, other browser, demo and passwordless), 1 e2e (with axe)
+
 ## Phase 22: Dose alerts for caregivers
 
 - [x] Per-person opt-in for caregivers: when a dose is due, or if it isn't ticked 30 or 60 minutes after (ADR-032); owner sees who gets alerts, and changes are in their activity log
@@ -245,6 +253,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 ---
 
 ## Change log
+
+- **2026-10-05**: Phase 23 shipped: change account email (ADR-033).
 
 - **2026-10-04**: Phase 22 shipped: dose alerts for caregivers (ADR-032).
 

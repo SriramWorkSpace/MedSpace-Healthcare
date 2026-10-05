@@ -144,6 +144,45 @@ async def send_security_alert(to: str, name: str, kind: str) -> bool:
     )
 
 
+async def send_email_change_link(to: str, name: str, token: str) -> bool:
+    return await _send(
+        to,
+        "Confirm your new email for MedSpace",
+        f"Hi {name}, confirm your new email",
+        [
+            "You asked to use this address for your MedSpace account. Your account moves to it "
+            "only after you confirm. The link works once and expires in 24 hours.",
+            "If you didn't ask for this, ignore this email and nothing will change.",
+        ],
+        ("Use this email", app_url(f"/confirm-email-change?token={token}")),
+    )
+
+
+async def send_email_change_notice(to: str, name: str, new_email: str, done: bool) -> bool:
+    """To the address being replaced: once when a change is asked for, once when it happens."""
+    if done:
+        subject, heading = "Your MedSpace email was changed", f"Hi {name}. Your email was changed"
+        what = f"Your MedSpace account now uses {new_email}. This address won't get its emails."
+    else:
+        subject = "Someone asked to change your MedSpace email"
+        heading = f"Hi {name}. A change to your email was requested"
+        what = (
+            f"Someone signed in to your account asked to move it to {new_email}. It only "
+            "happens if that address confirms."
+        )
+    return await _send(
+        to,
+        subject,
+        heading,
+        [
+            what,
+            "If this wasn't you, sign in, change your password and sign out other devices in "
+            "Settings, Security. You can cancel a pending change there too.",
+        ],
+        ("Open security settings", app_url("/app/settings#security")),
+    )
+
+
 # ---- Care circle --------------------------------------------------------------------------------
 
 _ROLE_TEXT = {

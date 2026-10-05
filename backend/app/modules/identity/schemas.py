@@ -139,6 +139,7 @@ class DeviceSessionOut(BaseModel):
 
 class SecurityOut(BaseModel):
     mfa_enabled: bool
+    pending_email: str | None = None  # waiting for the new address to confirm
     recovery_codes_left: int
     has_password: bool
     sessions: list[DeviceSessionOut]
@@ -163,3 +164,9 @@ class TokenIn(BaseModel):
 
 class Accepted(BaseModel):
     ok: bool = True
+
+
+class EmailChangeIn(BaseModel):
+    new_email: EmailStr
+    password: str | None = Field(None, max_length=128)
+    code: str | None = Field(None, max_length=12)

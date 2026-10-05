@@ -4,6 +4,7 @@ import {
   CalendarCheck,
   CalendarX,
   CheckCircle,
+  EnvelopeSimple,
   Eye,
   FileArrowUp,
   GoogleLogo,
@@ -70,6 +71,15 @@ export const AUDIT = {
   "auth.password_changed": { icon: Key, label: () => "Changed your password" },
   "auth.password_reset_requested": { icon: Key, label: () => "Asked for a password reset link" },
   "auth.password_reset": { icon: Key, label: () => "Reset your password from an email link" },
+  "auth.email_change_requested": {
+    icon: EnvelopeSimple,
+    label: (m) => `Asked to change your email to ${m.new_email}`,
+  },
+  "auth.email_change_cancelled": { icon: EnvelopeSimple, label: () => "Cancelled an email change" },
+  "auth.email_changed": {
+    icon: EnvelopeSimple,
+    label: (m) => `Changed your email to ${m.new_email}`,
+  },
   "auth.email_verified": { icon: CheckCircle, label: () => "Confirmed your email address" },
   "auth.session_revoked": { icon: SignOut, label: () => "Signed out a device" },
   "auth.other_sessions_revoked": {

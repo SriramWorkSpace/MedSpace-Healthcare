@@ -17,6 +17,7 @@ import { Field } from "@/components/ui/Field";
 import { CodeInput, PasswordInput } from "@/components/ui/PasswordInput";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { formatDate, timeAgo } from "@/lib/format";
+import { EmailCard } from "./EmailCard";
 import {
   useChangePassword,
   useDisableMfa,
@@ -517,6 +518,7 @@ export function SecuritySettings() {
 
   return (
     <div className="grid grid-cols-1 gap-4">
+      <EmailCard state={data} />
       <TwoStepCard state={data} />
       <SessionsCard sessions={data.sessions} />
       <PasswordCard hasPassword={data.has_password} />

@@ -30,6 +30,10 @@ export const router = createBrowserRouter([
         children: [
           { path: "reset-password", lazy: page(() => import("@/pages/auth/ResetPassword")) },
           { path: "verify-email", lazy: page(() => import("@/pages/auth/VerifyEmail")) },
+          {
+            path: "confirm-email-change",
+            lazy: page(() => import("@/pages/auth/ConfirmEmailChange")),
+          },
         ],
       },
       {

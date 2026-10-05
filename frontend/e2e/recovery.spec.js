@@ -55,3 +55,29 @@ test("forgot password: reset by email, then sign in with the new password", asyn
   await page.getByRole("button", { name: "Set new password" }).click();
   await expect(page.getByRole("heading", { name: "This link has expired" })).toBeVisible();
 });
+
+test("changing the email waits for the new inbox, then moves the account", async ({ page }) => {
+  const stamp = Date.now();
+  const oldEmail = `move-${stamp}@example.com`;
+  const newEmail = `moved-${stamp}@example.com`;
+  await signUp(page, oldEmail);
+  await page.goto("/app/settings#security");
+  const card = page.locator("#security").getByText("Email address").locator("../..");
+  await expect(card).toContainText(oldEmail);
+
+  await card.getByRole("button", { name: "Change" }).click();
+  const dialog = page.getByRole("dialog", { name: "Change your email" });
+  await dialog.getByLabel("New email").fill(newEmail);
+  await dialog.getByLabel("Current password").fill("a-long-enough-password");
+  await expectAccessible(page);
+  await dialog.getByRole("button", { name: "Send link" }).click();
+  await expect(page.getByText("Check your new inbox")).toBeVisible();
+  await expect(card).toContainText(`Waiting for you to confirm ${newEmail}`);
+
+  await page.goto(await emailLink(page, newEmail, "/confirm-email-change"));
+  await expect(page.getByRole("heading", { name: "Email changed" })).toBeVisible();
+  await expectAccessible(page);
+  await page.getByRole("link", { name: "Back to settings" }).click();
+  await expect(page.locator("#security")).toContainText(newEmail);
+  await expect(page.locator("#security")).not.toContainText("Waiting for you to confirm");
+});
