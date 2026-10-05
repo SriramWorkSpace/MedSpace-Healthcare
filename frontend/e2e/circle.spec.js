@@ -17,10 +17,10 @@ test("a helper switches to a family member's records and back", async ({ page })
 
   // Helpers can tick doses for the person they help.
   await page
-    .getByRole("button", { name: /^Mark taken: Metformin/ })
+    .getByRole("button", { name: /^Mark taken: .*Metformin/ })
     .first()
     .click();
-  await expect(page.getByRole("button", { name: /^Taken: Metformin/ }).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Taken: .*Metformin/ }).first()).toBeVisible();
 
   await page.goto("/app/medications");
   await expect(page.getByRole("button", { name: "Edit times" })).toHaveCount(0);

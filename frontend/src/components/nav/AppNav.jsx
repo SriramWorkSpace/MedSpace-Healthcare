@@ -97,7 +97,7 @@ export function AppNav() {
           <button
             type="button"
             onClick={openSearch}
-            aria-label="Search your records"
+            aria-label="Search your records (Ctrl K)"
             aria-keyshortcuts={IS_MAC ? "Meta+K" : "Control+K"}
             title={`Search (${IS_MAC ? "⌘K" : "Ctrl K"})`}
             className="searchbtn"

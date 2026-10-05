@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import {
@@ -78,6 +78,7 @@ export default function DocumentReview() {
   const show = searchParams.get("show");
   const shownEvidence = useEvidence(id, { enabled: Boolean(show), confirmed: true });
   const [showDismissed, setShowDismissed] = useState(false);
+  const latestLocate = useRef(0); // only the newest focus may set the highlight
   const confirm = useConfirmExtraction();
   const discard = useDiscardExtraction();
   const reprocess = useReprocessDocument();
@@ -118,9 +119,16 @@ export default function DocumentReview() {
   const meta = STATUS_META[d.status] ?? STATUS_META.queued;
 
   // Evidence highlights (ADR-031): a focused field (or the "p.N" button) shows its spot.
-  const locate = ({ keys, page: fallbackPage, label, explicit }) => {
+  const locate = (request) => {
     setShowDismissed(true);
-    const ev = evidence.data;
+    const ticket = ++latestLocate.current;
+    if (evidence.data) return applyLocate(request, evidence.data);
+    // Focused before the evidence arrived: show it once it does, unless something newer won.
+    evidence.refetch().then(({ data }) => {
+      if (ticket === latestLocate.current) applyLocate(request, data);
+    });
+  };
+  const applyLocate = ({ keys, page: fallbackPage, label, explicit }, ev) => {
     const spot = findSpot(ev, keys);
     if (spot) {
       setPage(spot.page);

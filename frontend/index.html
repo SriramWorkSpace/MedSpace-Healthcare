@@ -35,9 +35,37 @@
         } catch (e) {}
       })();
     </script>
+    <style>
+      .boot {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        opacity: 0;
+        animation: boot-in 240ms ease-out 300ms forwards;
+      }
+      @keyframes boot-in {
+        to {
+          opacity: 1;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .boot {
+          animation-duration: 1ms;
+        }
+      }
+      :root[data-theme="dark"] .boot img {
+        content: url("/brand/logo-mark-64-dark.png");
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Shown only on slow loads (fades in after 300 ms); React replaces it on first render. -->
+      <div class="boot" aria-hidden="true">
+        <img src="/brand/logo-mark-64.png" width="44" height="44" alt="" />
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

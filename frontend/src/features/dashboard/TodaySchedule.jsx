@@ -117,9 +117,11 @@ export function TodaySchedule({ doses, dateKey, readOnly = false }) {
                       onClick={() => mark(d, isTaken ? null : "taken")}
                       disabled={readOnly}
                       aria-pressed={isTaken}
-                      aria-label={`${isTaken ? "Taken: " : "Mark taken: "}${label}`}
+                      data-dose={id}
                       className="flex min-w-0 flex-1 items-center gap-3 rounded-[var(--radius-control)] px-3.5 py-3 text-left transition-transform duration-150 active:scale-[0.99]"
                     >
+                      {/* The spoken name starts with the action, then the visible text. */}
+                      <span className="sr-only">{isTaken ? "Taken: " : "Mark taken: "}</span>
                       <span className="tabular w-[70px] shrink-0 text-sm font-semibold text-ink-2">
                         {formatClock(d.time)}
                       </span>

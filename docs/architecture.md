@@ -354,7 +354,8 @@ Navigation is a **top bar on every screen size**; below `lg` it collapses into a
 | Backend | pytest + httpx ASGI client, real Postgres (pgvector) | Auth flows and token rotation, CSRF, rate limits, upload validation, cross-user isolation, extraction and normalizer tables, confirm/discard/versioning, timeline paging, search scoping and wildcard escaping, RAG retrieval and guardrails, Google sync idempotency, share-link expiry/revocation/view limits |
 | Frontend unit | Vitest + Testing Library | API client (CSRF, refresh), review form mapping, formatters, easter eggs |
 | End to end | Playwright (desktop + Pixel 7) + axe-core | Core journeys, WCAG 2.1 AA scans, phone overflow guard |
-| CI | GitHub Actions | Ruff, ESLint, all suites above, Docker image builds (dev + prod targets) |
+| CI | GitHub Actions | Ruff, ESLint, all suites above, dependency audit, Docker image builds (dev + prod targets) |
+| Performance (manual) | Lighthouse via `frontend/scripts/lighthouse.mjs` on the production build | Performance, accessibility, best practices and SEO for public and signed-in pages, mobile and desktop (results in plan Phase 24) |
 
 Fakes (`LLM_PROVIDER=fake`, `EMBEDDING_PROVIDER=hash`, `GOOGLE_PROVIDER=fake`, local storage, inline queue) make every suite deterministic and keyless.
 

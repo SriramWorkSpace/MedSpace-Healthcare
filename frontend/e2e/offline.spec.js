@@ -55,14 +55,14 @@ test("records stay readable offline and dose ticks sync when back online", async
   await expect(page.getByText("Today's doses")).toBeVisible();
 
   const tick = page.getByRole("button", { name: /^Mark taken:/ }).first();
-  const label = (await tick.getAttribute("aria-label")).replace("Mark taken: ", "");
+  const dose = await tick.getAttribute("data-dose");
   await tick.click();
   await expect(banner).toContainText("1 dose tick will sync when you reconnect");
 
   // The queued tick survives a reload while still offline.
   await expect.poll(async () => (await readSnapshot(page))?.state?.mutations?.length ?? 0).toBe(1);
   await page.reload();
-  await expect(page.getByRole("button", { name: `Taken: ${label}` })).toBeVisible();
+  await expect(page.locator(`[data-dose="${dose}"]`)).toHaveAttribute("aria-pressed", "true");
 
   await context.setOffline(false);
   await expect(banner).toBeHidden({ timeout: 15_000 });

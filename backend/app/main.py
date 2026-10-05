@@ -10,6 +10,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from sqlalchemy import text
 
 from app import jobs as _jobs  # noqa: F401  (register background jobs)
@@ -113,6 +114,8 @@ def create_app() -> FastAPI:
         ],
     )
     app.add_middleware(RequestLogMiddleware)
+    # JSON lists compress well; tiny responses aren't worth it. (nginx compresses static files.)
+    app.add_middleware(GZipMiddleware, minimum_size=1024)
     install_error_handlers(app)
 
     api = APIRouter(prefix="/api")

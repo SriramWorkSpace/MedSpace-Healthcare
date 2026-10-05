@@ -1,12 +1,17 @@
 import { createBrowserRouter } from "react-router";
 import MarketingLayout from "./layouts/MarketingLayout";
-import AppLayout from "./layouts/AppLayout";
-import AuthLayout from "./layouts/AuthLayout";
 import RouteError from "./RouteError";
 import Landing from "@/pages/marketing/Landing";
 
 /** Route modules are code-split; each lazy() resolves to `{ Component }`. */
 const page = (loader) => async () => ({ Component: (await loader()).default });
+/** Layouts too, so the landing page doesn't download the app shell (search, nav, banners). */
+const appLayout = page(() => import("./layouts/AppLayout"));
+const authLayout = page(() => import("./layouts/AuthLayout"));
+const openAuthLayout = async () => {
+  const { default: AuthLayout } = await import("./layouts/AuthLayout");
+  return { Component: () => <AuthLayout open /> };
+};
 
 export const router = createBrowserRouter([
   {
@@ -17,7 +22,7 @@ export const router = createBrowserRouter([
         children: [{ index: true, element: <Landing /> }],
       },
       {
-        element: <AuthLayout />,
+        lazy: authLayout,
         children: [
           { path: "login", lazy: page(() => import("@/pages/auth/Login")) },
           { path: "signup", lazy: page(() => import("@/pages/auth/Signup")) },
@@ -26,7 +31,7 @@ export const router = createBrowserRouter([
       },
       {
         // Emailed links: they must work whether or not this browser is signed in.
-        element: <AuthLayout open />,
+        lazy: openAuthLayout,
         children: [
           { path: "reset-password", lazy: page(() => import("@/pages/auth/ResetPassword")) },
           { path: "verify-email", lazy: page(() => import("@/pages/auth/VerifyEmail")) },
@@ -38,7 +43,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "app",
-        element: <AppLayout />,
+        lazy: appLayout,
         children: [
           { index: true, lazy: page(() => import("@/pages/app/Dashboard")) },
           { path: "documents", lazy: page(() => import("@/pages/app/Documents")) },

@@ -36,14 +36,14 @@ Backend
 
 Frontend
 - [x] Design tokens (light/dark), typography, Tailwind v4 `@theme` bridge
-- [~] UI primitives: Button, Field/Input, Chip, Skeleton, Dialog, MobileDrawer, EmptyState, Toaster done; Tabs/Tooltip added when first needed
+- [x] UI primitives: Button, Field/Input, Chip, Skeleton, Dialog, MobileDrawer, EmptyState, Toaster. (Tabs and Tooltip were never needed: filters use segmented controls, hints use visible text.)
 - [x] Top navigation (desktop bar + mobile drawer), theme toggle, user menu
 - [x] Marketing landing: hero with live document-to-schedule morph, workflow, feature bento, AI section, trust/privacy, CTA, footer
 - [x] Auth pages with validation, error states, demo login
 - [x] API client (cookies + CSRF + refresh-on-401 queue), TanStack Query setup, route guards
-- [~] Skeleton screens: app shell + generic page skeleton done; shaped skeletons ship with each feature page
+- [x] Skeleton screens: app shell, generic page skeleton, and a shaped skeleton on every data page (shipped with each feature)
 - [x] Easter eggs v1: rotating health puns in loaders, 404 pun page, Konami-code apple rain, logo-click apple
-- [~] Reduced-motion and keyboard/focus: global reduced-motion, MotionConfig, focus rings, dialog focus trap, skip links; full audit in Phase 8
+- [x] Reduced-motion and keyboard/focus: global reduced-motion, MotionConfig, focus rings, dialog focus trap, skip links; audited in Phase 8 and the 2026-10-02 QA pass
 
 ## Phase 2: Documents + processing pipeline
 
@@ -106,11 +106,19 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 ## Phase 8: Hardening + launch
 
 - [x] Playwright e2e: demo login → upload → review → confirm → ask → share (12 tests, desktop + mobile, in CI)
-- [x] Accessibility pass: axe WCAG 2.1 AA in e2e (landing, login dark, review, dashboard); token contrast fixed. [~] Lighthouse run not yet recorded
+- [x] Accessibility pass: axe WCAG 2.1 AA in e2e (landing, login dark, review, dashboard); token contrast fixed. Lighthouse recorded in Phase 24
 - [x] Route error boundary, retry states on every data view, toasts for transient failures, storage outages as 503
 - [x] Account data export (`GET /api/me/export`, secrets excluded) and delete account with file purge
 - [x] Multi-stage web image (nginx + /api proxy), deployment guide (docs/deployment.md), README screenshots
 - [x] Final graphify update and docs sync
+
+## Phase 24: Polish pass
+
+- [x] Lighthouse audit of the production build (`scripts/lighthouse.mjs`, 5 pages x mobile and desktop, signed in for app pages). After fixes: accessibility 100 and best practices 100 everywhere; SEO 100 on the landing page (app and sign-in pages are deliberately excluded from indexing); performance 96 to 99 on desktop, 62 to 75 on Lighthouse's simulated mid-range phone, where the remaining cost is running React and the page code (an SPA without server rendering)
+- [x] Fixes: app and sign-in layouts load lazily, so the landing page no longer downloads the app shell (56 to 38 initial files, about 260 to 224 KB gzipped); `robots.txt` keeps share links and app pages out of search engines; API responses are gzip-compressed; accessible names now include visible text (search button, account menu, dose buttons; WCAG 2.5.3); a loading screen in the HTML for slow connections (fades in after 300 ms, so fast loads never see it)
+- [x] Fixed on the way: focusing a review field before its evidence arrived lost the highlight; it now appears when the data lands
+- [x] README screenshots regenerated from a fresh demo by `scripts/readme-screenshots.mjs` (replaces two stale ad-hoc scripts); unused images removed
+- [x] Plan housekeeping: Phase 1 partial items closed, Lighthouse recorded
 
 ## Phase 23: Change account email
 
@@ -253,6 +261,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 ---
 
 ## Change log
+
+- **2026-10-05**: Polish pass (Phase 24): Lighthouse recorded and its findings fixed, README screenshots regenerated, plan tidied.
 
 - **2026-10-05**: Phase 23 shipped: change account email (ADR-033).
 

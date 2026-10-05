@@ -44,7 +44,7 @@ export function UserMenu() {
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label="Account menu"
+        aria-label={`Account menu (${initials(user.display_name)})`}
         onClick={() => setOpen((v) => !v)}
         className="grid grid-cols-1 size-8 place-items-center rounded-full bg-accent-soft text-[12px] font-semibold text-accent-soft-ink ring-1 ring-line transition-transform duration-150 active:scale-95"
       >

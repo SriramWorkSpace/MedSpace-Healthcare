@@ -1,0 +1,13 @@
+# MedSpace: only the public landing page is meant for search engines.
+# Share links (/s/) are private by design and must never be indexed.
+User-agent: *
+Allow: /$
+Disallow: /app
+Disallow: /s/
+Disallow: /api/
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /confirm-email-change
