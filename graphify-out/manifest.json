@@ -498,10 +498,10 @@
     "semantic_hash": ""
   },
   "frontend/src/components/nav/useScrolled.js": {
-    "mtime": 1790878112.8625665,
-    "seen": 1790880449.758269,
-    "ast_hash": "718321a705e74a382c9cce59a96e8238",
-    "semantic_hash": "718321a705e74a382c9cce59a96e8238"
+    "mtime": 1791196753.7507153,
+    "seen": 1791197447.988843,
+    "ast_hash": "94435bd0dea44d7e36de566e86843920",
+    "semantic_hash": ""
   },
   "frontend/src/components/ui/Button.jsx": {
     "mtime": 1790878033.765704,
@@ -816,9 +816,9 @@
     "semantic_hash": ""
   },
   "frontend/src/pages/app/Settings.jsx": {
-    "mtime": 1791038758.6500814,
-    "seen": 1791039909.7298703,
-    "ast_hash": "8ac475f0aa106e35b5da182d863c7233",
+    "mtime": 1791196508.38961,
+    "seen": 1791197447.9892654,
+    "ast_hash": "155f89dd3a4bc8c972e3e227d47d4db1",
     "semantic_hash": ""
   },
   "frontend/src/pages/app/Sharing.jsx": {
@@ -2049,6 +2049,24 @@
     "mtime": 1791182477.124376,
     "seen": 1791183488.051096,
     "ast_hash": "0b22bcbadd878ff5b1055ac9c2877aba",
+    "semantic_hash": ""
+  },
+  "frontend/e2e/settings.spec.js": {
+    "mtime": 1791196905.1915998,
+    "seen": 1791197447.9887838,
+    "ast_hash": "cb7e35e2437a8690ab8470e72488a600",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/settings/SettingsNav.jsx": {
+    "mtime": 1791196753.7507153,
+    "seen": 1791197447.989158,
+    "ast_hash": "22b0866076356af621c7354722b84e1a",
+    "semantic_hash": ""
+  },
+  "frontend/src/lib/smoothScroll.js": {
+    "mtime": 1791196502.6516187,
+    "seen": 1791197447.989216,
+    "ast_hash": "383f1ae03fe274e23c09a2eb20be38e3",
     "semantic_hash": ""
   }
 }
