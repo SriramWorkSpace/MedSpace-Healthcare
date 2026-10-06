@@ -96,7 +96,7 @@ Without email, nobody can reset a forgotten password, confirm an address or chan
 2. Root directory `backend`, runtime **Docker**, instance type **Free**.
 3. Start command:
    ```bash
-   sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT --no-proxy-headers"
+   sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT --no-proxy-headers --no-access-log"
    ```
 4. Health check path: `/api/ready`.
 5. Environment variables (full list in [deployment.md](deployment.md)):
@@ -129,15 +129,8 @@ idling takes up to a minute while the free instance wakes; that's normal.
 
 ## Part 7. The web app on Vercel (15 minutes)
 
-1. Create `frontend/vercel.json` with your Render URL and commit it:
-   ```json
-   {
-     "rewrites": [
-       { "source": "/api/(.*)", "destination": "https://YOUR-API.onrender.com/api/$1" },
-       { "source": "/(.*)", "destination": "/index.html" }
-     ]
-   }
-   ```
+1. In `frontend/vercel.json`, replace `YOUR-API.onrender.com` with your Render host and commit
+   it. Leave the `headers` section as it is: it's the site's security policy.
    The rewrite keeps the API on the same origin as the site, which the sign-in cookies need.
 2. Vercel, then **Add New Project**, import the repo, root directory `frontend`. Framework
    Vite, build `npm run build`, output `dist`.
@@ -146,7 +139,8 @@ idling takes up to a minute while the free instance wakes; that's normal.
 
 **Check:** open the site, click **Try the demo**, and the dashboard loads with sample data. Ask
 MedSpace streams its answer word by word (if it arrives all at once, the rewrite is buffering;
-it still works).
+it still works). Upload a sample PDF of a few MB to confirm uploads pass through the rewrite.
+Open the browser's developer tools console: no red "Content Security Policy" messages.
 
 ---
 
@@ -194,6 +188,24 @@ most:
 - [ ] Upload a sample PDF from `samples/`; it reaches "Needs review" and highlights work.
 - [ ] Turn on reminders on your phone (Settings, This device), send a test notification.
 - [ ] `/api/dev/outbox?to=x` returns 404 (the dev outbox is off in production).
+
+If the API won't start and its log says **Unsafe production settings**, it lists exactly which
+variables to fix. That's deliberate: production never runs with development secrets.
+
+### Keep the data safe
+
+- **Backups:** Neon's free plan keeps only a short restore window. Every few weeks, export a
+  copy: `pg_dump "<your Neon URL, starting postgresql://>" -Fc -f medspace.dump`, and keep
+  it somewhere private.
+- **Secrets:** if a secret ever leaks (pasted in a chat, committed by mistake), rotate it at
+  the provider and on Render. A new `JWT_SECRET` signs everyone out; a new
+  `TOKEN_ENCRYPTION_KEY` makes stored two-step secrets and Google tokens unreadable, so keep
+  that one stable.
+- **Logs:** MedSpace keeps share-link tokens out of its own logs, but Vercel's and Render's
+  request logs record full URLs. Don't grant others access to those dashboards.
+- **Known limit:** a deliberately crafted PDF with huge embedded images can still use a lot
+  of memory while pages render. Sizes and page counts are capped, and Render restarts the
+  instance if it runs out.
 
 ---
 

@@ -32,8 +32,10 @@ flowchart LR
 Build from `backend/Dockerfile`. Start command:
 
 ```bash
-sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT --no-proxy-headers"
+sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT --no-proxy-headers --no-access-log"
 ```
+
+`--no-access-log` matters: uvicorn's access log would write full URLs, including share-link and invitation tokens. MedSpace logs every request itself, with those tokens redacted.
 
 Environment (see `.env.example` for every option):
 
@@ -63,15 +65,12 @@ With `QUEUE_MODE=arq`, run a second process from the same image:
 
 ## 4. Web: static build with an `/api` rewrite
 
-**Vercel / Netlify:** build `frontend/` with `npm run build` (output `dist`) and add a rewrite:
+**Vercel:** build `frontend/` with `npm run build` (output `dist`). `frontend/vercel.json` is
+committed with the security headers and the rewrites; replace `YOUR-API.onrender.com` in its
+`/api` rewrite with your API host. Keep its headers equal to `deploy/security-headers.js` (a unit
+test checks).
 
-```json
-// vercel.json
-{ "rewrites": [
-  { "source": "/api/(.*)", "destination": "https://YOUR-API-HOST/api/$1" },
-  { "source": "/(.*)", "destination": "/index.html" }
-] }
-```
+**Netlify:** add the rewrites below and the same headers in `public/_headers`.
 
 ```text
 # netlify: public/_redirects
@@ -94,6 +93,8 @@ scopes are sensitive: without Google verification, only listed test users can co
 - [ ] "Try the demo" lands on a seeded dashboard
 - [ ] Uploading a sample PDF reaches "Needs review"
 - [ ] Response headers include HSTS and `X-Frame-Options: DENY`
+- [ ] The web page's response carries the `Content-Security-Policy` header, and the browser console shows no CSP violations
+- [ ] With `ENV=prod`, the API refuses to start if `JWT_SECRET` or `TOKEN_ENCRYPTION_KEY` is missing (the log lists what to fix)
 - [ ] API responses carry `RateLimit-Limit` / `RateLimit-Remaining`; eleven quick wrong-password sign-ins to one account return `429` with `Retry-After`
 - [ ] Sending a fake `X-Forwarded-For` does not reset a rate limit
 - [ ] Signing up delivers a confirmation email; "Forgot password?" delivers a reset link

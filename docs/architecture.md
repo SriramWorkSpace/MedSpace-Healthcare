@@ -295,10 +295,14 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 | Sign-out | Access tokens carry their session (`sid`); each request checks the session is live, so revoking a device (or every other device) takes effect immediately |
 | CSRF | Double-submit token: readable `ms_csrf` cookie echoed in `X-CSRF-Token` for unsafe methods |
 | Authorization | Every query filters by `current_user.id`; resources fetched by `(id, user_id)` so foreign IDs return 404, not 403 |
-| Uploads | Allow-list MIME + magic-byte sniffing, 15 MB cap, 30 pages cap, random storage keys, never served inline from storage domain |
+| Uploads | Allow-list MIME + magic-byte sniffing, 15 MB cap, 30 pages cap, images at most 40 megapixels and 12,000 px a side (read from headers before decoding), rendering capped at 4,000 px a side, request bodies cut off at the limit as they stream (ADR-035), random storage keys, never served inline from storage domain |
 | Secrets | Google tokens encrypted with Fernet; share tokens and refresh tokens hashed (SHA-256) |
 | Rate limiting | Two layers (ADR-027): a baseline budget on every `/api` route (600 reads and 120 writes per minute) plus tighter per-route limits on sign-in, sign-up, AI calls, uploads, exports, sharing and invitations, and a per-account sign-in limit. Keyed by user when signed in, by client IP otherwise; client IPs honour `X-Forwarded-For` only for `TRUSTED_PROXY_HOPS` proxies. Sliding-window counters in Redis (shared by every API process) or memory (single process); fails open. Responses carry `RateLimit-*` headers and 429s carry `Retry-After`. |
-| Headers | CSP, `X-Content-Type-Options`, `Referrer-Policy: strict-origin-when-cross-origin`, HSTS in prod |
+| Headers | API: CSP, `X-Content-Type-Options`, `Referrer-Policy: strict-origin-when-cross-origin`, HSTS in prod. Web app: strict CSP with no inline or remote script, `X-Frame-Options: DENY`, `Permissions-Policy`, COOP, from `frontend/deploy/security-headers.js` (copied into `vercel.json` and nginx; a test keeps them equal) |
+| Production settings | Start-up refuses a default or short JWT secret, a missing encryption key, insecure cookies, non-https frontend or CORS origins and local storage (ADR-035) |
+| Outbound requests | Push endpoints only to browser push services (FCM, Mozilla, WNS, Apple); Google and SMTP hosts are fixed by configuration |
+| Logs | Share and invitation tokens redacted from request and error logs; uvicorn's access log is off |
+| Demo | 400 live demo users at most, 5 a minute and 20 an hour per IP, purged after 24 hours |
 | Audit | `auth.*`, `mfa.*`, `document.*`, `extraction.confirmed`, `share.*`, `integration.*` events with IP + UA |
 | Dependencies | CI audit job: pip-audit and `npm audit --omit=dev --audit-level=high` |
 | Data | Synthetic data only. **Not HIPAA compliant**; disclaimer shown in-app and in README |
