@@ -66,9 +66,9 @@
     "semantic_hash": "c5ce9fba63b0d0d5b13010eace155c53"
   },
   "backend/app/main.py": {
-    "mtime": 1791190045.4817104,
-    "seen": 1791191829.5263932,
-    "ast_hash": "5d0ff3b019012e05eb41b79d4eade679",
+    "mtime": 1791314730.9768033,
+    "seen": 1791314943.7226446,
+    "ast_hash": "1eff093d3a63425d4d7af5e4067936e5",
     "semantic_hash": ""
   },
   "backend/app/models.py": {
@@ -882,9 +882,9 @@
     "semantic_hash": "94401304100cf6184d26757cc5c90b93"
   },
   "README.md": {
-    "mtime": 1791183468.037359,
-    "seen": 1791183488.051149,
-    "ast_hash": "3c9bfd35bc26bc121df8ea6ede5f49af",
+    "mtime": 1791314937.6525376,
+    "seen": 1791314943.7230992,
+    "ast_hash": "0b7c3a1121103c1b1b7dcf785fee9ec7",
     "semantic_hash": ""
   },
   "docker-compose.yml": {
@@ -900,15 +900,15 @@
     "semantic_hash": ""
   },
   "docs/decisions.md": {
-    "mtime": 1791183467.9392152,
-    "seen": 1791183488.0511534,
-    "ast_hash": "f2a6f3bd5c71090b7ad592620ea9dcac",
+    "mtime": 1791314770.3403392,
+    "seen": 1791314943.7231028,
+    "ast_hash": "8387863237b9317476adc34aeb5e7730",
     "semantic_hash": ""
   },
   "docs/plan.md": {
-    "mtime": 1791215751.7491264,
-    "seen": 1791215769.4092126,
-    "ast_hash": "adf66da62a61946d2b0993cdeb4431f9",
+    "mtime": 1791314770.3403392,
+    "seen": 1791314943.723108,
+    "ast_hash": "fd66557e9b161b7349a04f72136a6536",
     "semantic_hash": ""
   },
   "backend/app/modules/assistant/__init__.py": {
@@ -1128,9 +1128,9 @@
     "semantic_hash": "ccd9cbc53e002411c7218a813391e617"
   },
   "docs/deployment.md": {
-    "mtime": 1791039885.9833286,
-    "seen": 1791039909.7299356,
-    "ast_hash": "ea59282d219f99bc59dfc2e45279ff89",
+    "mtime": 1791314762.7062764,
+    "seen": 1791314943.7231042,
+    "ast_hash": "a265add49b02ccde78a5c1b3d6ee4b21",
     "semantic_hash": ""
   },
   "backend/app/modules/extraction/labs.py": {
@@ -2067,6 +2067,18 @@
     "mtime": 1791196502.6516187,
     "seen": 1791197447.989216,
     "ast_hash": "383f1ae03fe274e23c09a2eb20be38e3",
+    "semantic_hash": ""
+  },
+  "backend/tests/test_scheduler.py": {
+    "mtime": 1791314730.8967533,
+    "seen": 1791314943.722833,
+    "ast_hash": "aabf8818895c6feb5566dd5f983d2d54",
+    "semantic_hash": ""
+  },
+  "docs/launch-guide.md": {
+    "mtime": 1791314827.7784681,
+    "seen": 1791314943.7231069,
+    "ast_hash": "fcf5ac4dea385670c961c4de85ccea8a",
     "semantic_hash": ""
   }
 }
