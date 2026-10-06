@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { useMutation } from "@tanstack/react-query";
 import { ShieldCheck, Sparkle } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/Button";

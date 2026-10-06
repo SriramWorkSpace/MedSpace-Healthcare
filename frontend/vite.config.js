@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath, URL } from "node:url";
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
+import { SECURITY_HEADERS } from "./deploy/security-headers.js";
 
 /**
  * Emits /sw.js at build time: the template from src/pwa plus a version and the list of every
@@ -53,6 +54,8 @@ export default defineConfig({
   },
   preview: {
     port: 4173,
+    // The production headers, so e2e runs against the real CSP (dev keeps Vite's inline HMR).
+    headers: SECURITY_HEADERS,
     proxy: { "/api": { target: apiTarget, changeOrigin: false, xfwd: true } },
   },
   test: {

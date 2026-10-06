@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 const blank = (v) => (v === "" || v === undefined ? null : v);

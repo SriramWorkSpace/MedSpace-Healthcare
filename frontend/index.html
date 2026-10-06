@@ -24,17 +24,8 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <title>MedSpace · Your health, all in one space</title>
-    <script>
-      // Apply the saved theme before first paint to avoid a flash.
-      (function () {
-        try {
-          var t = localStorage.getItem("ms-theme");
-          var dark =
-            t === "dark" || (t !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
-          document.documentElement.dataset.theme = dark ? "dark" : "light";
-        } catch (e) {}
-      })();
-    </script>
+    <!-- Applies the saved theme before first paint (a file, not inline: the CSP allows no inline script). -->
+    <script src="/theme-init.js"></script>
     <style>
       .boot {
         position: fixed;
