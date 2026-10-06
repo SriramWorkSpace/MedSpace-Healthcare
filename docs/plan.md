@@ -112,6 +112,17 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 - [x] Multi-stage web image (nginx + /api proxy), deployment guide (docs/deployment.md), README screenshots
 - [x] Final graphify update and docs sync
 
+## Phase 25: Full edition with OCR for photos and scans (planned, ADR-034)
+
+- [ ] OCR port `app/shared/ocr.py`: `none` (free edition) and `tesseract` (PyMuPDF + Tesseract) adapters, `OCR_PROVIDER` setting, fake adapter for tests
+- [ ] Image clean-up before OCR with Pillow: rotation from Tesseract's orientation detection, straightening, contrast; page images only, never stored
+- [ ] Run OCR in the ARQ worker for image documents and image-only PDF pages; store words with boxes and confidence on `document_pages`
+- [ ] Feed OCR text to the offline extractor, the chunk index (search and Ask) and the evidence locator; highlights only above a confidence threshold, drawn in an "approximate" style
+- [ ] Synthetic photo corpus in the evaluation harness (sample PDFs rendered, rotated, blurred, noised); thresholds in CI; CI installs Tesseract
+- [ ] Full-edition Docker image target and compose profile (`docker compose --profile ocr up`); free edition unchanged
+- [ ] README "Editions" section (live link to the free edition; screenshots and a short clip of the full one); ADR-034 accepted
+- [ ] Tests: adapter contract, worker job, word-box storage, highlights on photos, confidence threshold, both editions in CI
+
 ## Phase 24: Polish pass
 
 - [x] Lighthouse audit of the production build (`scripts/lighthouse.mjs`, 5 pages x mobile and desktop, signed in for app pages). After fixes: accessibility 100 and best practices 100 everywhere; SEO 100 on the landing page (app and sign-in pages are deliberately excluded from indexing); performance 96 to 99 on desktop, 62 to 75 on Lighthouse's simulated mid-range phone, where the remaining cost is running React and the page code (an SPA without server rendering)
@@ -262,6 +273,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 
 ## Change log
 
+- **2026-10-07**: Inline deployments (free single-container hosting) now run the worker's scheduled jobs too: expired demo accounts and stale share links were never purged without a worker. Phase 25 (full edition with OCR, ADR-034) planned. Launch guide added (`docs/launch-guide.md`).
+
 - **2026-10-05**: UI consistency pass. Audited 23 routes at 4 widths in both themes (`scripts/ui-audit.mjs`): 0 console errors, failed requests, overflow, broken images or axe issues after fixes. Fixed: sign-in pages' header and footer landmarks; one heading scale (page titles 34px everywhere, card titles 16px); icon tiles one shape rule (squares, corner radius by size, soft-accent ink); overlay scrims and brand panels as tokens; landing nav wrapped on tablets (menu below lg); visit prep cramped at 1024 (stacks below xl); dashboard "Coming up" titles wrap instead of cutting off; phone filter tabs fade the edge with more tabs and keep the chosen one in view; Sharing rows on phones; expired reset links say so before any typing (new `POST /auth/password/reset/check`); developer text removed from the Documents empty state; Ask suggestions general rather than demo-specific; Timeline empty state gets an action. Keyboard focus rings verified on every tab stop.
 
 - **2026-10-05**: Polish pass (Phase 24): Lighthouse recorded and its findings fixed, README screenshots regenerated, plan tidied.
@@ -318,4 +331,4 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 
 - **2026-10-01**: Phase 1 shipped. Added `GET /api/auth/session` (quiet anonymous boot) and a same-origin API proxy (ADR-014).
 
-- **2026-10-01**: Plan created from the original brief. Changes vs brief: pgvector replaces FAISS (ADR-002); Groq with dual text/vision extraction (ADR-003); local embeddings (ADR-004); Calendar vs Tasks split (ADR-005); deterministic schedule normalization (ADR-006); ARQ queue (ADR-007); own auth + optional Google (ADR-008); draft→confirmed lifecycle (ADR-009); proxied share links (ADR-010).
+- **2026-10-01**: Plan created from the original brief. Changes vs brief: pgvector replaces FAISS (ADR-002); Groq with dual text/vision extraction (ADR-003); local embeddings (ADR-004); Calendar vs Tasks split (ADR-005); deterministic schedule normalization (ADR-006); ARQ queue (ADR-007); own auth + optional Google (ADR-008); draft→confirmed lifecycle (ADR-009); proxied share links (ADR-010)

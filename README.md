@@ -182,14 +182,14 @@ npx playwright install chromium && npm run e2e
 
 ### Deploy
 
-See [docs/deployment.md](docs/deployment.md) for a free-tier setup (static web host with an `/api` rewrite, a single API instance, Neon Postgres with pgvector, Cloudflare R2).
+Step-by-step launch checklist (accounts, secrets, email, hosting): [docs/launch-guide.md](docs/launch-guide.md). See [docs/deployment.md](docs/deployment.md) for a free-tier setup (static web host with an `/api` rewrite, a single API instance, Neon Postgres with pgvector, Cloudflare R2).
 
 ## Project structure
 
 ```
 backend/    FastAPI app (modules/, shared/ ports, migrations/, tests/)
 frontend/   React SPA (pages/, features/, components/ui/, styles/)
-docs/       architecture.md · decisions.md · plan.md · deployment.md
+docs/       architecture.md · decisions.md · plan.md · deployment.md · launch-guide.md
 samples/    synthetic prescriptions and a lab report for trying uploads
 graphify-out/  knowledge graph of the codebase (GRAPH_REPORT.md, graph.html)
 ```

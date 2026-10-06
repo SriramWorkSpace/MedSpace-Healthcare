@@ -7,6 +7,7 @@ import logging
 import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -44,19 +45,35 @@ from app.modules.visits.router import router as visits_router
 from app.shared.embeddings import warm_up
 
 
-async def reminder_loop() -> None:
-    """Once a minute, send due dose reminders (inline deployments without a worker)."""
+async def run_scheduled_jobs(now: datetime) -> list[str]:
+    """Inline deployments have no worker, so this does the worker's scheduled jobs: dose reminders
+    every minute, expired demo accounts at :07 and :37, stale share links daily at 03:15 UTC.
+    Returns the jobs that ran."""
     from app.core.db import SessionLocal
+    from app.modules.demo import service as demo
     from app.modules.reminders import service as reminders
+    from app.modules.sharing import service as sharing
 
+    jobs = [("reminders", reminders.send_due_reminders, True)]
+    if now.minute in (7, 37):
+        jobs.append(("demo purge", demo.purge_expired_demo_accounts, False))
+    if (now.hour, now.minute) == (3, 15):
+        jobs.append(("share link purge", sharing.purge_stale_links, False))
+    for name, job, commit in jobs:
+        try:  # never let one failing job stop the others
+            async with SessionLocal() as session:
+                await job(session)
+                if commit:
+                    await session.commit()
+        except Exception:
+            logging.getLogger("medspace.scheduler").exception("%s failed", name)
+    return [name for name, _, _ in jobs]
+
+
+async def reminder_loop() -> None:
     while True:
         await asyncio.sleep(60 - time.time() % 60)  # on the minute
-        try:
-            async with SessionLocal() as session:
-                await reminders.send_due_reminders(session)
-                await session.commit()
-        except Exception:  # never let one bad tick stop the loop
-            logging.getLogger("medspace.reminders").exception("reminder tick failed")
+        await run_scheduled_jobs(datetime.now(UTC))
 
 
 @asynccontextmanager

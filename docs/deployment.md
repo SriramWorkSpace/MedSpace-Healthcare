@@ -59,7 +59,7 @@ Environment (see `.env.example` for every option):
 | `MAIL_FROM` | sender, e.g. `MedSpace <no-reply@yourdomain>`; set up SPF and DKIM for that domain with your provider |
 
 With `QUEUE_MODE=arq`, run a second process from the same image:
-`arq app.worker.WorkerSettings` (it sends dose reminders every minute and purges expired demo accounts and stale share links). In inline mode the API process sends reminders itself.
+`arq app.worker.WorkerSettings` (it sends dose reminders every minute and purges expired demo accounts and stale share links). In inline mode the API process runs those scheduled jobs itself (reminders every minute, demo purge at :07 and :37, share link purge daily), so a single free container needs no worker.
 
 ## 4. Web: static build with an `/api` rewrite
 
