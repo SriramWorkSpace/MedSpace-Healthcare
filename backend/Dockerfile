@@ -20,4 +20,4 @@ USER medspace
 
 EXPOSE 8000
 # Client IPs come from TRUSTED_PROXY_HOPS (ADR-027), not uvicorn's proxy-header rewriting.
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--no-proxy-headers"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--no-proxy-headers", "--no-access-log"]

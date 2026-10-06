@@ -20,7 +20,10 @@ router = APIRouter(prefix="/auth", tags=["auth"])
     "/demo",
     response_model=SessionOut,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(rate_limit("auth:demo", 5, 60, by="ip"))],
+    dependencies=[
+        Depends(rate_limit("auth:demo", 5, 60, by="ip")),
+        Depends(rate_limit("auth:demo-hour", 20, 3600, by="ip")),
+    ],
 )
 async def demo_login(request: Request, response: Response, session: DbSession):
     if not get_settings().demo_enabled:

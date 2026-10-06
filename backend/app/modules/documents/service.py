@@ -54,6 +54,18 @@ async def create_document(
     mime = files.sniff_mime(data)
     if mime is None:
         raise UnsupportedMedia("MedSpace accepts PDF, JPG, PNG and WEBP files.")
+    if mime != files.PDF:
+        size = files.image_size(data, mime)
+        if size is None:
+            raise UnsupportedMedia(
+                "This image couldn't be read. Try saving it again as JPG or PNG."
+            )
+        w, h = size
+        if w * h > files.MAX_IMAGE_PIXELS or max(w, h) > files.MAX_IMAGE_SIDE:
+            raise Unprocessable(
+                "This image is too large in pixels. Resize it (or photograph the page again) and "
+                "try once more."
+            )
 
     sha = hashlib.sha256(data).hexdigest()
     existing = await session.scalar(

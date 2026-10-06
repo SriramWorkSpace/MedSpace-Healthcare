@@ -10,11 +10,12 @@ import logging
 import secrets
 from datetime import UTC, date, datetime, time, timedelta
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.core.db import utcnow
+from app.core.errors import ServiceUnavailable
 from app.modules.assistant import service as assistant
 from app.modules.circle.models import CareLink
 from app.modules.demo import samples
@@ -195,6 +196,13 @@ async def _page_texts(session: AsyncSession, doc_id) -> list[str]:
 
 
 async def create_demo_account(session: AsyncSession) -> User:
+    live = await session.scalar(
+        select(func.count()).select_from(User).where(User.is_demo.is_(True))
+    )
+    if (live or 0) >= get_settings().demo_max_accounts:
+        raise ServiceUnavailable(
+            "The demo is busy right now. Try again later, or create a free account."
+        )
     handle = secrets.token_hex(5)
     user = await identity.create_user(
         session,

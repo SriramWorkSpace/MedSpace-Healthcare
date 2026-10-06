@@ -8,8 +8,11 @@ import json
 from functools import lru_cache
 from typing import Annotated, Literal
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
+
+# Development only: production refuses to start with it (see _safe_in_production).
+DEV_JWT_SECRET = "dev-only-secret-change-me-please-0123456789"  # noqa: S105
 
 
 class Settings(BaseSettings):
@@ -35,7 +38,7 @@ class Settings(BaseSettings):
     queue_mode: Literal["inline", "arq"] = "inline"
 
     # --- Auth ----------------------------------------------------------------
-    jwt_secret: SecretStr = SecretStr("dev-only-secret-change-me-please-0123456789")
+    jwt_secret: SecretStr = SecretStr(DEV_JWT_SECRET)
     access_token_ttl_minutes: int = 15
     refresh_token_ttl_days: int = 14
     cookie_secure: bool = False
@@ -99,6 +102,9 @@ class Settings(BaseSettings):
     # --- Demo ----------------------------------------------------------------
     demo_enabled: bool = True
     demo_ttl_hours: int = 24
+    # Live demo users at most (each demo is two users: the account and its family member), so a
+    # public demo can't exhaust a free database or bucket between purges.
+    demo_max_accounts: int = 400
 
     @field_validator("cors_origins", mode="before")
     @classmethod
@@ -108,6 +114,29 @@ class Settings(BaseSettings):
                 return json.loads(value)
             return [o.strip() for o in value.split(",") if o.strip()]
         return value
+
+    @model_validator(mode="after")
+    def _safe_in_production(self) -> Settings:
+        """Refuse to start in production with settings that would quietly be unsafe."""
+        if self.env != "prod":
+            return self
+        problems = []
+        secret = self.jwt_secret.get_secret_value()
+        if secret == DEV_JWT_SECRET or len(secret) < 32:
+            problems.append("JWT_SECRET must be a random value of at least 32 characters")
+        if not (self.token_encryption_key and self.token_encryption_key.get_secret_value()):
+            problems.append("TOKEN_ENCRYPTION_KEY must be set (a Fernet key)")
+        if not self.cookie_secure:
+            problems.append("COOKIE_SECURE must be true")
+        if not self.frontend_url.startswith("https://"):
+            problems.append("FRONTEND_URL must use https")
+        if any(o == "*" or not o.startswith("https://") for o in self.cors_origins):
+            problems.append("CORS_ORIGINS must list https origins only (no *)")
+        if self.storage_provider != "s3":
+            problems.append("STORAGE_PROVIDER must be s3: local disk loses files on redeploy")
+        if problems:
+            raise ValueError("Unsafe production settings: " + "; ".join(problems))
+        return self
 
     @property
     def is_prod(self) -> bool:

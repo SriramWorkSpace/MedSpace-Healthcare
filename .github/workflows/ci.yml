@@ -114,7 +114,7 @@ jobs:
         run: |
           pip install -e .
           alembic upgrade head
-          nohup uvicorn app.main:app --port 8000 > ../api.log 2>&1 &
+          nohup uvicorn app.main:app --port 8000 --no-access-log > ../api.log 2>&1 &
       - name: Build and serve web
         working-directory: frontend
         run: |

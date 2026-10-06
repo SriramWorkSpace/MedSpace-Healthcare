@@ -20,7 +20,12 @@ from app.core.config import get_settings
 from app.core.db import engine
 from app.core.errors import ServiceUnavailable, install_error_handlers
 from app.core.logging import configure_logging
-from app.core.middleware import CSRFMiddleware, RequestLogMiddleware, SecurityHeadersMiddleware
+from app.core.middleware import (
+    BodySizeLimitMiddleware,
+    CSRFMiddleware,
+    RequestLogMiddleware,
+    SecurityHeadersMiddleware,
+)
 from app.core.ratelimit import RateLimitMiddleware
 from app.modules.assistant.router import router as assistant_router
 from app.modules.audit.router import router as audit_router
@@ -131,6 +136,10 @@ def create_app() -> FastAPI:
         ],
     )
     app.add_middleware(RequestLogMiddleware)
+    # Uploads are the largest bodies; allow their limit plus multipart overhead, nothing more.
+    app.add_middleware(
+        BodySizeLimitMiddleware, max_bytes=(settings.max_upload_mb + 1) * 1024 * 1024
+    )
     # JSON lists compress well; tiny responses aren't worth it. (nginx compresses static files.)
     app.add_middleware(GZipMiddleware, minimum_size=1024)
     install_error_handlers(app)

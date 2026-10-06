@@ -111,5 +111,7 @@ def install_error_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(Exception)
     async def _unhandled(request: Request, exc: Exception):
-        logger.exception("Unhandled error on %s %s", request.method, request.url.path)
+        from app.core.middleware import safe_path
+
+        logger.exception("Unhandled error on %s %s", request.method, safe_path(request.url.path))
         return _problem(500, "internal_error", "Something went wrong", "Unexpected error.", request)
