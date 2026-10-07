@@ -273,6 +273,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 
 ## Change log
 
+- **2026-10-07**: Deployed: web on Vercel (`medspace-healthcare.vercel.app`), API on Render (`medspace-api.onrender.com`). The Vercel `/api` rewrite now points at Render. Production also refuses to start with a non-https `PUBLIC_API_URL`, a localhost `DATABASE_URL`, missing R2 keys or no email provider.
+
 - **2026-10-07**: Production API image: runtime dependencies only, embedding model baked in, migrations and `$PORT` in the default command. Rehearsed as Render's free plan (512 MB, `ENV=prod`, offline model): 325 MB idle, 427 MB peak while processing five documents and rendering pages.
 
 - **2026-10-07**: Email through Brevo's HTTPS API (ADR-039): Render's free plan blocks SMTP ports, so Gmail SMTP can't work there. Storage creates its bucket only when it's missing, so least-privilege R2 tokens work.

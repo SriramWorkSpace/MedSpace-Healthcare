@@ -168,15 +168,17 @@ at peak while processing documents and rendering pages.
 | Instance Type | **Free** |
 
 **2. Environment variables.** **Add from .env** lets you paste them all at once; type the values in
-Render's form, never into a file in the repo. You'll fill the Vercel URL in properly in Part 7:
-until then use `https://medspace.vercel.app` (it only needs to be an https URL to start).
+Render's form, never into a file in the repo. All three URL variables are the **web app's**
+address (the browser reaches the API through Vercel's `/api` rewrite, ADR-014), not Render's.
+Production refuses to start if email, storage keys, the database or these URLs are missing or
+point at localhost.
 
 ```
 ENV=prod
 COOKIE_SECURE=true
-FRONTEND_URL=https://medspace.vercel.app
-PUBLIC_API_URL=https://medspace.vercel.app
-CORS_ORIGINS=https://medspace.vercel.app
+FRONTEND_URL=https://medspace-healthcare.vercel.app
+PUBLIC_API_URL=https://medspace-healthcare.vercel.app
+CORS_ORIGINS=https://medspace-healthcare.vercel.app
 QUEUE_MODE=inline
 TRUSTED_PROXY_HOPS=2
 RATE_LIMIT_BACKEND=memory
@@ -238,8 +240,9 @@ keeps working with slightly less smart search.
 
 ## Part 7. The web app on Vercel (15 minutes)
 
-1. In `frontend/vercel.json`, replace `YOUR-API.onrender.com` with your Render host and commit
-   it. Leave the `headers` section as it is: it's the site's security policy.
+1. `frontend/vercel.json` rewrites `/api/*` to `https://medspace-api.onrender.com` (already
+   committed; change it only if the Render service is renamed). Leave the `headers` section as it
+   is: it's the site's security policy.
    The rewrite keeps the API on the same origin as the site, which the sign-in cookies need.
 2. Vercel, then **Add New Project**, import the repo, root directory `frontend`. Framework
    Vite, build `npm run build`, output `dist`.

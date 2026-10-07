@@ -13,6 +13,19 @@ flowchart LR
   A -. optional .-> R[("Redis + worker<br/>QUEUE_MODE=arq")]
 ```
 
+## Current deployment
+
+| Piece | Where |
+|---|---|
+| Web app | `https://medspace-healthcare.vercel.app` (Vercel, root `frontend`) |
+| API | `https://medspace-api.onrender.com` (Render free, Singapore, Docker, root `backend`, health check `/api/health`) |
+| Database | Supabase Postgres, Singapore, session pooler |
+| Files | Cloudflare R2, bucket `medspace-documents` |
+| Email | Brevo HTTPS API |
+
+The browser only talks to the web app's origin; `frontend/vercel.json` rewrites `/api/*` to the
+API. So `FRONTEND_URL`, `PUBLIC_API_URL` and `CORS_ORIGINS` are all the web app's URL.
+
 ## 1. Database: Supabase (or any always-on Postgres 15+ with pgvector)
 
 The API queries the database every minute for due reminders (inline mode), so the database
@@ -85,8 +98,8 @@ With `QUEUE_MODE=arq`, run a second process from the same image:
 ## 4. Web: static build with an `/api` rewrite
 
 **Vercel:** build `frontend/` with `npm run build` (output `dist`). `frontend/vercel.json` is
-committed with the security headers and the rewrites; replace `YOUR-API.onrender.com` in its
-`/api` rewrite with your API host. Keep its headers equal to `deploy/security-headers.js` (a unit
+committed with the security headers and the rewrites; its `/api` rewrite points at
+`https://medspace-api.onrender.com` (change it if you deploy the API elsewhere). Keep its headers equal to `deploy/security-headers.js` (a unit
 test checks).
 
 **Netlify:** add the rewrites below and the same headers in `public/_headers`.
