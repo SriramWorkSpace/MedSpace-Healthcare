@@ -56,7 +56,7 @@ services:
       retries: 30
 
   api:
-    build: { context: ./backend }
+    build: { context: ./backend, args: { EXTRAS: "embeddings,dev" } }
     <<: *backend-env
     command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --no-access-log"
     ports: ["8000:8000"]
@@ -69,7 +69,7 @@ services:
       s3: { condition: service_healthy }
 
   worker:
-    build: { context: ./backend }
+    build: { context: ./backend, args: { EXTRAS: "embeddings,dev" } }
     <<: *backend-env
     command: arq app.worker.WorkerSettings --watch app
     volumes:
