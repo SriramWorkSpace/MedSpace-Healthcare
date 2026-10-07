@@ -22,7 +22,14 @@ GOOD_PROD = {
     "cookie_secure": True,
     "frontend_url": "https://medspace.example.org",
     "cors_origins": ["https://medspace.example.org"],
+    "public_api_url": "https://medspace.example.org",
+    "database_url": "postgresql+asyncpg://u:p@db.example.org:5432/postgres?ssl=require",
     "storage_provider": "s3",
+    "s3_endpoint_url": "https://account.r2.cloudflarestorage.com",
+    "s3_access_key": "access",
+    "s3_secret_key": "secret",
+    "mail_provider": "brevo",
+    "brevo_api_key": "xkeysib-test",
 }
 
 
@@ -43,6 +50,13 @@ def test_safe_production_settings_start():
         ({"frontend_url": "http://medspace.example.org"}, "FRONTEND_URL"),
         ({"cors_origins": ["*"]}, "CORS_ORIGINS"),
         ({"storage_provider": "local"}, "STORAGE_PROVIDER"),
+        ({"public_api_url": "http://localhost:8000"}, "PUBLIC_API_URL"),
+        ({"database_url": "postgresql+asyncpg://m:m@localhost:5432/m"}, "DATABASE_URL"),
+        ({"s3_secret_key": None}, "S3_SECRET_KEY"),
+        ({"s3_endpoint_url": "http://localhost:8333"}, "S3_ENDPOINT_URL"),
+        ({"brevo_api_key": None}, "email isn't configured"),
+        ({"mail_provider": "auto", "brevo_api_key": None}, "email isn't configured"),
+        ({"mail_provider": "fake"}, "email isn't configured"),
     ],
 )
 def test_unsafe_production_settings_refuse_to_start(change, message):
@@ -279,3 +293,9 @@ async def test_bucket_is_created_only_when_missing(head_status, creates):
     await store.put("users/x/doc.pdf", b"%PDF", "application/pdf")
     assert store.client.created is creates  # a 403 means "exists, not yours to inspect"
     assert store.client.put
+
+
+def test_production_accepts_smtp_or_auto_mail_too():
+    assert Settings(_env_file=None, **{**GOOD_PROD, "mail_provider": "auto"}).is_prod
+    smtp = {**GOOD_PROD, "mail_provider": "smtp", "brevo_api_key": None, "smtp_host": "smtp.x.org"}
+    assert Settings(_env_file=None, **smtp).is_prod

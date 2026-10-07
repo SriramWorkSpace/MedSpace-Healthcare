@@ -147,8 +147,31 @@ class Settings(BaseSettings):
             and self.google_client_secret.get_secret_value()
         ):
             problems.append("GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are required for Google")
+        if not self.public_api_url.startswith("https://"):
+            problems.append("PUBLIC_API_URL must use https (Google's redirect is built from it)")
+        if any(h in self.database_url for h in ("@localhost", "@127.0.0.1")):
+            problems.append("DATABASE_URL points at localhost: set the hosted database")
         if self.storage_provider != "s3":
             problems.append("STORAGE_PROVIDER must be s3: local disk loses files on redeploy")
+        elif not (
+            self.s3_access_key and self.s3_secret_key and self.s3_secret_key.get_secret_value()
+        ):
+            problems.append("S3_ACCESS_KEY and S3_SECRET_KEY must be set")
+        elif self.s3_endpoint_url and not self.s3_endpoint_url.startswith("https://"):
+            problems.append("S3_ENDPOINT_URL must use https")
+        mail_ready = (
+            self.mail_provider == "brevo"
+            and self.brevo_api_key
+            and self.brevo_api_key.get_secret_value()
+        ) or (self.mail_provider == "smtp" and self.smtp_host)
+        auto_ready = self.mail_provider == "auto" and (
+            (self.brevo_api_key and self.brevo_api_key.get_secret_value()) or self.smtp_host
+        )
+        if not (mail_ready or auto_ready):
+            problems.append(
+                "email isn't configured (BREVO_API_KEY, or SMTP_HOST): without it resets and "
+                "confirmations would silently go nowhere"
+            )
         if problems:
             raise ValueError("Unsafe production settings: " + "; ".join(problems))
         return self
