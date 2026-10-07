@@ -220,6 +220,7 @@ Guardrails (system prompt + post-checks):
 
 - Sign-in is email/password **or optional "Continue with Google"** (ADR-017), which asks for identity plus `calendar.events` + `tasks` in one consent. Users who skip those scopes, or use a password, connect Google later (`access_type=offline`, `prompt=consent`). Both flows share one callback; a signed state cookie records the intent.
 - Refresh tokens encrypted at rest with Fernet (`TOKEN_ENCRYPTION_KEY`).
+- **Client routing (ADR-036):** real accounts use live Google OAuth (PKCE) when configured; demo accounts always use the in-memory simulation. Each connection stores the client that issued it (`oauth_connections.mode`) and keeps using it, so simulated grants never reach Google and live ones never fall back. In Google's Testing status (`GOOGLE_OAUTH_TESTING`), only listed test users can connect and grants expire after 7 days (shown as "Reconnect needed"). Deleting an account revokes its grant.
 - **Calendar**: one recurring event per medication dose time (`RRULE:FREQ=DAILY;UNTIL=...`), appointments and follow-ups as single events. Uses `extendedProperties.private.medspace_id` for idempotency.
 - **Tasks**: one-off care actions (lab tests, finish course, upload report) in a dedicated "MedSpace" task list. Google Tasks stores dates only (no time, no recurrence), so recurring dose reminders always go to Calendar.
 - `sync_links` maps `(entity_type, entity_id, provider) → external_id` so edits update and removals delete the remote object.

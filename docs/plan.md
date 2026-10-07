@@ -273,6 +273,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 
 ## Change log
 
+- **2026-10-07**: Google Calendar and Tasks run on real OAuth 2.0 in production (ADR-036): real accounts use live Google, demo accounts the simulation, each connection keeps its own client, production refuses Google without credentials, account deletion revokes the grant, and the UI notes when access is limited to test users. The production Google client gained HTTP-level tests. Launch guide rewritten for an all-free deployment in Singapore with Gmail for email.
+
 - **2026-10-07**: Security and data-integrity review before launch (ADR-035). Fixed: production refuses unsafe settings (default JWT secret, missing encryption key and others); push endpoints limited to browser push services (SSRF); share and invitation tokens kept out of logs; image pixel limits and a rendering cap (decompression bombs); request bodies cut off at the upload limit as they stream; an overall demo cap; a strict CSP and security headers for the web app. Added an authorization sweep over every ID-taking route.
 
 - **2026-10-07**: Inline deployments (free single-container hosting) now run the worker's scheduled jobs too: expired demo accounts and stale share links were never purged without a worker. Phase 25 (full edition with OCR, ADR-034) planned. Launch guide added (`docs/launch-guide.md`).

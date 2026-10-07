@@ -51,7 +51,8 @@ Environment (see `.env.example` for every option):
 | `QUEUE_MODE` | `inline` for a single free instance, `arq` with Redis + a worker |
 | `EMBEDDING_PROVIDER` | `fastembed` (model downloads once; give the disk ~300 MB) |
 | `LLM_PROVIDER` / `GROQ_API_KEY` | optional, for real extraction and answers |
-| `GOOGLE_PROVIDER` + client id/secret | optional, see README |
+| `GOOGLE_PROVIDER` | `google` for real OAuth 2.0 with `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (production refuses to start without them); `fake` simulates Google. Demo accounts always use the simulation (ADR-036). |
+| `GOOGLE_OAUTH_TESTING` | `true` while the consent screen is in Google's Testing status: only listed test users can connect, and the UI says so |
 | `TRUSTED_PROXY_HOPS` | number of proxies **you control** that append to `X-Forwarded-For` before the API: `1` behind the bundled nginx or one load balancer, `2` for a CDN rewrite plus a platform load balancer. Wrong values either share one budget across all users (too low) or let clients spoof their IP (too high). |
 | `RATE_LIMIT_BACKEND` | `redis` whenever more than one API process runs (limits must be shared); `memory` only for a single process |
 | `RATE_LIMIT_SCALE` | leave at `1` in production |
@@ -81,7 +82,9 @@ test checks).
 **Single host:** build `frontend/Dockerfile` with `--target prod`. It serves the SPA with nginx and
 proxies `/api` to `API_UPSTREAM` (streaming-friendly for Ask MedSpace's SSE).
 
-## 5. Google OAuth (optional)
+## 5. Google OAuth
+
+Step by step: [launch-guide.md, Part 9](launch-guide.md#part-9-google-calendar-and-tasks-30-minutes).
 
 Add `https://YOUR-WEB-ORIGIN/api/integrations/google/callback` as an authorized redirect URI and
 set `PUBLIC_API_URL` to the web origin so the redirect stays same-origin. Calendar and Tasks
@@ -99,3 +102,4 @@ scopes are sensitive: without Google verification, only listed test users can co
 - [ ] Sending a fake `X-Forwarded-For` does not reset a rate limit
 - [ ] Signing up delivers a confirmation email; "Forgot password?" delivers a reset link
 - [ ] `GET /api/dev/outbox?to=x` returns 404 (dev outbox is off in production)
+- [ ] A listed Google test user connects Google, and a confirmed prescription syncs to Calendar and Tasks
