@@ -77,8 +77,14 @@ class S3Storage:
 
         try:
             self.client.head_bucket(Bucket=self.bucket)
-        except ClientError:
-            self.client.create_bucket(Bucket=self.bucket)
+        except ClientError as exc:
+            # Create it only when it's really missing (local dev). A least-privilege token, scoped
+            # to objects in one bucket, may be refused bucket-level calls: that's fine, the bucket
+            # exists and object calls will succeed or fail on their own.
+            status = exc.response.get("ResponseMetadata", {}).get("HTTPStatusCode")
+            code = str(exc.response.get("Error", {}).get("Code", ""))
+            if status == 404 or code in ("404", "NoSuchBucket", "NotFound"):
+                self.client.create_bucket(Bucket=self.bucket)
         self._bucket_ready = True
 
     async def put(self, key: str, data: bytes, content_type: str) -> None:

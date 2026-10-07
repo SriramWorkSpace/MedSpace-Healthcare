@@ -240,3 +240,42 @@ def test_database_pool_size_comes_from_settings():
     assert engine.pool._max_overflow == s.db_max_overflow
     small = Settings(_env_file=None, db_pool_size=5, db_max_overflow=5)
     assert small.db_pool_size + small.db_max_overflow <= 15  # Supabase free session pooler
+
+
+# ---- 8. Storage works with a least-privilege, object-only token --------------------------------
+
+
+class _StubS3:
+    def __init__(self, head_status: int) -> None:
+        self.head_status = head_status
+        self.created = False
+        self.put = False
+
+    def head_bucket(self, Bucket):
+        from botocore.exceptions import ClientError
+
+        raise ClientError(
+            {
+                "Error": {"Code": str(self.head_status)},
+                "ResponseMetadata": {"HTTPStatusCode": self.head_status},
+            },
+            "HeadBucket",
+        )
+
+    def create_bucket(self, Bucket):
+        self.created = True
+
+    def put_object(self, **kwargs):
+        self.put = True
+
+
+@pytest.mark.parametrize(("head_status", "creates"), [(403, False), (404, True)])
+async def test_bucket_is_created_only_when_missing(head_status, creates):
+    from app.shared.storage import S3Storage
+
+    store = S3Storage.__new__(S3Storage)
+    store.bucket, store._bucket_ready = "medspace-documents", False
+    store.client = _StubS3(head_status)
+    await store.put("users/x/doc.pdf", b"%PDF", "application/pdf")
+    assert store.client.created is creates  # a 403 means "exists, not yours to inspect"
+    assert store.client.put
