@@ -25,6 +25,8 @@ class OAuthConnection(IdMixin, TimestampMixin, Base):
     access_token_enc: Mapped[str] = mapped_column(Text)
     refresh_token_enc: Mapped[str | None] = mapped_column(Text)
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # MedSpace's own calendar: calendar.app.created can reach nothing else (ADR-037).
+    calendar_id: Mapped[str | None] = mapped_column(String(255))
     tasklist_id: Mapped[str | None] = mapped_column(String(255))
     status: Mapped[str] = mapped_column(String(16), default="active")  # active | revoked
 

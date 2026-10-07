@@ -8,6 +8,7 @@ demo accounts on the simulation and real accounts on Google.
 from __future__ import annotations
 
 import json
+import logging
 from urllib.parse import parse_qs, urlparse
 
 import httpx
@@ -20,7 +21,8 @@ from app.modules.demo import service as demo
 from app.modules.identity.models import User
 from app.modules.integrations import google
 from app.modules.integrations.google import (
-    SCOPES,
+    CONNECT_SCOPES,
+    IDENTITY_SCOPES,
     TOKEN_URL,
     USERINFO_URL,
     GoogleAuthError,
@@ -53,7 +55,7 @@ class FakeGoogleHTTP:
                     "access_token": "live-access",
                     "refresh_token": "live-refresh",
                     "expires_in": 3600,
-                    "scope": " ".join(SCOPES),
+                    "scope": " ".join(CONNECT_SCOPES),
                 },
             )
         if url.startswith(USERINFO_URL):
@@ -64,7 +66,9 @@ class FakeGoogleHTTP:
             )
         if "oauth2.googleapis.com/revoke" in url:
             return httpx.Response(200)
-        if "/calendar/v3/" in url and req.method == "POST":
+        if url == "https://www.googleapis.com/calendar/v3/calendars" and req.method == "POST":
+            return httpx.Response(200, json={"id": "medspace-cal@group.calendar.google.com"})
+        if "/calendar/v3/" in url and url.endswith("/events") and req.method == "POST":
             self.events += 1
             return httpx.Response(200, json={"id": f"evt{self.events}"})
         if "/tasks/v1/users/@me/lists" in url and req.method == "POST":
@@ -108,7 +112,7 @@ async def connect_live(client: httpx.AsyncClient) -> str:
 # ---- The production client builds correct OAuth requests ---------------------------------------
 
 
-def test_auth_url_uses_pkce_offline_access_and_least_scopes():
+def test_connect_asks_for_least_privilege_scopes_with_pkce():
     c = HttpGoogleClient("cid", "secret", "https://site.example/api/integrations/google/callback")
     q = parse_qs(urlparse(c.auth_url("st", "challenge")).query)
     assert q["client_id"] == ["cid"]
@@ -118,12 +122,20 @@ def test_auth_url_uses_pkce_offline_access_and_least_scopes():
     assert q["prompt"] == ["consent"]
     assert set(q["scope"][0].split()) == {
         "openid",
-        "email",
-        "profile",
-        "https://www.googleapis.com/auth/calendar.events",  # events only, not all calendars
+        "email",  # shows which Google account is connected
+        "https://www.googleapis.com/auth/calendar.app.created",  # only MedSpace's own calendar
         "https://www.googleapis.com/auth/tasks",
     }
+    assert "include_granted_scopes" not in q  # never widens to earlier grants
     assert "secret" not in c.auth_url("st", "challenge")
+
+
+def test_sign_in_asks_for_identity_only():
+    c = HttpGoogleClient("cid", "secret", "https://site.example/api/integrations/google/callback")
+    q = parse_qs(urlparse(c.auth_url("st", "challenge", sign_in=True)).query)
+    assert q["scope"][0].split() == IDENTITY_SCOPES == ["openid", "email", "profile"]
+    assert "access_type" not in q  # no refresh token: sign-in needs no Google API access
+    assert q["code_challenge_method"] == ["S256"]
 
 
 async def test_token_exchange_sends_the_verifier_and_refresh_detects_revocation(live):
@@ -178,7 +190,16 @@ async def test_confirmed_prescription_syncs_to_google_calendar_and_tasks(
     assert resp.json()["events"] == live.events > 0
     assert resp.json()["tasks"] == live.tasks > 0
 
-    event = json.loads(live.to("/calendar/v3/calendars/primary/events")[0].content)
+    # Reminders go to MedSpace's own calendar, created once in the user's time zone.
+    [created] = [
+        c for c in live.calls if str(c.url) == "https://www.googleapis.com/calendar/v3/calendars"
+    ]
+    assert json.loads(created.content)["summary"] == "MedSpace"
+    assert json.loads(created.content)["timeZone"] == user.timezone
+    assert not live.to("/calendars/primary")  # never the user's main calendar
+    posts = live.to("/calendars/medspace-cal%40group.calendar.google.com/events")
+    assert len(posts) == live.events
+    event = json.loads(posts[0].content)
     assert event["summary"].startswith("Take ")
     assert event["recurrence"][0].startswith("RRULE:")
     assert event["start"]["timeZone"]
@@ -216,7 +237,9 @@ async def test_deleting_the_account_revokes_google_access(auth_client, live):
     resp = await auth_client.delete("/api/me", headers=csrf(auth_client))
     assert resp.status_code == 204
     revokes = live.to("oauth2.googleapis.com/revoke")
-    assert len(revokes) == 1 and revokes[0].url.params["token"] == "live-refresh"
+    assert len(revokes) == 1
+    assert "live-refresh" not in str(revokes[0].url)  # the body, never the URL
+    assert parse_qs(revokes[0].content.decode())["token"] == ["live-refresh"]
 
 
 async def test_live_connections_never_fall_back_to_the_simulation(
@@ -243,3 +266,43 @@ def test_production_requires_google_credentials_when_google_is_on():
         google_client_secret="secret",
     )
     assert ok.google_provider == "google"
+
+
+async def test_tokens_never_reach_the_browser_or_the_logs(auth_client, session, live, caplog):
+    caplog.set_level(logging.DEBUG)  # every logger, every level, including HTTP clients
+    user = await session.scalar(select(User).where(User.email == "ada@example.com"))
+    await demo.seed(session, user)
+    await session.commit()
+    await connect_live(auth_client)
+    rx = (await auth_client.get("/api/prescriptions")).json()[0]
+    await auth_client.post(
+        "/api/integrations/google/sync",
+        json={"prescription_id": rx["id"]},
+        headers=csrf(auth_client),
+    )
+    conn = await session.scalar(select(OAuthConnection))
+    conn.expires_at = None  # force a refresh too
+    conn.tasklist_id = conn.tasklist_id or "list1"
+    await session.commit()
+    await auth_client.post("/api/integrations/google/pull", headers=csrf(auth_client))
+
+    responses = [
+        await auth_client.get(path)
+        for path in (
+            "/api/integrations/google/status",
+            "/api/auth/session",
+            "/api/me/export",
+            f"/api/integrations/google/preview?prescription_id={rx['id']}",
+        )
+    ]
+    await auth_client.delete("/api/integrations/google", headers=csrf(auth_client))
+    # Everything the server logged, at any level. The test's own HTTP client (the "browser")
+    # logs the URLs it requests, which is not server output.
+    server_log = " | ".join(
+        r.getMessage() for r in caplog.records if "http://medspace.test" not in r.getMessage()
+    )
+    assert "googleapis.com" in server_log  # the server's calls to Google are in scope
+    for secret in ("live-refresh", "live-access", "shh-client-secret", "auth-code"):
+        for resp in responses:
+            assert secret not in resp.text, (resp.url, secret)
+        assert secret not in server_log, secret

@@ -130,8 +130,9 @@ export function SyncDialog({ open, onClose, prescriptionId }) {
             <GoogleLogo size={24} weight="bold" />
           </span>
           <p className="max-w-sm text-sm text-ink-2">
-            Connect your Google account once, then choose what to add. You can remove everything
-            later in one click.
+            Connect your Google account once, then choose what to add. Reminders go to a separate
+            MedSpace calendar, and nothing else in your Google account is touched. You can remove
+            everything later in one click.
           </p>
           <Button onClick={connectGoogle}>Connect Google</Button>
           {status.data?.mode === "simulation" && (

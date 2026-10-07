@@ -5,9 +5,8 @@ import { Button } from "@/components/ui/Button";
 import { useAuthProviders } from "./googleAuth";
 
 /**
- * "Continue with Google": signs in (or creates an account) and, in the same consent screen,
- * asks for Calendar and Tasks so reminders work right away. People can untick those and
- * connect later from Settings.
+ * "Continue with Google": signs in (or creates an account) with identity only: name and email.
+ * Calendar and Tasks are asked for separately, only when someone connects them (ADR-037).
  */
 export function GoogleButton() {
   const [params] = useSearchParams();
@@ -33,7 +32,7 @@ export function GoogleButton() {
           ? "Simulated on this server, so no Google account is needed."
           : testersOnly
             ? "Google sign-in is open to invited testers for now. Everyone else can use email or the demo."
-            : "Also offers Calendar and Tasks access for reminders. You can skip that and connect later."}
+            : "Shares only your name and email. Calendar and Tasks stay off until you connect them."}
       </p>
     </div>
   );

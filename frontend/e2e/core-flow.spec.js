@@ -90,17 +90,22 @@ test("Google sync works in simulation mode", async ({ page }) => {
   await expect(page.getByText(/@gmail\.simulated/)).toBeVisible();
 });
 
-test("Continue with Google signs in and connects reminders (simulated)", async ({ page }) => {
+test("Continue with Google signs in, then reminders are connected separately (simulated)", async ({
+  page,
+}) => {
   await page.goto("/login");
   await page.getByRole("button", { name: "Continue with Google" }).click();
   await page.waitForURL("**/app");
   await expect(page.getByText("Signed in with Google")).toBeVisible();
-  await expect(page.getByText(/Calendar and Tasks are connected/)).toBeVisible();
+  // Sign-in shares identity only; Calendar and Tasks are a separate, explicit step.
+  await expect(page.getByText(/Connect Calendar and Tasks any time/)).toBeVisible();
   await expect(page).not.toHaveURL(/google=/);
 
   await page.goto("/app/settings");
-  await expect(page.getByText("Connected", { exact: true })).toBeVisible();
+  await expect(page.getByText("Not connected", { exact: true })).toBeVisible();
   await expect(page.getByText("Email and password")).toHaveCount(0);
+  await page.getByRole("button", { name: "Connect Google" }).click();
+  await expect(page.getByText("Connected", { exact: true })).toBeVisible();
 });
 
 test("diet notes from the care team are grouped with their sources", async ({ page }) => {

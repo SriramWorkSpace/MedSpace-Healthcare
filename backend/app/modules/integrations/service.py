@@ -33,6 +33,7 @@ from app.modules.records.models import CareAction, Medication, Prescription
 logger = logging.getLogger("medspace.integrations")
 
 TASKLIST_TITLE = "MedSpace"
+CALENDAR_TITLE = "MedSpace"
 DOSE_MINUTES = 15
 FOOTER = (
     "Added by MedSpace from a confirmed record. MedSpace organizes your documents; always "
@@ -307,6 +308,10 @@ async def sync_prescription(
         for lk in await _links(session, user.id, prescription_id)
     }
 
+    if calendar and any(it.target == "google_calendar" for it in items):
+        conn.calendar_id = await google.ensure_calendar(
+            token, conn.calendar_id, CALENDAR_TITLE, user.timezone
+        )
     if tasks and any(it.target == "google_tasks" for it in items):
         conn.tasklist_id = await google.ensure_tasklist(token, conn.tasklist_id, TASKLIST_TITLE)
 
@@ -318,7 +323,9 @@ async def sync_prescription(
             wanted.add(key)
             link = existing.get(key)
             if it.target == "google_calendar":
-                ext = await google.upsert_event(token, link.external_id if link else None, it.body)
+                ext = await google.upsert_event(
+                    token, conn.calendar_id, link.external_id if link else None, it.body
+                )
                 counts["events"] += 1
             else:
                 ext = await google.upsert_task(
@@ -371,7 +378,8 @@ async def sync_prescription(
 
 async def _delete_remote(google, token: str, conn: OAuthConnection, link: SyncLink) -> None:
     if link.target == "google_calendar":
-        await google.delete_event(token, link.external_id)
+        if conn.calendar_id:
+            await google.delete_event(token, conn.calendar_id, link.external_id)
     elif conn.tasklist_id:
         await google.delete_task(token, conn.tasklist_id, link.external_id)
 

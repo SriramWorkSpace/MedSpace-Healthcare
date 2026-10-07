@@ -14,18 +14,23 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from functools import lru_cache
 from typing import Any, Protocol
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 
 import httpx
 
 from app.core.config import get_settings
 
+# Least privilege (ADR-037), asked for in context (incremental authorization):
+# - Sign-in: identity only. The name becomes the display name; nothing else is read.
 IDENTITY_SCOPES = ["openid", "email", "profile"]
+# - Connect: which Google account (email), plus the two sync scopes.
+#   calendar.app.created reaches only the "MedSpace" calendar this app creates, never the user's
+#   other calendars. tasks is the narrowest scope that can write tasks.
 SYNC_SCOPES = [
-    "https://www.googleapis.com/auth/calendar.events",
+    "https://www.googleapis.com/auth/calendar.app.created",
     "https://www.googleapis.com/auth/tasks",
 ]
-SCOPES = IDENTITY_SCOPES + SYNC_SCOPES
+CONNECT_SCOPES = ["openid", "email", *SYNC_SCOPES]
 
 
 def has_sync_scopes(granted: str) -> bool:
@@ -38,7 +43,7 @@ AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 TOKEN_URL = "https://oauth2.googleapis.com/token"  # noqa: S105 (URL, not a secret)
 REVOKE_URL = "https://oauth2.googleapis.com/revoke"
 USERINFO_URL = "https://openidconnect.googleapis.com/v1/userinfo"
-CAL = "https://www.googleapis.com/calendar/v3/calendars/primary/events"
+CALENDARS = "https://www.googleapis.com/calendar/v3/calendars"
 TASKS = "https://tasks.googleapis.com/tasks/v1"
 
 
@@ -81,8 +86,13 @@ class GoogleClient(Protocol):
     async def refresh(self, refresh_token: str) -> Tokens: ...
     async def revoke(self, token: str) -> None: ...
     async def user_email(self, access_token: str) -> str | None: ...
-    async def upsert_event(self, access: str, event_id: str | None, body: dict) -> str: ...
-    async def delete_event(self, access: str, event_id: str) -> None: ...
+    async def ensure_calendar(
+        self, access: str, calendar_id: str | None, title: str, tz: str
+    ) -> str: ...
+    async def upsert_event(
+        self, access: str, calendar_id: str, event_id: str | None, body: dict
+    ) -> str: ...
+    async def delete_event(self, access: str, calendar_id: str, event_id: str) -> None: ...
     async def ensure_tasklist(self, access: str, tasklist_id: str | None, title: str) -> str: ...
     async def upsert_task(
         self, access: str, tasklist: str, task_id: str | None, body: dict
@@ -96,8 +106,12 @@ def _tokens(payload: dict[str, Any], refresh_token: str | None = None) -> Tokens
         access_token=payload["access_token"],
         refresh_token=payload.get("refresh_token") or refresh_token,
         expires_at=datetime.now(UTC) + timedelta(seconds=int(payload.get("expires_in", 3600))),
-        scope=payload.get("scope", " ".join(SCOPES)),
+        scope=payload.get("scope", ""),  # Google always says what was granted; assume nothing
     )
+
+
+def _events(calendar_id: str) -> str:
+    return f"{CALENDARS}/{quote(calendar_id, safe='')}/events"
 
 
 class HttpGoogleClient:
@@ -118,11 +132,14 @@ class HttpGoogleClient:
                     "client_id": self.client_id,
                     "redirect_uri": self.redirect_uri,
                     "response_type": "code",
-                    "scope": " ".join(SCOPES),
-                    "access_type": "offline",
-                    # Sign-in lets people pick an account; consent guarantees a refresh token.
-                    "prompt": "select_account consent" if sign_in else "consent",
-                    "include_granted_scopes": "true",
+                    "scope": " ".join(IDENTITY_SCOPES if sign_in else CONNECT_SCOPES),
+                    # Sign-in only identifies the user: no Google API access, no refresh token.
+                    # Connect asks for offline access so reminders sync later.
+                    **(
+                        {"prompt": "select_account"}
+                        if sign_in
+                        else {"access_type": "offline", "prompt": "consent"}
+                    ),
                     "state": state,
                     "code_challenge": code_challenge,
                     "code_challenge_method": "S256",
@@ -159,7 +176,8 @@ class HttpGoogleClient:
         return _tokens(payload, refresh_token)
 
     async def revoke(self, token: str) -> None:
-        await self.http.post(REVOKE_URL, params={"token": token})
+        # In the form body, never the URL: URLs end up in proxy and client logs.
+        await self.http.post(REVOKE_URL, data={"token": token})
 
     async def _call(
         self, method: str, url: str, access: str, json: dict | None = None
@@ -193,16 +211,39 @@ class HttpGoogleClient:
     async def user_email(self, access_token: str) -> str | None:
         return (await self.user_info(access_token)).email
 
-    async def upsert_event(self, access: str, event_id: str | None, body: dict) -> str:
-        if event_id:
-            data = await self._call("PUT", f"{CAL}/{event_id}", access, body)
-            if data:
-                return data["id"]
-        data = await self._call("POST", CAL, access, body)
+    async def ensure_calendar(
+        self, access: str, calendar_id: str | None, title: str, tz: str
+    ) -> str:
+        """MedSpace's own calendar (the only one calendar.app.created can reach)."""
+        if calendar_id and await self._call(
+            "GET", f"{CALENDARS}/{quote(calendar_id, safe='')}", access
+        ):
+            return calendar_id
+        data = await self._call(
+            "POST",
+            CALENDARS,
+            access,
+            {
+                "summary": title,
+                "timeZone": tz,
+                "description": "Dose reminders and follow-ups added by MedSpace.",
+            },
+        )
         return data["id"]
 
-    async def delete_event(self, access: str, event_id: str) -> None:
-        await self._call("DELETE", f"{CAL}/{event_id}", access)
+    async def upsert_event(
+        self, access: str, calendar_id: str, event_id: str | None, body: dict
+    ) -> str:
+        events = _events(calendar_id)
+        if event_id:
+            data = await self._call("PUT", f"{events}/{event_id}", access, body)
+            if data:
+                return data["id"]
+        data = await self._call("POST", events, access, body)
+        return data["id"]
+
+    async def delete_event(self, access: str, calendar_id: str, event_id: str) -> None:
+        await self._call("DELETE", f"{_events(calendar_id)}/{event_id}", access)
 
     async def ensure_tasklist(self, access: str, tasklist_id: str | None, title: str) -> str:
         if tasklist_id and await self._call(
@@ -242,16 +283,19 @@ class FakeGoogleClient:
     store: dict[str, dict[str, dict]] = {}
 
     def auth_url(self, state: str, code_challenge: str, *, sign_in: bool = False) -> str:
-        return f"/api/integrations/google/callback?code=sim-{uuid.uuid4().hex[:10]}&state={state}"
+        # Same scopes as the real client: sign-in grants identity only.
+        suffix = "-identityonly" if sign_in else ""
+        code = f"sim-{uuid.uuid4().hex[:10]}{suffix}"
+        return f"/api/integrations/google/callback?code={code}&state={state}"
 
     async def exchange_code(self, code: str, verifier: str) -> Tokens:
         identity_only = code.endswith("-identityonly")
         account = code.removeprefix("sim-").removesuffix("-identityonly") or uuid.uuid4().hex[:10]
         return Tokens(
             access_token=f"sim-access-{account}",
-            refresh_token=f"sim-refresh-{account}",
+            refresh_token=None if identity_only else f"sim-refresh-{account}",
             expires_at=datetime.now(UTC) + timedelta(hours=1),
-            scope=" ".join(IDENTITY_SCOPES if identity_only else SCOPES),
+            scope=" ".join(IDENTITY_SCOPES if identity_only else CONNECT_SCOPES),
         )
 
     async def user_info(self, access_token: str) -> GoogleIdentity:
@@ -271,7 +315,7 @@ class FakeGoogleClient:
             f"sim-access-{account}",
             refresh_token,
             datetime.now(UTC) + timedelta(hours=1),
-            " ".join(SCOPES),
+            " ".join(CONNECT_SCOPES),
         )
 
     async def revoke(self, token: str) -> None:
@@ -279,18 +323,32 @@ class FakeGoogleClient:
 
     def _bucket(self, access: str) -> dict[str, dict]:
         account = access.removeprefix("sim-access-")
-        return self.store.setdefault(account, {"events": {}, "lists": {}, "tasks": {}})
+        return self.store.setdefault(
+            account, {"calendars": {}, "events": {}, "lists": {}, "tasks": {}}
+        )
 
     async def user_email(self, access_token: str) -> str | None:
         return (await self.user_info(access_token)).email
 
-    async def upsert_event(self, access: str, event_id: str | None, body: dict) -> str:
+    async def ensure_calendar(
+        self, access: str, calendar_id: str | None, title: str, tz: str
+    ) -> str:
+        calendars = self._bucket(access)["calendars"]
+        if calendar_id in calendars:
+            return calendar_id
+        new_id = f"cal_{uuid.uuid4().hex[:8]}@group.calendar.google.com"
+        calendars[new_id] = {"summary": title, "timeZone": tz}
+        return new_id
+
+    async def upsert_event(
+        self, access: str, calendar_id: str, event_id: str | None, body: dict
+    ) -> str:
         events = self._bucket(access)["events"]
         event_id = event_id if event_id in events else f"evt_{uuid.uuid4().hex[:12]}"
-        events[event_id] = body
+        events[event_id] = {**body, "calendar": calendar_id}
         return event_id
 
-    async def delete_event(self, access: str, event_id: str) -> None:
+    async def delete_event(self, access: str, calendar_id: str, event_id: str) -> None:
         self._bucket(access)["events"].pop(event_id, None)
 
     async def ensure_tasklist(self, access: str, tasklist_id: str | None, title: str) -> str:

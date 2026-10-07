@@ -34,10 +34,11 @@ def query(resp: httpx.Response) -> dict[str, str]:
     return {k: v[0] for k, v in parse_qs(urlparse(resp.headers["location"]).query).items()}
 
 
-async def test_sign_in_creates_account_and_connects_reminders(client: httpx.AsyncClient, session):
+async def test_sign_in_asks_for_identity_only(client: httpx.AsyncClient, session):
     resp = await google_sign_in(client, next="/app/medications")
     assert urlparse(resp.headers["location"]).path == "/app/medications"
-    assert query(resp) == {"google": "signed_in", "reminders": "connected"}
+    # Least privilege (ADR-037): Calendar and Tasks are asked for only when connecting.
+    assert query(resp) == {"google": "signed_in", "reminders": "later"}
 
     me = (await client.get("/api/auth/session")).json()["user"]
     assert me["google_linked"] is True
@@ -45,7 +46,7 @@ async def test_sign_in_creates_account_and_connects_reminders(client: httpx.Asyn
     assert me["is_demo"] is True  # simulated Google accounts expire like demos
 
     status = (await client.get("/api/integrations/google/status")).json()
-    assert status["connected"] is True
+    assert status["connected"] is False
     # Simulated sign-ins get the seeded demo records.
     assert len((await client.get("/api/prescriptions")).json()) == 3
     actions = [a["action"] for a in (await client.get("/api/audit")).json()["items"]]
