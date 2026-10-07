@@ -12,6 +12,7 @@ from app.modules.identity import service as identity
 from app.modules.identity.cookies import set_auth_cookies
 from app.modules.identity.router import SessionOut
 from app.modules.identity.schemas import UserOut
+from app.shared.queue import enqueue
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -32,5 +33,6 @@ async def demo_login(request: Request, response: Response, session: DbSession):
     issued = await identity.issue_session(session, user, request)
     await audit.record(session, action="auth.demo_login", user_id=user.id, request=request)
     await session.commit()
+    await enqueue("index_demo_documents", str(user.id))  # after commit: the job reads the seed
     csrf = set_auth_cookies(response, issued.access_token, issued.refresh_token)
     return SessionOut(user=UserOut.model_validate(user), csrf_token=csrf)

@@ -31,6 +31,7 @@ from app.modules.integrations.google import (
     has_sync_scopes,
     pkce_pair,
 )
+from app.shared.queue import enqueue
 
 logger = logging.getLogger("medspace.integrations")
 router = APIRouter(prefix="/integrations/google", tags=["integrations"])
@@ -189,11 +190,14 @@ async def callback(
             )
         except Conflict:
             return fail("email_taken")
-        if outcome == "created" and google.mode == "simulation":
+        seeded = outcome == "created" and google.mode == "simulation"
+        if seeded:
             await demo.seed_quietly(session, account)  # simulated sign-ins get the demo records
         if account.mfa_enabled:
             # Google proved the first factor; the account's own second factor still applies.
             await session.commit()
+            if seeded:
+                await enqueue("index_demo_documents", str(account.id))
             resp = RedirectResponse(
                 _frontend(
                     "/login",
@@ -219,6 +223,8 @@ async def callback(
                 session, account, tokens, who.email, request, mode=google.mode
             )
         await session.commit()
+        if seeded:
+            await enqueue("index_demo_documents", str(account.id))
         resp = RedirectResponse(
             _frontend(
                 claims.get("next") or "/app",

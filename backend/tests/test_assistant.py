@@ -5,6 +5,7 @@ import json
 import httpx
 
 from app.modules.assistant.service import chunk_pages, classify, keywords
+from app.shared.queue import drain
 from tests.conftest import BASE_URL, csrf
 
 
@@ -76,6 +77,7 @@ async def test_answers_are_grounded_and_cited(client: httpx.AsyncClient):
 
 async def test_document_text_is_searchable(client: httpx.AsyncClient):
     await client.post("/api/auth/demo")
+    await drain()  # demo documents are indexed in the background after sign-in
     tid = await new_thread(client)
     result = await ask(client, tid, "What did the lipid panel say about LDL cholesterol?")
     doc_sources = [s for s in result["sources"] if s["kind"] == "document"]

@@ -16,7 +16,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.core.db import utcnow
 from app.core.errors import ServiceUnavailable
-from app.modules.assistant import service as assistant
 from app.modules.circle.models import CareLink
 from app.modules.demo import samples
 from app.modules.documents import service as documents
@@ -116,10 +115,7 @@ async def seed(session: AsyncSession, user: User) -> None:
             {"id": "demo-2", "text": "Can Atorvastatin move to the morning?", "done": False},
         ]
 
-    # Index everything for Ask MedSpace.
-    docs, _ = await documents.list_documents(session, user.id)
-    for d in docs:
-        await assistant.index_document(session, d.id)
+    # Ask MedSpace indexing runs in the background once this commits (jobs.index_demo_documents).
 
 
 async def seed_family(session: AsyncSession, user: User, handle: str) -> None:

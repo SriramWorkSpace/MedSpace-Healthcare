@@ -70,6 +70,9 @@ def mailbox() -> FakeMailer:
 @pytest.fixture(autouse=True)
 async def _clean_tables() -> AsyncIterator[None]:
     yield
+    from app.shared.queue import drain
+
+    await drain()  # background jobs (e.g. demo indexing) finish before their rows are wiped
     tables = ", ".join(f'"{t.name}"' for t in reversed(Base.metadata.sorted_tables))
     async with engine.begin() as conn:
         await conn.execute(text(f"TRUNCATE {tables} RESTART IDENTITY CASCADE"))

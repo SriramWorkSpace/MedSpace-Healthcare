@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import httpx
 
+from app.shared.queue import drain
 from tests.conftest import BASE_URL
 
 
@@ -30,6 +31,7 @@ async def test_prescribers_and_clinics(client: httpx.AsyncClient):
 
 async def test_document_text_matches_with_snippets(client: httpx.AsyncClient):
     await client.post("/api/auth/demo")
+    await drain()  # demo documents are indexed in the background after sign-in
     res = await search(client, "triglycerides")
     docs = res["groups"]["documents"]
     assert docs and docs[0]["title"] == "Lipid profile results"

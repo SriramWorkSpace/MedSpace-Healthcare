@@ -299,3 +299,19 @@ def test_production_accepts_smtp_or_auto_mail_too():
     assert Settings(_env_file=None, **{**GOOD_PROD, "mail_provider": "auto"}).is_prod
     smtp = {**GOOD_PROD, "mail_provider": "smtp", "brevo_api_key": None, "smtp_host": "smtp.x.org"}
     assert Settings(_env_file=None, **smtp).is_prod
+
+
+# ---- 9. The demo signs in before its documents are indexed --------------------------------------
+
+
+async def test_demo_returns_before_indexing_then_indexes(client: httpx.AsyncClient, session):
+    from sqlalchemy import func, select
+
+    from app.modules.assistant.models import DocumentChunk
+    from app.shared.queue import _inline_tasks, drain
+
+    resp = await client.post("/api/auth/demo")
+    assert resp.status_code == 201
+    assert any(t.get_name() == "job:index_demo_documents" for t in _inline_tasks)
+    await drain()
+    assert await session.scalar(select(func.count()).select_from(DocumentChunk)) > 0
