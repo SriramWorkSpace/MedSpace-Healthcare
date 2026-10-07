@@ -1,5 +1,4 @@
 {
-  "$comment": "Replace YOUR-API.onrender.com with your Render URL (docs/launch-guide.md, Part 7). Headers must match deploy/security-headers.js.",
   "headers": [
     {
       "source": "/(.*)",

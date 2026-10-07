@@ -10,6 +10,12 @@ describe("security headers", () => {
     expect(sent).toEqual(SECURITY_HEADERS);
   });
 
+  it("vercel.json uses only keys Vercel's schema accepts", () => {
+    // Vercel rejects the project on any unknown top-level key (even "$comment").
+    const vercel = JSON.parse(read("../vercel.json"));
+    expect(Object.keys(vercel).sort()).toEqual(["headers", "rewrites"]);
+  });
+
   it("nginx sends every shared header on HTML", () => {
     const nginx = read("./nginx.conf.template");
     for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
