@@ -218,10 +218,10 @@ Guardrails (system prompt + post-checks):
 
 ### 4.6 Google integration
 
-- Sign-in is email/password **or optional "Continue with Google"** (ADR-017), which asks for identity plus `calendar.events` + `tasks` in one consent. Users who skip those scopes, or use a password, connect Google later (`access_type=offline`, `prompt=consent`). Both flows share one callback; a signed state cookie records the intent.
+- Sign-in is email/password **or optional "Continue with Google"**, which asks for identity only (`openid email profile`, no offline access). Calendar and Tasks are asked for in context when the user connects (`openid email calendar.app.created tasks`, `access_type=offline`, `prompt=consent`), ADR-037. Both flows share one callback; a signed state cookie records the intent, the PKCE verifier and the client used.
 - Refresh tokens encrypted at rest with Fernet (`TOKEN_ENCRYPTION_KEY`).
 - **Client routing (ADR-036):** real accounts use live Google OAuth (PKCE) when configured; demo accounts always use the in-memory simulation. Each connection stores the client that issued it (`oauth_connections.mode`) and keeps using it, so simulated grants never reach Google and live ones never fall back. In Google's Testing status (`GOOGLE_OAUTH_TESTING`), only listed test users can connect and grants expire after 7 days (shown as "Reconnect needed"). Deleting an account revokes its grant.
-- **Calendar**: one recurring event per medication dose time (`RRULE:FREQ=DAILY;UNTIL=...`), appointments and follow-ups as single events. Uses `extendedProperties.private.medspace_id` for idempotency.
+- **Calendar**: a dedicated "MedSpace" calendar created by the app (the only one `calendar.app.created` can reach); one recurring event per medication dose time (`RRULE:FREQ=DAILY;UNTIL=...`), appointments and follow-ups as single events. Uses `extendedProperties.private.medspace_link` for idempotency.
 - **Tasks**: one-off care actions (lab tests, finish course, upload report) in a dedicated "MedSpace" task list. Google Tasks stores dates only (no time, no recurrence), so recurring dose reminders always go to Calendar.
 - `sync_links` maps `(entity_type, entity_id, provider) → external_id` so edits update and removals delete the remote object.
 
@@ -297,7 +297,7 @@ All routes are under `/api`. JSON errors use RFC 9457 `application/problem+json`
 | CSRF | Double-submit token: readable `ms_csrf` cookie echoed in `X-CSRF-Token` for unsafe methods |
 | Authorization | Every query filters by `current_user.id`; resources fetched by `(id, user_id)` so foreign IDs return 404, not 403 |
 | Uploads | Allow-list MIME + magic-byte sniffing, 15 MB cap, 30 pages cap, images at most 40 megapixels and 12,000 px a side (read from headers before decoding), rendering capped at 4,000 px a side, request bodies cut off at the limit as they stream (ADR-035), random storage keys, never served inline from storage domain |
-| Secrets | Google tokens encrypted with Fernet; share tokens and refresh tokens hashed (SHA-256) |
+| Secrets | Google access and refresh tokens encrypted with Fernet, never in API responses, exports, URLs or logs (tested at DEBUG level, ADR-037); MedSpace's share tokens and refresh tokens hashed (SHA-256) |
 | Rate limiting | Two layers (ADR-027): a baseline budget on every `/api` route (600 reads and 120 writes per minute) plus tighter per-route limits on sign-in, sign-up, AI calls, uploads, exports, sharing and invitations, and a per-account sign-in limit. Keyed by user when signed in, by client IP otherwise; client IPs honour `X-Forwarded-For` only for `TRUSTED_PROXY_HOPS` proxies. Sliding-window counters in Redis (shared by every API process) or memory (single process); fails open. Responses carry `RateLimit-*` headers and 429s carry `Retry-After`. |
 | Headers | API: CSP, `X-Content-Type-Options`, `Referrer-Policy: strict-origin-when-cross-origin`, HSTS in prod. Web app: strict CSP with no inline or remote script, `X-Frame-Options: DENY`, `Permissions-Policy`, COOP, from `frontend/deploy/security-headers.js` (copied into `vercel.json` and nginx; a test keeps them equal) |
 | Production settings | Start-up refuses a default or short JWT secret, a missing encryption key, insecure cookies, non-https frontend or CORS origins and local storage (ADR-035) |

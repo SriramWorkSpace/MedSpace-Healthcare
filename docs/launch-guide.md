@@ -173,8 +173,13 @@ prescriptions well. Groq makes photo uploads and Ask MedSpace much better.
 ## Part 9. Google Calendar and Tasks (30 minutes)
 
 MedSpace connects to Google with OAuth 2.0 (authorization code with PKCE). Confirmed medication
-schedules become recurring Google Calendar reminders, and to-dos become Google Tasks. MedSpace
-asks only for `calendar.events` (its own events, not your whole calendar settings) and `tasks`.
+schedules become recurring reminders in a separate **MedSpace** calendar, and to-dos go to a
+**MedSpace** list in Google Tasks. Access is least-privilege (ADR-037):
+
+- "Continue with Google" asks for name and email only.
+- Connecting reminders asks for `calendar.app.created` (only calendars MedSpace itself creates,
+  never your others) and `tasks`, plus your email to show which account is connected.
+- Tokens are encrypted in the database and never reach the browser or the logs.
 
 The OAuth app stays in Google's **Testing** status, which is free and needs no review: only the
 test users you list (up to 100) can connect. Demo accounts always use a built-in simulation, so
@@ -190,8 +195,11 @@ recruiters trying the demo still see the whole flow, and nothing fake lands in a
    Leave the logo empty (a logo triggers a brand review).
 2. **Audience:** user type **External**, publishing status **Testing**. Under **Test users**,
    add your own Gmail and anyone else who should be able to connect.
-3. **Data access:** **Add or remove scopes**, then tick `openid`, `.../auth/userinfo.email`,
-   `.../auth/userinfo.profile`, `.../auth/calendar.events` and `.../auth/tasks`. Save.
+3. **Data access:** **Add or remove scopes**, then tick exactly these five and nothing else:
+   `openid`, `.../auth/userinfo.email`, `.../auth/userinfo.profile`,
+   `.../auth/calendar.app.created` and `.../auth/tasks`. If `calendar.app.created` isn't in the
+   list, paste `https://www.googleapis.com/auth/calendar.app.created` under **Manually add
+   scopes**. Save.
 
 **3. OAuth client**
 1. **Clients**, then **Create client**: application type **Web application**, name `MedSpace web`.
@@ -215,8 +223,9 @@ recruiters trying the demo still see the whole flow, and nothing fake lands in a
 2. Upload a sample prescription from `samples/`, review it, confirm.
 3. Settings, **Google Calendar & Tasks**, **Connect Google**. Google shows "Google hasn't
    verified this app": that's expected in Testing; choose **Continue**, then allow access.
-4. Open the prescription and **Add to Google**. Dose reminders appear in Google Calendar, and a
-   **MedSpace** list appears in Google Tasks.
+4. Open the prescription and **Add to Google**. A **MedSpace** calendar appears in Google
+   Calendar with the dose reminders, and a **MedSpace** list appears in Google Tasks. Your other
+   calendars are untouched.
 
 **Good to know**
 - In Testing, Google expires each tester's access after 7 days. MedSpace notices and shows

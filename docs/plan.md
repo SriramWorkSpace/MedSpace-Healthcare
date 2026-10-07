@@ -273,6 +273,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 
 ## Change log
 
+- **2026-10-07**: Least-privilege Google access (ADR-037): sign-in asks for identity only; connecting asks for `calendar.app.created` (a dedicated MedSpace calendar, nothing else) and `tasks`; token revocation moved out of the URL; a DEBUG-level test proves tokens, the client secret and authorization codes never reach logs or API responses.
+
 - **2026-10-07**: Google Calendar and Tasks run on real OAuth 2.0 in production (ADR-036): real accounts use live Google, demo accounts the simulation, each connection keeps its own client, production refuses Google without credentials, account deletion revokes the grant, and the UI notes when access is limited to test users. The production Google client gained HTTP-level tests. Launch guide rewritten for an all-free deployment in Singapore with Gmail for email.
 
 - **2026-10-07**: Security and data-integrity review before launch (ADR-035). Fixed: production refuses unsafe settings (default JWT secret, missing encryption key and others); push endpoints limited to browser push services (SSRF); share and invitation tokens kept out of logs; image pixel limits and a rendering cap (decompression bombs); request bodies cut off at the upload limit as they stream; an overall demo cap; a strict CSP and security headers for the web app. Added an authorization sweep over every ID-taking route.

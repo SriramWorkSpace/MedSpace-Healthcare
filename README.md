@@ -156,13 +156,13 @@ GROQ_API_KEY=gsk_...
 
 ### Enable Google sign-in, Calendar & Tasks
 
-"Continue with Google" on the sign-in page logs people in and, in the same consent screen, offers Calendar and Tasks access so reminders work immediately. Anyone who skips that (or uses email and password) can connect Google later from Settings. Without credentials, both flows run as a built-in simulation, and demo accounts always do (ADR-036). For the hosted setup, follow [the launch guide, Part 9](docs/launch-guide.md#part-9-google-calendar-and-tasks-30-minutes).
+"Continue with Google" on the sign-in page shares only name and email. Calendar and Tasks are connected separately, from Settings or **Add to Google**, with least-privilege scopes: `calendar.app.created` (only the MedSpace calendar the app creates) and `tasks` (ADR-037). Without credentials, both flows run as a built-in simulation, and demo accounts always do (ADR-036). For the hosted setup, follow [the launch guide, Part 9](docs/launch-guide.md#part-9-google-calendar-and-tasks-30-minutes).
 
 1. In Google Cloud Console, create a project and enable the **Google Calendar API** and **Google Tasks API**.
 2. Configure the OAuth consent screen (External, *Testing* mode) and add yourself as a test user.
 3. Create an **OAuth client ID** (Web application) with redirect URI `http://localhost:8000/api/integrations/google/callback`.
 4. Set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` and `GOOGLE_PROVIDER=google` in `.env` (never committed; Google's downloaded `client_secret*.json` is git-ignored too).
-5. Add the `openid`, `email` and `profile` scopes to the consent screen alongside Calendar and Tasks. The same redirect URI serves sign-in and connecting.
+5. On the consent screen's Data access page, add exactly `openid`, `userinfo.email`, `userinfo.profile`, `calendar.app.created` and `tasks`. The same redirect URI serves sign-in and connecting.
 
 > Calendar and Tasks scopes are classified as *sensitive* by Google. Until the app passes Google verification, the consent screen stays in Testing mode (up to 100 named test users).
 

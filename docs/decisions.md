@@ -313,3 +313,15 @@ Format: `Status: Accepted | Superseded by ADR-xxx | Deprecated`
   - Deleting an account disconnects Google first, revoking the grant.
   - The simulation stays for development without credentials and for demo accounts.
 - **Consequences:** Testers get real Calendar events and Tasks; everyone else still sees the full flow through the demo. Testers reconnect weekly until the app is verified; publishing the app needs no code change (`GOOGLE_OAUTH_TESTING=false`). The production client is now tested at the HTTP level against a mocked Google (request shapes, PKCE, token refresh and revocation, sync calls).
+
+## ADR-037: Least-privilege Google scopes, asked for in context
+
+- **Date:** 2026-10-07
+- **Status:** Accepted (supersedes ADR-017's single combined consent)
+- **Context:** Sign-in asked for identity, Calendar and Tasks in one consent, with offline access, so a refresh token able to write to every calendar existed for anyone who signed in with Google, whether or not they ever used reminders. `calendar.events` reaches events on all of a user's calendars, while MedSpace only ever writes its own reminders. Revocation sent the refresh token in the URL query string.
+- **Decision:**
+  - **Sign-in** asks for `openid email profile` only: no Google API access, no offline access, no refresh token.
+  - **Connect** (Settings or Add to Google) asks for `openid email` (to show which account is connected), `calendar.app.created` and `tasks`, with offline access. `include_granted_scopes` is off, so a grant never widens to earlier ones.
+  - `calendar.app.created` only reaches calendars the app created. MedSpace creates one "MedSpace" calendar in the user's time zone (`oauth_connections.calendar_id`) and puts every reminder and follow-up there; the user's other calendars are out of reach. `tasks` stays, as the narrowest scope that can write tasks; MedSpace writes only to its own "MedSpace" list.
+  - Tokens: access and refresh tokens are Fernet-encrypted at rest with `TOKEN_ENCRYPTION_KEY` (required in production), never serialized to an API response or the data export, sent to Google only in headers or form bodies (never URLs), and HTTP client logging is limited to warnings. A test drives connect, sync, refresh, pull and disconnect with every logger at DEBUG and asserts no token, client secret or authorization code appears in any server log line or API response.
+- **Consequences:** Signing in with Google no longer creates a stored grant. Users choose Calendar and Tasks explicitly, see a dedicated MedSpace calendar they can hide or recolour, and disconnecting can't touch anything else. The OAuth callback URL still carries the one-time authorization code (Google's redirect); it is single-use, PKCE-bound and expires in minutes, and MedSpace's own request log records paths without query strings.
