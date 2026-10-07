@@ -148,45 +148,91 @@ email arrives (check spam). Brevo's **Transactional**, **Logs** page shows every
 
 ---
 
-## Part 6. The API on Render (20 minutes)
+## Part 6. The API on Render (30 minutes)
 
-1. **New, then Web Service**, connect the GitHub repo.
-2. Root directory `backend`, runtime **Docker**, region **Singapore**, instance type **Free**.
-3. Start command:
-   ```bash
-   sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT --no-proxy-headers --no-access-log"
-   ```
-4. Health check path: `/api/health` (not `/api/ready`: that one queries the database, and Render
-   calls the health check every few seconds).
-5. Environment variables (full list in [deployment.md](deployment.md)):
+The image runs migrations and then starts the API on Render's port by itself, so there's no start
+command to paste. It was rehearsed locally at Render's 512 MB limit: about 325 MB idle and 430 MB
+at peak while processing documents and rendering pages.
 
-   | Variable | Value |
-   |---|---|
-   | `ENV` | `prod` |
-   | `DATABASE_URL` | from Part 3 |
-   | `DB_POOL_SIZE`, `DB_MAX_OVERFLOW` | `5` and `5` (Supabase's free pooler allows about 15 connections) |
-   | `JWT_SECRET`, `TOKEN_ENCRYPTION_KEY` | from Part 2 |
-   | `COOKIE_SECURE` | `true` |
-   | `FRONTEND_URL`, `PUBLIC_API_URL`, `CORS_ORIGINS` | your Vercel URL (Part 7), e.g. `https://medspace.vercel.app` |
-   | `QUEUE_MODE` | `inline` (no worker on the free plan; the API runs reminders and clean-up itself) |
-   | `TRUSTED_PROXY_HOPS` | `2` (Vercel's rewrite plus Render's load balancer) |
-   | `RATE_LIMIT_BACKEND` | `memory` (one process) |
-   | `EMBEDDING_PROVIDER` | `fastembed`; if Render reports out-of-memory restarts, switch to `hash` (Ask still works, slightly less smart) |
-   | `OCR_PROVIDER` | `none` (once Phase 25 exists) |
-   | Storage | from Part 4 |
-   | Email | from Part 5 |
-   | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | from Part 2; subject `mailto:<the sending Gmail>` |
-   | `LLM_PROVIDER`, `GROQ_API_KEY` | `groq` and your key (Part 8) |
-   | Google | added in Part 9 |
+**1. Create the service.** Render dashboard, **New**, **Web Service**, **GitHub**, pick
+`MedSpace-Healthcare`, then:
 
-You don't need the Vercel URL before Part 7: deploy, create the web app, then come back and set
-`FRONTEND_URL`, `PUBLIC_API_URL` and `CORS_ORIGINS`.
+| Field | Value |
+|---|---|
+| Name | `medspace-api` (it becomes `https://medspace-api.onrender.com`, or with a suffix if taken) |
+| Language | **Docker** |
+| Branch | `main` |
+| Region | **Singapore** |
+| Root Directory | `backend` |
+| Dockerfile Path | `./Dockerfile` (the default) |
+| Instance Type | **Free** |
 
-If the API won't start and its log says **Unsafe production settings**, it lists exactly which
-variables to fix. That's deliberate: production never runs with development secrets.
+**2. Environment variables.** **Add from .env** lets you paste them all at once; type the values in
+Render's form, never into a file in the repo. You'll fill the Vercel URL in properly in Part 7:
+until then use `https://medspace.vercel.app` (it only needs to be an https URL to start).
 
-**Check:** `https://<your-api>.onrender.com/api/ready` returns ready. The first request after
-idling takes up to a minute while the free instance wakes; that's normal.
+```
+ENV=prod
+COOKIE_SECURE=true
+FRONTEND_URL=https://medspace.vercel.app
+PUBLIC_API_URL=https://medspace.vercel.app
+CORS_ORIGINS=https://medspace.vercel.app
+QUEUE_MODE=inline
+TRUSTED_PROXY_HOPS=2
+RATE_LIMIT_BACKEND=memory
+EMBEDDING_PROVIDER=fastembed
+DATABASE_URL=<secret: Part 3>
+DB_POOL_SIZE=5
+DB_MAX_OVERFLOW=5
+JWT_SECRET=<secret: Part 2>
+TOKEN_ENCRYPTION_KEY=<secret: Part 2>
+STORAGE_PROVIDER=s3
+S3_ENDPOINT_URL=<Part 4>
+S3_ACCESS_KEY=<Part 4>
+S3_SECRET_KEY=<secret: Part 4>
+S3_BUCKET=medspace-documents
+S3_REGION=auto
+MAIL_PROVIDER=brevo
+BREVO_API_KEY=<secret: Part 5>
+MAIL_FROM=MedSpace <your sending Gmail>
+VAPID_PUBLIC_KEY=<Part 2>
+VAPID_PRIVATE_KEY=<secret: Part 2>
+VAPID_SUBJECT=mailto:<your sending Gmail>
+LLM_PROVIDER=fake
+GOOGLE_PROVIDER=fake
+```
+
+`LLM_PROVIDER` and `GOOGLE_PROVIDER` change in Parts 8 and 9.
+
+**3. Advanced** (expand it before creating):
+
+| Field | Value |
+|---|---|
+| Health Check Path | `/api/health` (not `/api/ready`: that one queries the database, and Render calls the health check every few seconds) |
+| Auto-Deploy | **On Commit** |
+| Build Filters, Included Paths | `backend/**` (commits that only touch the web app or docs don't redeploy the API) |
+
+Leave Docker Command, Pre-Deploy Command and Secret Files empty.
+
+**4. Create Web Service** and watch the **Logs**. The first build takes 5 to 10 minutes (it bakes
+the AI search model into the image). A good start ends with `Application startup complete`.
+- **Unsafe production settings: ...**: the line lists exactly which variables to fix.
+- **Database errors**: recheck `DATABASE_URL` (session pooler, `postgresql+asyncpg://`, password
+  filled in, `?ssl=require`).
+
+**Check:** open `https://<your-service>.onrender.com/api/health` (`{"status":"ok"}`), then
+`/api/ready` (`{"status":"ready"}`: the database is reachable and migrations ran).
+
+**5. Let Brevo accept the server.** Render service page, **Connect** (top right), **Outbound**: copy
+each IP address listed. In Brevo: **Security**, **Authorised IPs**, add each one. If Brevo won't
+take Render's addresses, deactivate IP blocking there instead; the API key then protects sending
+on its own, so keep it secret.
+
+**6. Send me the service URL** (`https://...onrender.com`; it isn't secret) so `vercel.json` can
+point at it, or edit that one line yourself (Part 7).
+
+If Render ever reports the instance ran out of memory, set `EMBEDDING_PROVIDER=hash`: Ask MedSpace
+keeps working with slightly less smart search.
 
 ---
 

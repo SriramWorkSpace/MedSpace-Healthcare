@@ -38,11 +38,16 @@ limit and pauses only after 7 days without activity, which the reminder check pr
 
 ## 3. API: one container
 
-Build from `backend/Dockerfile`. Start command:
+Build from `backend/Dockerfile`. The image's default command migrates and then serves on `$PORT`
+(8000 if unset), so no start command is needed:
 
 ```bash
-sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT --no-proxy-headers --no-access-log"
+sh -c "alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --no-proxy-headers --no-access-log"
 ```
+
+The production image installs only runtime dependencies (`EXTRAS=embeddings`; docker-compose
+builds with `embeddings,dev`) and bakes the embedding model in, so hosts with ephemeral disks don't
+download it on every start. Rehearsed at 512 MB: about 325 MB idle, 430 MB peak while processing.
 
 Health check path: `/api/health`, which doesn't touch the database. (`/api/ready` does, and a platform health check polling it every few seconds keeps the database busy for nothing.)
 
