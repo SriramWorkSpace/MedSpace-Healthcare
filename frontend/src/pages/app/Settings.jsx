@@ -191,6 +191,11 @@ function GoogleCard() {
                 ? "You sign in with Google. Connect Calendar and Tasks to get dose reminders and to-dos."
                 : "Recurring dose reminders in Calendar, one-off to-dos in Tasks."}
           </p>
+          {s.testers_only && !s.connected && (
+            <p className="mt-1 text-xs text-ink-3">
+              Open to invited testers for now. Testers reconnect about once a week.
+            </p>
+          )}
         </div>
       </div>
       <div className="flex flex-wrap gap-2">

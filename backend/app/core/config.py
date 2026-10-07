@@ -98,6 +98,9 @@ class Settings(BaseSettings):
     google_provider: Literal["fake", "google"] = "fake"
     google_client_id: str | None = None
     google_client_secret: SecretStr | None = None
+    # True while the OAuth consent screen is in Google's "Testing" status: only listed test users
+    # can connect, and Google expires their refresh tokens after 7 days (they reconnect).
+    google_oauth_testing: bool = True
 
     # --- Demo ----------------------------------------------------------------
     demo_enabled: bool = True
@@ -132,6 +135,12 @@ class Settings(BaseSettings):
             problems.append("FRONTEND_URL must use https")
         if any(o == "*" or not o.startswith("https://") for o in self.cors_origins):
             problems.append("CORS_ORIGINS must list https origins only (no *)")
+        if self.google_provider == "google" and not (
+            self.google_client_id
+            and self.google_client_secret
+            and self.google_client_secret.get_secret_value()
+        ):
+            problems.append("GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are required for Google")
         if self.storage_provider != "s3":
             problems.append("STORAGE_PROVIDER must be s3: local disk loses files on redeploy")
         if problems:

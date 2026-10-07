@@ -141,7 +141,7 @@ async def test_callback_without_state_cookie_is_rejected(client: httpx.AsyncClie
 
 async def test_providers_endpoint_reports_simulation(client: httpx.AsyncClient):
     assert (await client.get("/api/auth/google/providers")).json() == {
-        "google": {"enabled": True, "mode": "simulation"}
+        "google": {"enabled": True, "mode": "simulation", "testers_only": False}
     }
 
 

@@ -41,6 +41,7 @@ from app.modules.identity.schemas import (
     TokenIn,
     UserOut,
 )
+from app.modules.integrations import service as integrations
 from app.modules.notify import service as notify
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -202,6 +203,8 @@ async def export_data(user: CurrentUser, session: DbSession):
 )
 async def delete_account(user: CurrentUser, response: Response, session: DbSession):
     user_id = user.id
+    # Revoke Google access first, so the grant doesn't outlive the account in Google's settings.
+    await integrations.disconnect(session, user, remove_items=False)
     await service.delete_user(session, user)
     await session.commit()
     await documents.purge_user_files(user_id)

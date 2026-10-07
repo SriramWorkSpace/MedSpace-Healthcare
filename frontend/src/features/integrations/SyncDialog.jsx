@@ -136,7 +136,13 @@ export function SyncDialog({ open, onClose, prescriptionId }) {
           <Button onClick={connectGoogle}>Connect Google</Button>
           {status.data?.mode === "simulation" && (
             <p className="text-xs text-ink-3">
-              This server runs a Google simulation, so nothing leaves MedSpace.
+              This account uses a Google simulation, so nothing leaves MedSpace.
+            </p>
+          )}
+          {status.data?.testers_only && (
+            <p className="max-w-sm text-xs text-ink-3">
+              Google access is open to invited testers for now. Others will see a Google
+              &ldquo;access blocked&rdquo; page.
             </p>
           )}
         </div>

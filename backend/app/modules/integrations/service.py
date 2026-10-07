@@ -25,7 +25,7 @@ from app.modules.integrations.google import (
     GoogleAPIError,
     GoogleAuthError,
     Tokens,
-    get_google,
+    client_for_mode,
 )
 from app.modules.integrations.models import OAuthConnection, SyncLink
 from app.modules.records.models import CareAction, Medication, Prescription
@@ -52,10 +52,18 @@ async def get_connection(session: AsyncSession, user_id: uuid.UUID) -> OAuthConn
 
 
 async def save_connection(
-    session: AsyncSession, user: User, tokens: Tokens, email: str | None, request: Request | None
+    session: AsyncSession,
+    user: User,
+    tokens: Tokens,
+    email: str | None,
+    request: Request | None,
+    *,
+    mode: str,
 ) -> OAuthConnection:
+    """Store a grant. `mode` is the client that issued it (live or simulation); every later
+    call on this connection goes back to that same client."""
     conn = await get_connection(session, user.id) or OAuthConnection(user_id=user.id)
-    conn.mode = get_google().mode
+    conn.mode = mode
     conn.account_email = email
     conn.scopes = tokens.scope
     conn.access_token_enc = encrypt(tokens.access_token)
@@ -89,7 +97,7 @@ async def access_token(session: AsyncSession, conn: OAuthConnection) -> str:
         await session.commit()
         raise Conflict("Google access expired. Reconnect to keep syncing.")
     try:
-        tokens = await get_google().refresh(refresh)
+        tokens = await _client(conn).refresh(refresh)
     except GoogleAuthError as exc:
         conn.status = "revoked"
         await session.commit()
@@ -98,6 +106,13 @@ async def access_token(session: AsyncSession, conn: OAuthConnection) -> str:
     conn.expires_at = tokens.expires_at
     await session.flush()
     return tokens.access_token
+
+
+def _client(conn: OAuthConnection):
+    try:
+        return client_for_mode(conn.mode)
+    except GoogleAPIError as exc:
+        raise Conflict("Google isn't available on this server right now.") from exc
 
 
 async def _require(session: AsyncSession, user_id: uuid.UUID) -> tuple[OAuthConnection, str]:
@@ -285,7 +300,7 @@ async def sync_prescription(
 ) -> dict:
     p = await _load_prescription(session, user.id, prescription_id)
     conn, token = await _require(session, user.id)
-    google = get_google()
+    google = _client(conn)
     items = plan_items(p, user.timezone, calendar=calendar, tasks=tasks)
     existing = {
         (lk.target, lk.entity_type, lk.entity_id, lk.slot): lk
@@ -369,7 +384,7 @@ async def unsync_prescription(
     if not links:
         return 0
     conn, token = await _require(session, user.id)
-    google = get_google()
+    google = _client(conn)
     for link in links:
         with contextlib.suppress(GoogleAPIError):  # already gone remotely; drop our link anyway
             await _delete_remote(google, token, conn, link)
@@ -393,7 +408,7 @@ async def pull_task_status(session: AsyncSession, user: User) -> int:
     if conn is None or conn.status != "active" or not conn.tasklist_id:
         return 0
     token = await access_token(session, conn)
-    google = get_google()
+    google = _client(conn)
     links = (
         await session.scalars(
             select(SyncLink).where(SyncLink.user_id == user.id, SyncLink.target == "google_tasks")
@@ -416,9 +431,12 @@ async def disconnect(
     conn = await get_connection(session, user.id)
     if conn is None:
         return
-    google = get_google()
+    try:
+        google = client_for_mode(conn.mode)
+    except GoogleAPIError:
+        google = None  # OAuth no longer configured: forget the grant locally
     links = (await session.scalars(select(SyncLink).where(SyncLink.user_id == user.id))).all()
-    if remove_items and conn.status == "active":
+    if google and remove_items and conn.status == "active":
         try:
             token = await access_token(session, conn)
             for link in links:
@@ -427,7 +445,7 @@ async def disconnect(
             pass
     try:
         token_for_revoke = decrypt(conn.refresh_token_enc or conn.access_token_enc)
-        if token_for_revoke:
+        if google and token_for_revoke:
             await google.revoke(token_for_revoke)
     except Exception:  # revocation is best-effort
         logger.warning("google token revocation failed", exc_info=True)

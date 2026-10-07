@@ -14,6 +14,7 @@ export function GoogleButton() {
   const providers = useAuthProviders();
   const [leaving, setLeaving] = useState(false);
   const simulated = providers.data?.google?.mode === "simulation";
+  const testersOnly = providers.data?.google?.testers_only;
 
   const start = () => {
     setLeaving(true);
@@ -30,7 +31,9 @@ export function GoogleButton() {
       <p className="text-center text-xs text-ink-3">
         {simulated
           ? "Simulated on this server, so no Google account is needed."
-          : "Also offers Calendar and Tasks access for reminders. You can skip that and connect later."}
+          : testersOnly
+            ? "Google sign-in is open to invited testers for now. Everyone else can use email or the demo."
+            : "Also offers Calendar and Tasks access for reminders. You can skip that and connect later."}
       </p>
     </div>
   );

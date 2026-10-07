@@ -315,11 +315,45 @@ class FakeGoogleClient:
         return None if task is None else task.get("status") == "completed"
 
 
-@lru_cache
-def get_google() -> GoogleClient:
+def live_configured() -> bool:
     s = get_settings()
-    if s.google_provider == "google" and s.google_client_id and s.google_client_secret:
-        return HttpGoogleClient(
-            s.google_client_id, s.google_client_secret.get_secret_value(), s.google_redirect_uri
-        )
+    return bool(
+        s.google_provider == "google"
+        and s.google_client_id
+        and s.google_client_secret
+        and s.google_client_secret.get_secret_value()
+    )
+
+
+@lru_cache
+def _live() -> HttpGoogleClient:
+    s = get_settings()
+    return HttpGoogleClient(
+        s.google_client_id, s.google_client_secret.get_secret_value(), s.google_redirect_uri
+    )
+
+
+@lru_cache
+def _simulation() -> FakeGoogleClient:
     return FakeGoogleClient()
+
+
+def get_google() -> GoogleClient:
+    """The server's Google: real OAuth when configured, else the simulation (development)."""
+    return _live() if live_configured() else _simulation()
+
+
+def client_for_mode(mode: str) -> GoogleClient:
+    """The client that issued a connection's tokens: a simulated connection never reaches real
+    Google, and a live one never falls back to the simulation."""
+    if mode == "simulation":
+        return _simulation()
+    if not live_configured():
+        raise GoogleAPIError("Google OAuth isn't configured on this server.")
+    return _live()
+
+
+def client_for_user(user: Any) -> GoogleClient:
+    """Demo accounts always use the simulation: their data is synthetic and deleted within a day,
+    and in OAuth testing mode Google would block them anyway."""
+    return _simulation() if getattr(user, "is_demo", False) else get_google()
