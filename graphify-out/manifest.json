@@ -12,9 +12,9 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "backend/app/core/config.py": {
-    "mtime": 1791362492.448343,
-    "seen": 1791362676.3914862,
-    "ast_hash": "e41c239fb79f25c39a2f86fec9035c8d",
+    "mtime": 1791369641.8566713,
+    "seen": 1791369846.4922032,
+    "ast_hash": "1f0f0267b4747fe022b0cc120ab03bf6",
     "semantic_hash": ""
   },
   "backend/app/core/db.py": {
@@ -373,7 +373,7 @@
   },
   "backend/scripts/init-db.sql": {
     "mtime": 1790877337.95084,
-    "seen": 1791365980.7215025,
+    "seen": 1791369846.4924567,
     "ast_hash": "",
     "semantic_hash": ""
   },
@@ -900,15 +900,15 @@
     "semantic_hash": ""
   },
   "docs/decisions.md": {
-    "mtime": 1791362530.4437327,
-    "seen": 1791362676.3922796,
-    "ast_hash": "64fde0ff6ad84e92f13d6ce794c4bc21",
+    "mtime": 1791369703.6414368,
+    "seen": 1791369846.4928167,
+    "ast_hash": "73395f776df3432aadd609cd32607ae3",
     "semantic_hash": ""
   },
   "docs/plan.md": {
-    "mtime": 1791362530.4437327,
-    "seen": 1791362676.392288,
-    "ast_hash": "704ed1cfef0414c2065bdf52ca9c1967",
+    "mtime": 1791369703.6424437,
+    "seen": 1791369846.4928226,
+    "ast_hash": "51102086cee9bfa5b87bf73cccb2a970",
     "semantic_hash": ""
   },
   "backend/app/modules/assistant/__init__.py": {
@@ -1128,9 +1128,9 @@
     "semantic_hash": "ccd9cbc53e002411c7218a813391e617"
   },
   "docs/deployment.md": {
-    "mtime": 1791362530.4425602,
-    "seen": 1791362676.3922818,
-    "ast_hash": "288e57c550529420edb8540af78a60c9",
+    "mtime": 1791369703.6393597,
+    "seen": 1791369846.492818,
+    "ast_hash": "b0dec025620e2def20c1d7268a453bcd",
     "semantic_hash": ""
   },
   "backend/app/modules/extraction/labs.py": {
@@ -1663,7 +1663,7 @@
   },
   "backend/app/eval/thresholds.json": {
     "mtime": 1790965200.822874,
-    "seen": 1791365980.7211833,
+    "seen": 1791369846.4922295,
     "ast_hash": "",
     "semantic_hash": ""
   },
@@ -1908,9 +1908,9 @@
     "semantic_hash": ""
   },
   "backend/app/shared/mail.py": {
-    "mtime": 1791037869.3809092,
-    "seen": 1791039909.7287083,
-    "ast_hash": "1d8be84aa4644396c845b7ded2001b0a",
+    "mtime": 1791369632.7344656,
+    "seen": 1791369846.4924107,
+    "ast_hash": "e61a95f5efa6114fe60571ec65c7b01d",
     "semantic_hash": ""
   },
   "backend/migrations/versions/20261003_c303047d6642_email_verification_and_reset_tokens.py": {
@@ -2076,9 +2076,9 @@
     "semantic_hash": ""
   },
   "docs/launch-guide.md": {
-    "mtime": 1791365974.5162737,
-    "seen": 1791365980.7218335,
-    "ast_hash": "8cdc444ee2b6be58b5609adcc01d04f1",
+    "mtime": 1791369703.6393597,
+    "seen": 1791369846.4928212,
+    "ast_hash": "0c99b725a41b1020b11bfd376f168804",
     "semantic_hash": ""
   },
   "backend/tests/test_authorization_sweep.py": {
@@ -2127,6 +2127,12 @@
     "mtime": 1791356756.632441,
     "seen": 1791357152.0861864,
     "ast_hash": "e894a0ca00abb6ff16316ee07f95b129",
+    "semantic_hash": ""
+  },
+  "backend/tests/test_mail_brevo.py": {
+    "mtime": 1791369657.5575926,
+    "seen": 1791369846.4924932,
+    "ast_hash": "ce910ea0ce31dc48e248b89235d44e65",
     "semantic_hash": ""
   }
 }
