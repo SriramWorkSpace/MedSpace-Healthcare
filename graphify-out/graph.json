@@ -22201,7 +22201,7 @@
       "node_kind": "heading",
       "norm_label": "housekeeping",
       "source_file": "docs/launch-guide.md",
-      "source_location": "L353"
+      "source_location": "L399"
     },
     {
       "id": "docs_launch_guide_keep_the_data_safe",
@@ -22213,7 +22213,7 @@
       "node_kind": "heading",
       "norm_label": "keep the data safe",
       "source_file": "docs/launch-guide.md",
-      "source_location": "L309"
+      "source_location": "L355"
     },
     {
       "id": "docs_launch_guide_launch_guide_the_steps_only_you_can_do",
@@ -22237,7 +22237,7 @@
       "node_kind": "heading",
       "norm_label": "part 10. keep reminders working on the free plan (5 minutes)",
       "source_file": "docs/launch-guide.md",
-      "source_location": "L288"
+      "source_location": "L334"
     },
     {
       "id": "docs_launch_guide_part_11_final_checks_15_minutes",
@@ -22249,7 +22249,7 @@
       "node_kind": "heading",
       "norm_label": "part 11. final checks (15 minutes)",
       "source_file": "docs/launch-guide.md",
-      "source_location": "L297"
+      "source_location": "L343"
     },
     {
       "id": "docs_launch_guide_part_12_make_it_shine_on_your_resume",
@@ -22261,7 +22261,7 @@
       "node_kind": "heading",
       "norm_label": "part 12. make it shine on your resume",
       "source_file": "docs/launch-guide.md",
-      "source_location": "L328"
+      "source_location": "L374"
     },
     {
       "id": "docs_launch_guide_part_1_accounts_to_create_about_30_minutes",
@@ -22324,14 +22324,14 @@
       "source_location": "L120"
     },
     {
-      "id": "docs_launch_guide_part_6_the_api_on_render_20_minutes",
-      "label": "Part 6. The API on Render (20 minutes)",
+      "id": "docs_launch_guide_part_6_the_api_on_render_30_minutes",
+      "label": "Part 6. The API on Render (30 minutes)",
       "_origin": "ast",
       "community": 144,
       "community_name": "Launch guide: the steps only you can do",
       "file_type": "document",
       "node_kind": "heading",
-      "norm_label": "part 6. the api on render (20 minutes)",
+      "norm_label": "part 6. the api on render (30 minutes)",
       "source_file": "docs/launch-guide.md",
       "source_location": "L151"
     },
@@ -22345,7 +22345,7 @@
       "node_kind": "heading",
       "norm_label": "part 7. the web app on vercel (15 minutes)",
       "source_file": "docs/launch-guide.md",
-      "source_location": "L193"
+      "source_location": "L239"
     },
     {
       "id": "docs_launch_guide_part_8_ai_groq_5_minutes",
@@ -22357,7 +22357,7 @@
       "node_kind": "heading",
       "norm_label": "part 8. ai: groq (5 minutes)",
       "source_file": "docs/launch-guide.md",
-      "source_location": "L209"
+      "source_location": "L255"
     },
     {
       "id": "docs_launch_guide_part_9_google_calendar_and_tasks_30_minutes",
@@ -22369,7 +22369,7 @@
       "node_kind": "heading",
       "norm_label": "part 9. google calendar and tasks (30 minutes)",
       "source_file": "docs/launch-guide.md",
-      "source_location": "L219"
+      "source_location": "L265"
     },
     {
       "id": "backend_app_modules_integrations_google",
@@ -24127,15 +24127,26 @@
       "source_location": "L11"
     },
     {
-      "id": "pages_app_visitprep_visitprep",
-      "label": "@/pages/app/VisitPrep",
+      "id": "frontend_package_devdependencies_axe_core_playwright",
+      "label": "@axe-core/playwright",
       "_origin": "ast",
       "community": 175,
-      "community_name": "@/pages/app/VisitPrep",
-      "confidence": "EXTRACTED",
+      "community_name": "@axe-core/playwright",
       "file_type": "code",
-      "norm_label": "@/pages/app/visitprep",
-      "source_file": "@/pages/app/VisitPrep"
+      "norm_label": "@axe-core/playwright",
+      "source_file": "frontend/package.json",
+      "source_location": "L35"
+    },
+    {
+      "id": "axe_core_playwright",
+      "label": "@axe-core/playwright",
+      "_origin": "ast",
+      "community": 175,
+      "community_name": "@axe-core/playwright",
+      "file_type": "concept",
+      "norm_label": "@axe-core/playwright",
+      "source_file": "frontend/package.json",
+      "source_location": "L35"
     },
     {
       "id": "backend_migrations_versions_20261003_1988f67cd325_push_reminders",
@@ -24202,6 +24213,17 @@
       "norm_label": "human-friendly one-time codes like 'k7m2-q9xd' (no 0/o/1/l to avoid misreading).",
       "source_file": "backend/app/core/totp.py",
       "source_location": "L74"
+    },
+    {
+      "id": "pages_app_visitprep_visitprep",
+      "label": "@/pages/app/VisitPrep",
+      "_origin": "ast",
+      "community": 178,
+      "community_name": "@/pages/app/VisitPrep",
+      "confidence": "EXTRACTED",
+      "file_type": "code",
+      "norm_label": "@/pages/app/visitprep",
+      "source_file": "@/pages/app/VisitPrep"
     },
     {
       "id": "frontend_src_features_doses_request",
@@ -24631,28 +24653,6 @@
       "norm_label": "verifyemail.jsx",
       "source_file": "frontend/src/pages/auth/VerifyEmail.jsx",
       "source_location": "L1"
-    },
-    {
-      "id": "frontend_package_devdependencies_testing_library_user_event",
-      "label": "@testing-library/user-event",
-      "_origin": "ast",
-      "community": 191,
-      "community_name": "@testing-library/user-event",
-      "file_type": "code",
-      "norm_label": "@testing-library/user-event",
-      "source_file": "frontend/package.json",
-      "source_location": "L41"
-    },
-    {
-      "id": "testing_library_user_event",
-      "label": "@testing-library/user-event",
-      "_origin": "ast",
-      "community": 191,
-      "community_name": "@testing-library/user-event",
-      "file_type": "concept",
-      "norm_label": "@testing-library/user-event",
-      "source_file": "frontend/package.json",
-      "source_location": "L41"
     },
     {
       "id": "backend_app_core_config_py_field_validator",
@@ -29204,17 +29204,6 @@
       "source_location": "L34"
     },
     {
-      "id": "frontend_package_devdependencies_axe_core_playwright",
-      "label": "@axe-core/playwright",
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "devDependencies",
-      "file_type": "code",
-      "norm_label": "@axe-core/playwright",
-      "source_file": "frontend/package.json",
-      "source_location": "L35"
-    },
-    {
       "id": "frontend_package_devdependencies_eslint",
       "label": "eslint",
       "_origin": "ast",
@@ -29314,6 +29303,17 @@
       "source_location": "L39"
     },
     {
+      "id": "frontend_package_devdependencies_testing_library_user_event",
+      "label": "@testing-library/user-event",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "devDependencies",
+      "file_type": "code",
+      "norm_label": "@testing-library/user-event",
+      "source_file": "frontend/package.json",
+      "source_location": "L41"
+    },
+    {
       "id": "frontend_package_devdependencies_vite",
       "label": "vite",
       "_origin": "ast",
@@ -29334,17 +29334,6 @@
       "norm_label": "@vitejs/plugin-react",
       "source_file": "frontend/package.json",
       "source_location": "L42"
-    },
-    {
-      "id": "axe_core_playwright",
-      "label": "@axe-core/playwright",
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "devDependencies",
-      "file_type": "concept",
-      "norm_label": "@axe-core/playwright",
-      "source_file": "frontend/package.json",
-      "source_location": "L35"
     },
     {
       "id": "eslint",
@@ -29444,6 +29433,17 @@
       "norm_label": "@testing-library/jest-dom",
       "source_file": "frontend/package.json",
       "source_location": "L39"
+    },
+    {
+      "id": "testing_library_user_event",
+      "label": "@testing-library/user-event",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "devDependencies",
+      "file_type": "concept",
+      "norm_label": "@testing-library/user-event",
+      "source_file": "frontend/package.json",
+      "source_location": "L41"
     },
     {
       "id": "vite",
@@ -30486,7 +30486,7 @@
       "node_kind": "heading",
       "norm_label": "4. web: static build with an `/api` rewrite",
       "source_file": "docs/deployment.md",
-      "source_location": "L80"
+      "source_location": "L85"
     },
     {
       "id": "docs_deployment_5_google_oauth",
@@ -30498,7 +30498,7 @@
       "node_kind": "heading",
       "norm_label": "5. google oauth",
       "source_file": "docs/deployment.md",
-      "source_location": "L98"
+      "source_location": "L103"
     },
     {
       "id": "docs_deployment_checklist",
@@ -30510,7 +30510,7 @@
       "node_kind": "heading",
       "norm_label": "checklist",
       "source_file": "docs/deployment.md",
-      "source_location": "L106"
+      "source_location": "L111"
     },
     {
       "id": "docs_deployment_deploying_medspace",
@@ -103550,13 +103550,24 @@
     },
     {
       "source": "docs_deployment_deploying_medspace",
+      "target": "docs_deployment_5_google_oauth",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/deployment.md",
+      "source_location": "L103",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_deployment_deploying_medspace",
       "target": "docs_deployment_checklist",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/deployment.md",
-      "source_location": "L106",
+      "source_location": "L111",
       "weight": 1.0
     },
     {
@@ -103600,18 +103611,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/deployment.md",
-      "source_location": "L80",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_deployment_deploying_medspace",
-      "target": "docs_deployment_5_google_oauth",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/deployment.md",
-      "source_location": "L98",
+      "source_location": "L85",
       "weight": 1.0
     },
     {
@@ -103704,7 +103704,7 @@
     },
     {
       "source": "docs_launch_guide_launch_guide_the_steps_only_you_can_do",
-      "target": "docs_launch_guide_part_6_the_api_on_render_20_minutes",
+      "target": "docs_launch_guide_part_6_the_api_on_render_30_minutes",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -103721,7 +103721,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/launch-guide.md",
-      "source_location": "L193",
+      "source_location": "L239",
       "weight": 1.0
     },
     {
@@ -103732,7 +103732,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/launch-guide.md",
-      "source_location": "L209",
+      "source_location": "L255",
       "weight": 1.0
     },
     {
@@ -103743,29 +103743,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/launch-guide.md",
-      "source_location": "L219",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_launch_guide_launch_guide_the_steps_only_you_can_do",
-      "target": "docs_launch_guide_part_10_keep_reminders_working_on_the_free_plan_5_minutes",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/launch-guide.md",
-      "source_location": "L288",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_launch_guide_launch_guide_the_steps_only_you_can_do",
-      "target": "docs_launch_guide_part_11_final_checks_15_minutes",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/launch-guide.md",
-      "source_location": "L297",
+      "source_location": "L265",
       "weight": 1.0
     },
     {
@@ -103781,13 +103759,35 @@
     },
     {
       "source": "docs_launch_guide_launch_guide_the_steps_only_you_can_do",
+      "target": "docs_launch_guide_part_10_keep_reminders_working_on_the_free_plan_5_minutes",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/launch-guide.md",
+      "source_location": "L334",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_launch_guide_launch_guide_the_steps_only_you_can_do",
+      "target": "docs_launch_guide_part_11_final_checks_15_minutes",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/launch-guide.md",
+      "source_location": "L343",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_launch_guide_launch_guide_the_steps_only_you_can_do",
       "target": "docs_launch_guide_part_12_make_it_shine_on_your_resume",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/launch-guide.md",
-      "source_location": "L328",
+      "source_location": "L374",
       "weight": 1.0
     },
     {
@@ -103798,7 +103798,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/launch-guide.md",
-      "source_location": "L353",
+      "source_location": "L399",
       "weight": 1.0
     },
     {
@@ -103842,7 +103842,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/launch-guide.md",
-      "source_location": "L309",
+      "source_location": "L355",
       "weight": 1.0
     },
     {
@@ -118044,7 +118044,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/deployment.md",
-      "source_location": "L100",
+      "source_location": "L105",
       "weight": 1.0
     },
     {
@@ -119428,5 +119428,5 @@
       "source_file": "docker-compose.yml"
     }
   ],
-  "built_at_commit": "aabcc69a4fb9c92d3ce89dd81c9c37805a318dbd"
+  "built_at_commit": "8c9bc46a847eb0b1d8709ca2976b75c6d0e1478c"
 }

@@ -373,7 +373,7 @@
   },
   "backend/scripts/init-db.sql": {
     "mtime": 1790877337.95084,
-    "seen": 1791369846.4924567,
+    "seen": 1791375331.0849898,
     "ast_hash": "",
     "semantic_hash": ""
   },
@@ -888,9 +888,9 @@
     "semantic_hash": ""
   },
   "docker-compose.yml": {
-    "mtime": 1791317246.0945587,
-    "seen": 1791318253.0925798,
-    "ast_hash": "c331e272be4b4070d5823a4771b2a909",
+    "mtime": 1791374397.726793,
+    "seen": 1791375331.0860832,
+    "ast_hash": "ef85df9b38e1a5b79737edc131803a2a",
     "semantic_hash": ""
   },
   "docs/architecture.md": {
@@ -906,9 +906,9 @@
     "semantic_hash": ""
   },
   "docs/plan.md": {
-    "mtime": 1791369703.6424437,
-    "seen": 1791369846.4928226,
-    "ast_hash": "51102086cee9bfa5b87bf73cccb2a970",
+    "mtime": 1791374970.5592172,
+    "seen": 1791375331.086112,
+    "ast_hash": "b36f2faac416f6e9cadfae6d16b1b8b5",
     "semantic_hash": ""
   },
   "backend/app/modules/assistant/__init__.py": {
@@ -1128,9 +1128,9 @@
     "semantic_hash": "ccd9cbc53e002411c7218a813391e617"
   },
   "docs/deployment.md": {
-    "mtime": 1791369703.6393597,
-    "seen": 1791369846.492818,
-    "ast_hash": "b0dec025620e2def20c1d7268a453bcd",
+    "mtime": 1791374970.5581303,
+    "seen": 1791375331.0860987,
+    "ast_hash": "3cdc4f91c1edbcca4d44c66a889272c0",
     "semantic_hash": ""
   },
   "backend/app/modules/extraction/labs.py": {
@@ -1663,7 +1663,7 @@
   },
   "backend/app/eval/thresholds.json": {
     "mtime": 1790965200.822874,
-    "seen": 1791369846.4922295,
+    "seen": 1791375331.0844862,
     "ast_hash": "",
     "semantic_hash": ""
   },
@@ -2076,9 +2076,9 @@
     "semantic_hash": ""
   },
   "docs/launch-guide.md": {
-    "mtime": 1791369703.6393597,
-    "seen": 1791369846.4928212,
-    "ast_hash": "0c99b725a41b1020b11bfd376f168804",
+    "mtime": 1791374970.5408692,
+    "seen": 1791375331.086108,
+    "ast_hash": "9bd0a1fbfef4b18fde576c505f4d6bc2",
     "semantic_hash": ""
   },
   "backend/tests/test_authorization_sweep.py": {

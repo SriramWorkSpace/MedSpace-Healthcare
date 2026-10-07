@@ -1,7 +1,7 @@
 # Graph Report - MedSpace  (2026-10-07)
 
 ## Corpus Check
-- 352 files · ~161,265 words
+- 352 files · ~161,530 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `aabcc69a`
+- Built from commit: `8c9bc46a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -152,6 +152,7 @@
 - main.jsx
 - ObjectStorage
 - CircleAccept.jsx
+- @axe-core/playwright
 - totp.py
 - sw-template.js
 - vercel.json
@@ -159,7 +160,6 @@
 - react-router
 - zod
 - globals
-- @testing-library/user-event
 - test_security_hardening.py
 - test_assistant.py
 - test_doses.py
@@ -223,7 +223,7 @@ Nodes (27): clsx, date-fns, @fontsource-variable/geist, @fontsource-variable/gei
 
 ### Community 4 - "devDependencies"
 Cohesion: 0.08
-Nodes (25): @axe-core/playwright, eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, devDependencies, @axe-core/playwright, eslint (+17 more)
+Nodes (25): eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, devDependencies, eslint, @eslint/js, eslint-plugin-react-hooks (+17 more)
 
 ### Community 6 - "router.jsx"
 Cohesion: 0.06
