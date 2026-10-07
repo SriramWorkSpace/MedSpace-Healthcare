@@ -33,7 +33,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://YOUR-API.onrender.com/api/$1"
+      "destination": "https://medspace-api.onrender.com/api/$1"
     },
     {
       "source": "/(.*)",
