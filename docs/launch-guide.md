@@ -91,15 +91,28 @@ every-minute reminder check would use them up mid-month; ADR-038.)
 
 ---
 
-## Part 4. File storage: Cloudflare R2 (10 minutes)
+## Part 4. File storage: Cloudflare R2 (15 minutes)
 
-1. R2, then **Create bucket**, e.g. `medspace-documents`, location hint **Asia-Pacific**. Keep it
-   private; files always stream through the API.
-2. **Manage R2 API tokens**, then create a token with object read and write on that bucket only.
-3. Note the account ID (for the endpoint), access key and secret key.
+Uploaded documents live here. The bucket stays private: files only ever stream through the API,
+which checks who's asking.
 
-Settings: `STORAGE_PROVIDER=s3`, `S3_ENDPOINT_URL=https://<account-id>.r2.cloudflarestorage.com`,
-`S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET=medspace-documents`, `S3_REGION=auto`.
+1. Cloudflare dashboard, **R2 Object Storage**. If asked, add a payment method to activate R2;
+   the free allowance (10 GB stored) covers this project.
+2. **Create bucket:** name `medspace-documents`, location **Automatic** with the hint
+   **Asia-Pacific (APAC)**, default storage class **Standard**. Leave **Public access** and the
+   `r2.dev` subdomain off, and add no CORS rules.
+3. **Manage API tokens** (R2 overview page), **Create Account API token**:
+   - name `medspace-api`
+   - permissions **Object Read & Write** (not Admin)
+   - **Apply to specific buckets only**: `medspace-documents`
+   - TTL: forever (or a date you'll remember to rotate it by)
+4. Create. Cloudflare shows the **Access Key ID**, the **Secret Access Key** and the S3 endpoint
+   **once**. Save all three in your password manager: `S3_ACCESS_KEY`, `S3_SECRET_KEY`, and
+   `S3_ENDPOINT_URL` (`https://<account-id>.r2.cloudflarestorage.com`, without the bucket name
+   at the end). You don't need the "Token value".
+
+Settings: `STORAGE_PROVIDER=s3`, `S3_ENDPOINT_URL`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`,
+`S3_BUCKET=medspace-documents`, `S3_REGION=auto`.
 
 ---
 
