@@ -1,36 +1,36 @@
 # Graph Report - MedSpace  (2026-10-07)
 
 ## Corpus Check
-- 352 files · ~161,530 words
+- 353 files · ~162,187 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2918 nodes · 7315 edges · 207 communities (162 shown, 45 thin omitted)
-- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 110 edges (avg confidence: 0.93)
+- 2925 nodes · 7350 edges · 204 communities (161 shown, 43 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 112 edges (avg confidence: 0.93)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8c9bc46a`
+- Built from commit: `f2500915`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- test_eval.py
-- record
-- reminders/router.py
+- extract
+- ratelimit.py
+- reminders/service.py
 - dependencies
 - devDependencies
-- S3Storage
+- sharing/router.py
 - router.jsx
 - User
-- reminders/service.py
+- heuristic.py
 - Architecture Decision Records
 - doses/service.py
 - integrations/router.py
 - documents/api.js
 - TrendChart.jsx
 - integrations/service.py
-- extraction/schemas.py
+- sharing/service.py
 - FeatureBento.jsx
 - auth.jsx
 - HttpGoogleClient
@@ -38,17 +38,17 @@
 - test_visits.py
 - visits/service.py
 - documents/router.py
-- ratelimit.py
+- search/service.py
 - ReviewForm.jsx
 - test_labs.py
-- AsyncClient
+- test_email_recovery.py
 - test_caregiver_reminders.py
 - EasterEggs.jsx
-- test_evidence.py
+- demo/service.py
 - utcnow
 - SearchPalette.jsx
 - integrations/api.js
-- score.py
+- test_eval.py
 - supply/service.py
 - MedSpace Build Plan
 - records/service.py
@@ -56,7 +56,7 @@
 - AppNav.jsx
 - MedSpace Architecture
 - signup
-- demo/service.py
+- errors.py
 - MedSpace
 - db.py
 - visits/api.js
@@ -66,7 +66,7 @@
 - records/api.js
 - Visits.jsx
 - scripts
-- build_pdf
+- drain
 - SupplyDialog.jsx
 - api service (alembic + uvicorn)
 - lib/format.js
@@ -75,10 +75,11 @@
 - deps.py
 - helpers.js
 - Ask.jsx
-- sharing/service.py
+- record
 - 4. Core flows
 - Diet.jsx
 - identity/router.py
+- README.md
 - package.json
 - Widgets.jsx
 - sharing/api.js
@@ -107,9 +108,9 @@
 - SourceViewer.jsx
 - DocumentReview.jsx
 - Documents.jsx
-- worker.py
+- audit/router.py
 - csrf
-- files.py
+- install.js
 - vite.config.js
 - medspace-api
 - @phosphor-icons/react
@@ -124,7 +125,7 @@
 - clinician.js
 - SecuritySettings.jsx
 - ReminderSettings.jsx
-- test_authorization_sweep.py
+- export.py
 - corpus.py
 - Launch guide: the steps only you can do
 - google.py
@@ -132,44 +133,41 @@
 - circle/api.js
 - push.js
 - MedicationHistory.jsx
-- evidence.py
-- test_timeline_dashboard.py
-- main.py
+- locate
+- LocalStorage
+- get_settings
 - doses/api.js
-- test_sharing.py
 - normalize_frequency
-- Extraction evaluation
-- notify/service.py
+- extraction/router.py
 - RecoveryForms.jsx
-- llm.py
 - offline.js
 - test_ratelimit.py
 - useResendVerification
-- LocalStorage
 - hooks.js
 - VisitPrep.jsx
-- install.js
+- test_assistant.py
 - main.jsx
-- ObjectStorage
 - CircleAccept.jsx
-- @axe-core/playwright
 - totp.py
+- env.py
 - sw-template.js
 - vercel.json
 - labs.py
 - react-router
 - zod
 - globals
+- test_sharing.py
 - test_security_hardening.py
-- test_assistant.py
+- @testing-library/user-event
+- test_timeline_dashboard.py
 - test_doses.py
 - extraction/service.py
-- safe_path
+- .dispatch
 - links.js
 - assistant/service.py
-- get_settings
-- FakeMailer
-- test_email_recovery.py
+- identity/service.py
+- test_email_change.py
+- notify/service.py
 - smoothScroll.js
 
 ## God Nodes (most connected - your core abstractions)
@@ -187,14 +185,14 @@
 ## Surprising Connections (you probably didn't know these)
 - `CI Backend job (ruff + pytest on pgvector Postgres)` --semantically_similar_to--> `postgres service (pgvector/pgvector:pg17)`  [INFERRED] [semantically similar]
   .github/workflows/ci.yml → docker-compose.yml
+- `test_production_requires_google_credentials_when_google_is_on()` --calls--> `Settings`  [EXTRACTED]
+  backend/tests/test_google_live.py → backend/app/core/config.py
+- `invite_url()` --calls--> `get_settings()`  [EXTRACTED]
+  backend/app/modules/circle/service.py → backend/app/core/config.py
+- `share_url()` --calls--> `get_settings()`  [EXTRACTED]
+  backend/app/modules/sharing/service.py → backend/app/core/config.py
 - `_clean_tables()` --uses--> `Base`  [INFERRED]
   backend/tests/conftest.py → backend/app/core/db.py
-- `_schema()` --uses--> `Base`  [INFERRED]
-  backend/tests/conftest.py → backend/app/core/db.py
-- `demo_login()` --uses--> `NotFound`  [INFERRED]
-  backend/app/modules/demo/router.py → backend/app/core/errors.py
-- `outbox()` --uses--> `NotFound`  [INFERRED]
-  backend/app/modules/notify/router.py → backend/app/core/errors.py
 
 ## Import Cycles
 - None detected.
@@ -203,19 +201,19 @@
 - **Local Docker Compose stack** — docker_compose_postgres, docker_compose_redis, docker_compose_s3, docker_compose_api, docker_compose_worker, docker_compose_web [EXTRACTED 1.00]
 - **Local Docker Compose Stack** — docker_compose_postgres, docker_compose_redis, docker_compose_api, docker_compose_worker, docker_compose_web [EXTRACTED 1.00]
 
-## Communities (207 total, 45 thin omitted)
+## Communities (204 total, 43 thin omitted)
 
-### Community 0 - "test_eval.py"
-Cohesion: 0.10
-Nodes (34): ambiguous_date(), _apply_sig(), diet_category(), _diet_notes(), _dosing(), extract(), _lab_results(), _lab_row() (+26 more)
+### Community 0 - "extract"
+Cohesion: 0.12
+Nodes (17): ambiguous_date(), diet_category(), _diet_notes(), extract(), _parse_date(), date, Split an advice line like "Diet: low salt. Avoid sugary drinks." into separate…, 11/05/2026 can be 11 May or Nov 5; 25/05/2026 cannot. (+9 more)
 
-### Community 1 - "record"
-Cohesion: 0.13
-Nodes (35): AuditLog, Append-only trail of security-relevant actions. Never updated or deleted by app…, list_for_user(), Any, AsyncSession, Request, UUID, Audit trail: `record()` is the single write path, used by every module. (+27 more)
+### Community 1 - "ratelimit.py"
+Cohesion: 0.11
+Nodes (18): RateLimited, caller_key(), client_ip(), Decision, _estimate(), get_store(), Any, Request (+10 more)
 
-### Community 2 - "reminders/router.py"
-Cohesion: 0.07
-Nodes (47): action(), config(), get_settings(), list_subscriptions(), put_settings(), CurrentUser, DbSession, delete (+39 more)
+### Community 2 - "reminders/service.py"
+Cohesion: 0.06
+Nodes (77): action(), config(), get_settings(), list_subscriptions(), put_settings(), CurrentUser, DbSession, delete (+69 more)
 
 ### Community 3 - "dependencies"
 Cohesion: 0.07
@@ -223,31 +221,35 @@ Nodes (27): clsx, date-fns, @fontsource-variable/geist, @fontsource-variable/gei
 
 ### Community 4 - "devDependencies"
 Cohesion: 0.08
-Nodes (25): eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, devDependencies, eslint, @eslint/js, eslint-plugin-react-hooks (+17 more)
+Nodes (25): @axe-core/playwright, eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, devDependencies, @axe-core/playwright, eslint (+17 more)
+
+### Community 5 - "sharing/router.py"
+Cohesion: 0.18
+Nodes (22): create_share(), list_shares(), open_share(), CurrentUser, DbSession, delete, get, post (+14 more)
 
 ### Community 6 - "router.jsx"
 Cohesion: 0.06
 Nodes (5): MarketingLayout(), RouteError(), appLayout, authLayout, openAuthLayout()
 
 ### Community 7 - "User"
-Cohesion: 0.10
-Nodes (42): AppError, Forbidden, install_error_handlers(), PayloadTooLarge, _problem(), Any, Exception, FastAPI (+34 more)
+Cohesion: 0.16
+Nodes (29): Unprocessable, hash_password(), verify_password(), User, begin_setup(), change_password(), check_second_factor(), clear_second_factor() (+21 more)
 
-### Community 8 - "reminders/service.py"
-Cohesion: 0.15
-Nodes (31): SubscriptionOut, action_token(), apply_action(), _clock(), _deliver(), _due(), get_settings_for(), _labels() (+23 more)
+### Community 8 - "heuristic.py"
+Cohesion: 0.12
+Nodes (30): _apply_sig(), _dosing(), _lab_results(), _lab_row(), _medication_from_line(), Offline, rule-based extractor used when no LLM is configured (CI, demo, keyless…, Frequency, duration and instructions from the text after a medicine's…, ConfirmCareAction (+22 more)
 
 ### Community 9 - "Architecture Decision Records"
 Cohesion: 0.05
 Nodes (40): ADR-001: Modular monolith with two processes, ADR-002: pgvector instead of FAISS, ADR-003: Groq as the LLM provider, behind a provider interface, ADR-004: Local embeddings with fastembed, ADR-005: Calendar for recurring reminders, Tasks for one-off actions, ADR-006: Deterministic frequency normalization, ADR-007: Durable job queue with ARQ + inline fallback, ADR-008: Own authentication; Google OAuth only for integrations (+32 more)
 
 ### Community 10 - "doses/service.py"
-Cohesion: 0.12
-Nodes (40): adherence(), clear_dose(), log_dose(), medication_adherence(), CurrentUser, date, DbSession, delete (+32 more)
+Cohesion: 0.13
+Nodes (39): adherence(), clear_dose(), log_dose(), medication_adherence(), CurrentUser, date, DbSession, delete (+31 more)
 
 ### Community 11 - "integrations/router.py"
-Cohesion: 0.10
-Nodes (38): constant_time_equals(), mfa_challenge(), The token a first-factor success hands back instead of a session., client_for_user(), has_sync_scopes(), pkce_pair(), True when the user left both Calendar and Tasks ticked on Google's consent…, Demo accounts always use the simulation: their data is synthetic and deleted… (+30 more)
+Cohesion: 0.12
+Nodes (34): constant_time_equals(), has_sync_scopes(), pkce_pair(), True when the user left both Calendar and Tasks ticked on Google's consent…, callback(), connect(), disconnect(), _frontend() (+26 more)
 
 ### Community 12 - "documents/api.js"
 Cohesion: 0.10
@@ -259,11 +261,11 @@ Nodes (11): describeChange(), FLAG_LABELS, formatNumber(), buildScale(), linePat
 
 ### Community 14 - "integrations/service.py"
 Cohesion: 0.20
-Nodes (30): Conflict, encrypt(), OAuthConnection, A connected Google account. Tokens are Fernet-encrypted at rest (ADR-008)., access_token(), appointment_event(), _client(), _clock() (+22 more)
+Nodes (30): encrypt(), GoogleAPIError, OAuthConnection, A connected Google account. Tokens are Fernet-encrypted at rest (ADR-008)., access_token(), appointment_event(), _client(), _clock() (+22 more)
 
-### Community 15 - "extraction/schemas.py"
-Cohesion: 0.13
-Nodes (27): confirm_extraction(), discard_extraction(), get_evidence(), get_latest_extraction(), CurrentUser, DbSession, get, post (+19 more)
+### Community 15 - "sharing/service.py"
+Cohesion: 0.21
+Nodes (22): NotFound, new_opaque_token(), A scoped, expiring, revocable read-only link (ADR-010). Only the token's hash…, ShareLink, ShareLinkItem, create(), link_status(), list_links() (+14 more)
 
 ### Community 16 - "FeatureBento.jsx"
 Cohesion: 0.11
@@ -274,12 +276,12 @@ Cohesion: 0.15
 Nodes (16): ADR-0026, acting, getActing(), listeners, setActing(), api(), NO_REFRESH, onSessionExpired() (+8 more)
 
 ### Community 18 - "HttpGoogleClient"
-Cohesion: 0.13
-Nodes (9): _events(), GoogleAPIError, GoogleAuthError, HttpGoogleClient, Exception, MedSpace's own calendar (the only one calendar.app.created can reach)., Consent was revoked or the refresh token is no longer valid., test_connect_asks_for_least_privilege_scopes_with_pkce() (+1 more)
+Cohesion: 0.14
+Nodes (6): _events(), GoogleAuthError, HttpGoogleClient, Exception, MedSpace's own calendar (the only one calendar.app.created can reach)., Consent was revoked or the refresh token is no longer valid.
 
 ### Community 19 - "test_google_live.py"
-Cohesion: 0.12
-Nodes (17): connect_live(), FakeGoogleHTTP, live(), AsyncClient, fixture, Request, Response, Real Google OAuth 2.0 (GOOGLE_PROVIDER=google), with Google's HTTP endpoints… (+9 more)
+Cohesion: 0.10
+Nodes (20): connect_live(), FakeGoogleHTTP, live(), AsyncClient, fixture, Request, Response, Real Google OAuth 2.0 (GOOGLE_PROVIDER=google), with Google's HTTP endpoints… (+12 more)
 
 ### Community 20 - "test_visits.py"
 Cohesion: 0.49
@@ -290,40 +292,40 @@ Cohesion: 0.07
 Nodes (73): get_dashboard(), get_timeline(), CurrentUser, date, DbSession, get, AsNeededOut, DashboardOut (+65 more)
 
 ### Community 22 - "documents/router.py"
-Cohesion: 0.16
-Nodes (26): delete_document(), download_document(), get_document(), list_documents(), page_preview(), CurrentUser, DbSession, delete (+18 more)
+Cohesion: 0.20
+Nodes (23): delete_document(), download_document(), get_document(), list_documents(), page_preview(), CurrentUser, DbSession, delete (+15 more)
 
-### Community 23 - "ratelimit.py"
-Cohesion: 0.09
-Nodes (22): caller_key(), client_ip(), Decision, _estimate(), get_store(), MemoryStore, Any, Request (+14 more)
+### Community 23 - "search/service.py"
+Cohesion: 0.17
+Nodes (16): CurrentUser, DbSession, get, search(), _like(), _prefix_tsquery(), AsyncSession, BaseModel (+8 more)
 
 ### Community 24 - "ReviewForm.jsx"
 Cohesion: 0.14
 Nodes (22): evidenceKeys(), findSpot(), itemName(), ADR-0031, evidence, values, blank(), CARE_KINDS (+14 more)
 
 ### Community 25 - "test_labs.py"
-Cohesion: 0.26
-Nodes (14): lab_confirm_body(), _lab_pdf_text(), AsyncClient, Lab results: copied from reports, flagged only against the printed range,…, test_demo_trends_chart_history(), test_heuristic_reads_single_line_rows_and_printed_flags(), test_heuristic_reads_split_line_lab_tables(), test_labs_are_private_and_deletable() (+6 more)
+Cohesion: 0.31
+Nodes (13): build_lab_pdf(), lab_confirm_body(), _lab_pdf_text(), AsyncClient, Lab results: copied from reports, flagged only against the printed range,…, test_demo_trends_chart_history(), test_heuristic_reads_split_line_lab_tables(), test_labs_are_private_and_deletable() (+5 more)
 
-### Community 26 - "AsyncClient"
-Cohesion: 0.21
-Nodes (18): forgot(), login(), AsyncClient, MonkeyPatch, Response, Pre-hijack: an attacker signs up with the victim's address and sets a password., reset_token(), subjects() (+10 more)
+### Community 26 - "test_email_recovery.py"
+Cohesion: 0.19
+Nodes (29): FakeMailer, Keeps the last messages in memory (the dev outbox and tests read them)., confirm_email(), link_token(), The token from the first `<path>?token=...` link in an email body., Follow the verification link from the outbox, as the address owner would., forgot(), login() (+21 more)
 
 ### Community 27 - "test_caregiver_reminders.py"
-Cohesion: 0.25
+Cohesion: 0.23
 Nodes (26): alerts(), caregiver(), owner_with_medicine(), AsyncClient, Response, Dose alerts for caregivers (ADR-032): opt-in per person, on time or "not ticked…, Eve, confirmed, in Ada's care circle with `role`, with a subscribed device., test_alert_when_due_with_actions_for_helpers() (+18 more)
 
 ### Community 28 - "EasterEggs.jsx"
 Cohesion: 0.18
 Nodes (12): AppleRain(), makeApples(), AppleRain, EasterEggProvider(), onKey(), EggContext, EGGS, isTyping() (+4 more)
 
-### Community 29 - "test_evidence.py"
-Cohesion: 0.15
-Nodes (24): build_lab_pdf(), build_scan_png(), _diabetes(), issued(), LabReport, _lipids(), date, Synthetic prescriptions rendered as real PDFs (and one scan-style PNG). Every… (+16 more)
+### Community 29 - "demo/service.py"
+Cohesion: 0.22
+Nodes (17): create_demo_account(), _ingest(), _page_texts(), purge_expired_demo_accounts(), AsyncSession, date, Demo accounts: every "Try the demo" click gets an isolated, synthetic, short-…, A fictional family member who added the demo user to her care circle as a… (+9 more)
 
 ### Community 30 - "utcnow"
-Cohesion: 0.09
-Nodes (47): datetime, UUID, Time-ordered UUID (RFC 9562 v7) so primary keys index and sort well., utcnow(), uuid7(), Gone, Unauthorized, hash_password() (+39 more)
+Cohesion: 0.17
+Nodes (28): datetime, utcnow(), Gone, sha256_hex(), cancel_email_change(), confirm_email_change(), _consume(), EmailChange (+20 more)
 
 ### Community 31 - "SearchPalette.jsx"
 Cohesion: 0.15
@@ -333,13 +335,13 @@ Nodes (11): useSearch(), SearchContext, EASE_IN, EASE_OUT, GROUPS, JUMP_TO, Sear
 Cohesion: 0.29
 Nodes (10): connectGoogle(), googleKeys, useDisconnectGoogle(), useGoogleMutation(), useGooglePreview(), useGoogleStatus(), usePullTasks(), useSyncPrescription() (+2 more)
 
-### Community 33 - "score.py"
-Cohesion: 0.21
-Nodes (16): check(), main(), Run the extraction evaluation (ADR-024). python -m app.eval # offline…, run(), to_markdown(), aggregate(), CaseResult, Check (+8 more)
+### Community 33 - "test_eval.py"
+Cohesion: 0.19
+Nodes (18): check(), main(), Run the extraction evaluation (ADR-024). python -m app.eval # offline…, run(), to_markdown(), aggregate(), CaseResult, Check (+10 more)
 
 ### Community 34 - "supply/service.py"
-Cohesion: 0.09
-Nodes (53): MedicationSupply, One count per medicine (ADR-023). Estimates are derived from this count, the…, clear_supply(), list_supplies(), CurrentUser, DbSession, delete, get (+45 more)
+Cohesion: 0.10
+Nodes (49): clear_supply(), list_supplies(), CurrentUser, DbSession, delete, get, post, put (+41 more)
 
 ### Community 35 - "MedSpace Build Plan"
 Cohesion: 0.07
@@ -347,7 +349,7 @@ Nodes (28): Change log, MedSpace Build Plan, Phase 0: Foundations, Phase 10: Lab
 
 ### Community 36 - "records/service.py"
 Cohesion: 0.09
-Nodes (70): build_export(), AsyncSession, Account data export: one JSON document with every record the user owns.…, delete_diet_note(), delete_lab_result(), get_lab_trend(), get_prescription(), list_care_actions() (+62 more)
+Nodes (70): build_export(), AsyncSession, Medication, delete_diet_note(), delete_lab_result(), get_lab_trend(), get_prescription(), list_care_actions() (+62 more)
 
 ### Community 37 - "CLAUDE.md"
 Cohesion: 0.18
@@ -365,9 +367,9 @@ Nodes (11): 10. Deployment, 1. System overview, 2. Repository layout, 3.1 Ports 
 Cohesion: 0.30
 Nodes (23): signup(), code_for(), login(), new_client(), AsyncClient, Account security (ADR-029): two-step verification, active sessions, password…, test_a_code_cannot_be_used_twice(), test_cannot_revoke_someone_elses_session() (+15 more)
 
-### Community 41 - "demo/service.py"
-Cohesion: 0.10
-Nodes (49): create_demo_account(), _ingest(), _page_texts(), purge_expired_demo_accounts(), AsyncSession, date, Demo accounts: every "Try the demo" click gets an isolated, synthetic, short-…, A fictional family member who added the demo user to her care circle as a… (+41 more)
+### Community 41 - "errors.py"
+Cohesion: 0.07
+Nodes (38): AppError, Conflict, install_error_handlers(), PayloadTooLarge, _problem(), Any, Exception, FastAPI (+30 more)
 
 ### Community 42 - "MedSpace"
 Cohesion: 0.12
@@ -375,15 +377,15 @@ Nodes (16): Architecture at a glance, Deploy, Enable Google sign-in, Calendar & 
 
 ### Community 43 - "db.py"
 Cohesion: 0.08
-Nodes (55): Base, IdMixin, Database engine, session factory and declarative base., TimestampMixin, Import every module's ORM models so `Base.metadata` is complete (Alembic,…, ChatThread, DocumentChunk, A page-aware slice of a document, embedded for semantic search and indexed for… (+47 more)
+Nodes (51): Base, IdMixin, UUID, Database engine, session factory and declarative base., TimestampMixin, Import every module's ORM models so `Base.metadata` is complete (Alembic,…, ChatThread, DocumentChunk (+43 more)
 
 ### Community 45 - "test_auth.py"
 Cohesion: 0.21
 Nodes (17): AsyncClient, test_audit_trail_lists_own_events(), test_demo_login_creates_isolated_demo_user(), test_health_supports_head(), test_login_is_rate_limited(), test_login_wrong_password_is_generic(), test_logout_revokes_session(), test_me_requires_auth() (+9 more)
 
 ### Community 46 - "Deploying MedSpace"
-Cohesion: 0.29
-Nodes (7): 1. Database: Supabase (or any always-on Postgres 15+ with pgvector), 2. Object storage: Cloudflare R2 (or AWS S3), 3. API: one container, 4. Web: static build with an `/api` rewrite, 5. Google OAuth, Checklist, Deploying MedSpace
+Cohesion: 0.25
+Nodes (8): 1. Database: Supabase (or any always-on Postgres 15+ with pgvector), 2. Object storage: Cloudflare R2 (or AWS S3), 3. API: one container, 4. Web: static build with an `/api` rewrite, 5. Google OAuth, Checklist, Current deployment, Deploying MedSpace
 
 ### Community 47 - "AuthForms.jsx"
 Cohesion: 0.18
@@ -397,9 +399,9 @@ Nodes (4): recordKeys, useInvalidateRecords(), useUpdateCareAction(), useUpdateM
 Cohesion: 0.22
 Nodes (9): scripts, build, dev, e2e, format, lint, preview, test (+1 more)
 
-### Community 51 - "build_pdf"
-Cohesion: 0.19
-Nodes (30): build_pdf(), drain(), Background job dispatch. `QUEUE_MODE=arq`: jobs go to Redis and run in the…, Wait for all inline jobs (used by tests)., AsyncClient, Diet notes from your care team: extracted, reviewed, confirmed, never invented., test_demo_has_diet_notes_and_they_are_private(), test_reconfirming_replaces_notes_and_delete_works() (+22 more)
+### Community 51 - "drain"
+Cohesion: 0.14
+Nodes (41): build_pdf(), build_scan_png(), _diabetes(), issued(), LabReport, _lipids(), date, Synthetic prescriptions rendered as real PDFs (and one scan-style PNG). Every… (+33 more)
 
 ### Community 52 - "SupplyDialog.jsx"
 Cohesion: 0.25
@@ -418,24 +420,28 @@ Cohesion: 0.25
 Nodes (18): GoogleIdentity, google_sign_in(), AsyncClient, MonkeyPatch, Response, query(), Optional "Continue with Google" sign-in (simulation mode), ADR-017., Run start -> (simulated consent) -> callback. Returns the final redirect. (+10 more)
 
 ### Community 57 - "deps.py"
-Cohesion: 0.08
-Nodes (42): get_session(), AsyncSession, _authenticated(), _extract_token(), get_current_user(), get_optional_user(), AsyncSession, Request (+34 more)
+Cohesion: 0.25
+Nodes (14): get_session(), AsyncSession, _authenticated(), _extract_token(), get_current_user(), get_optional_user(), AsyncSession, Request (+6 more)
 
 ### Community 58 - "helpers.js"
 Cohesion: 0.14
 Nodes (10): RFC-6238, here, SAMPLE, confirmEmail(), emailLink(), expectAccessible(), signUp(), startDemo() (+2 more)
 
-### Community 60 - "sharing/service.py"
-Cohesion: 0.24
-Nodes (20): NotFound, A scoped, expiring, revocable read-only link (ADR-010). Only the token's hash…, ShareLink, ShareLinkItem, create(), link_status(), list_links(), open_public() (+12 more)
+### Community 60 - "record"
+Cohesion: 0.14
+Nodes (31): Forbidden, list_for_user(), Any, AsyncSession, Request, UUID, Stage an audit row in the caller's transaction (committed with the business…, record() (+23 more)
 
 ### Community 61 - "4. Core flows"
 Cohesion: 0.25
 Nodes (8): 4.1 Upload → Extract → Review → Organize → Act, 4.2.1 Evaluation, 4.2 Extraction pipeline details, 4.3 Data lifecycle, 4.4 Ask MedSpace (RAG), 4.5 Secure sharing, 4.6 Google integration, 4. Core flows
 
 ### Community 63 - "identity/router.py"
-Cohesion: 0.07
-Nodes (80): RateLimited, check(), Count one hit for `scope` + `key` and decide. Fails open if the store is…, demo_login(), DbSession, post, Request, Response (+72 more)
+Cohesion: 0.08
+Nodes (75): check(), Count one hit for `scope` + `key` and decide. Fails open if the store is…, decode_purpose_token(), clear_auth_cookies(), Response, Set access, refresh and CSRF cookies. Returns the CSRF token (also echoed in…, set_auth_cookies(), cancel_email_change() (+67 more)
+
+### Community 64 - "README.md"
+Cohesion: 0.22
+Nodes (6): Extraction evaluation, Method, Metrics, Results: offline extractor, Running it, What the evaluation found, and what changed
 
 ### Community 65 - "package.json"
 Cohesion: 0.40
@@ -469,25 +475,25 @@ Nodes (3): systemTheme(), ThemeContext, ThemeProvider()
 Cohesion: 0.50
 Nodes (3): DocumentReview(), ADR-0031, recordLabel()
 
-### Community 115 - "worker.py"
-Cohesion: 0.09
-Nodes (16): Import every module's jobs so the registry in `app.shared.queue.JOBS` is…, Embedder, FastEmbedEmbedder, get_embedder(), Protocol, Embedding port (ADR-004): local fastembed in production, a deterministic hasher…, BAAI/bge-small-en-v1.5 via ONNX on CPU. The model downloads once (~130 MB) and…, Load (and on first run, download) the embedding model before the first request… (+8 more)
+### Community 115 - "audit/router.py"
+Cohesion: 0.36
+Nodes (7): list_audit(), AsyncSession, CurrentUser, get, AuditLogOut, AuditPage, BaseModel
 
 ### Community 117 - "csrf"
 Cohesion: 0.54
 Nodes (13): csrf(), acting(), _invite(), _owner(), person(), AsyncClient, Care circle: invitations bound to an email, role-limited access to someone…, test_demo_accounts_help_a_family_member() (+5 more)
 
-### Community 119 - "files.py"
-Cohesion: 0.15
-Nodes (15): image_size(), inspect(), Inspection, _matrix(), Exception, Rect, File inspection: type sniffing by magic bytes, PDF text extraction and page…, PNG bytes per page for the vision model. Images are passed through (re-encoded… (+7 more)
+### Community 119 - "install.js"
+Cohesion: 0.33
+Nodes (3): emit(), listeners, promptInstall()
 
 ### Community 127 - "test_integrations.py"
 Cohesion: 0.30
 Nodes (15): decrypt(), dose_event(), _rrule(), bucket_for(), connect(), first_prescription(), AsyncClient, Google Calendar/Tasks sync against the in-memory simulation… (+7 more)
 
 ### Community 128 - "conftest.py"
-Cohesion: 0.29
-Nodes (10): reset_rate_limits(), auth_client(), _clean_tables(), client(), mailbox(), AsyncClient, fixture, Test harness: real Postgres (pgvector), fakes for every external service. (+2 more)
+Cohesion: 0.21
+Nodes (14): reset_rate_limits(), auth_client(), _clean_tables(), client(), AsyncClient, fixture, Test harness: real Postgres (pgvector), fakes for every external service., _schema() (+6 more)
 
 ### Community 135 - "DoseStrip.jsx"
 Cohesion: 0.29
@@ -509,9 +515,9 @@ Nodes (25): ADR-0029, securityKeys, useCancelEmailChange(), useChangePassword(),
 Cohesion: 0.44
 Nodes (7): pushKeys, usePushConfig(), usePushSettings(), useSavePushSettings(), useSendTest(), LEADS, ReminderSettings()
 
-### Community 142 - "test_authorization_sweep.py"
-Cohesion: 0.52
-Nodes (6): fill(), owner_ids(), AsyncClient, Every route that takes an ID refuses another account's IDs, and leaves that…, snapshot(), test_no_route_accepts_another_accounts_ids()
+### Community 142 - "export.py"
+Cohesion: 0.12
+Nodes (9): Import every module's jobs so the registry in `app.shared.queue.JOBS` is…, index_demo_documents(), Demo background jobs., Index a new demo account's documents for Ask MedSpace. Embedding is most of the…, Background job: process an uploaded document end to end., Account data export: one JSON document with every record the user owns.…, job(), Register a coroutine as a background job under its function name. (+1 more)
 
 ### Community 143 - "corpus.py"
 Cohesion: 0.24
@@ -523,11 +529,11 @@ Nodes (15): Housekeeping, Keep the data safe, Launch guide: the steps only you c
 
 ### Community 145 - "google.py"
 Cohesion: 0.10
-Nodes (12): client_for_mode(), get_google(), GoogleClient, _live(), live_configured(), Any, Protocol, Google OAuth + Calendar v3 + Tasks v1 behind a small port, with an in-memory… (+4 more)
+Nodes (14): client_for_mode(), client_for_user(), get_google(), GoogleClient, _live(), live_configured(), Any, Protocol (+6 more)
 
 ### Community 146 - "circle/router.py"
-Cohesion: 0.15
-Nodes (28): accept(), get_circle(), invite(), preview(), BackgroundTasks, CurrentUser, DbSession, delete (+20 more)
+Cohesion: 0.13
+Nodes (31): accept(), get_circle(), invite(), preview(), BackgroundTasks, CurrentUser, DbSession, delete (+23 more)
 
 ### Community 147 - "circle/api.js"
 Cohesion: 0.18
@@ -541,53 +547,37 @@ Nodes (6): currentSubscription(), ADR-0028, keyToBytes(), subscribePush(), swReg
 Cohesion: 0.20
 Nodes (3): DOT, RANGES, WEEKDAYS
 
-### Community 150 - "evidence.py"
-Cohesion: 0.16
-Nodes (10): _clean(), _date_variants(), _Locator, date, Rect, Where on the page each extracted value is printed (ADR-031). Given the original…, First variant found, preferring the hinted page (or the anchor's page and…, The value, then shorter word prefixes (a long note can wrap or end differently). (+2 more)
+### Community 150 - "locate"
+Cohesion: 0.11
+Nodes (21): _clean(), _date_variants(), locate(), _Locator, date, Rect, Where on the page each extracted value is printed (ADR-031). Given the original…, First variant found, preferring the hinted page (or the anchor's page and… (+13 more)
 
-### Community 151 - "test_timeline_dashboard.py"
-Cohesion: 0.56
-Nodes (8): demo(), AsyncClient, test_dashboard_shows_today(), test_deleting_account_removes_files(), test_demo_account_is_seeded_with_history(), test_export_contains_records_but_no_secrets(), test_timeline_orders_and_filters(), test_timeline_pagination_never_splits_a_day()
+### Community 151 - "LocalStorage"
+Cohesion: 0.36
+Nodes (3): LocalStorage, Stores objects under a directory. Used for tests and keyless local runs., Path
 
-### Community 152 - "main.py"
-Cohesion: 0.09
-Nodes (29): Application settings, loaded from environment variables (and `.env` in…, ServiceUnavailable, configure_logging(), Logging configuration., BodySizeLimitMiddleware, _BodyTooLarge, CSRFMiddleware, BaseHTTPMiddleware (+21 more)
+### Community 152 - "get_settings"
+Cohesion: 0.07
+Nodes (45): get_settings(), Application settings, loaded from environment variables (and `.env` in…, configure_logging(), Logging configuration., BodySizeLimitMiddleware, _BodyTooLarge, CSRFMiddleware, BaseHTTPMiddleware (+37 more)
 
 ### Community 153 - "doses/api.js"
 Cohesion: 0.38
 Nodes (4): doseKeys, patchDashboard(), patchHistory(), useSetDose()
 
-### Community 155 - "test_sharing.py"
-Cohesion: 0.53
-Nodes (10): anon(), AsyncClient, setup_share(), test_cannot_share_someone_elses_records(), test_create_returns_token_once_and_stores_only_hash(), test_expired_links_are_gone(), test_public_view_returns_scoped_bundle_and_audits(), test_revoked_links_stop_working_immediately() (+2 more)
-
 ### Community 156 - "normalize_frequency"
-Cohesion: 0.22
-Nodes (14): _clean(), _hm_to_min(), _min_to_hm(), normalize_frequency(), Deterministic normalization of prescription shorthand (ADR-006). The LLM copies…, Schedule, _times_for(), parametrize (+6 more)
+Cohesion: 0.20
+Nodes (16): _clean(), _hm_to_min(), _min_to_hm(), normalize_frequency(), parse_duration_days(), Deterministic normalization of prescription shorthand (ADR-006). The LLM copies…, x 7 days' -> 7, '2/52' -> 14, '3/12' -> 90, '1 month' -> 30. Ongoing or unknown…, Schedule (+8 more)
 
-### Community 157 - "Extraction evaluation"
-Cohesion: 0.33
-Nodes (6): Extraction evaluation, Method, Metrics, Results: offline extractor, Running it, What the evaluation found, and what changed
-
-### Community 158 - "notify/service.py"
-Cohesion: 0.32
-Nodes (12): app_url(), _html(), Transactional email (ADR-030): what MedSpace says, and to whom. Delivery is the…, To the address being replaced: once when a change is asked for, once when it…, _send(), send_circle_invite(), send_email_change_link(), send_email_change_notice() (+4 more)
-
-### Community 160 - "llm.py"
-Cohesion: 0.27
-Nodes (6): GroqProvider, LLMError, _parse_json(), Any, Exception, LLM port and the Groq adapter (ADR-003). When `LLM_PROVIDER=fake` (the default)…
+### Community 157 - "extraction/router.py"
+Cohesion: 0.30
+Nodes (13): confirm_extraction(), discard_extraction(), get_evidence(), get_latest_extraction(), CurrentUser, DbSession, get, post (+5 more)
 
 ### Community 161 - "offline.js"
 Cohesion: 0.24
 Nodes (13): clearOfflineCopy(), currentUserId(), emit(), isOfflineEnabled(), ADR-0025, listeners, MAX_AGE_MS, PERSISTED (+5 more)
 
 ### Community 162 - "test_ratelimit.py"
-Cohesion: 0.22
-Nodes (14): fake_clock(), _login(), AsyncClient, fixture, Rate limiting: sliding windows, honest client IPs, per-user and per-account…, settings(), test_baseline_budget_covers_every_route(), test_headers_scale_and_disable() (+6 more)
-
-### Community 166 - "LocalStorage"
-Cohesion: 0.36
-Nodes (3): LocalStorage, Stores objects under a directory. Used for tests and keyless local runs., Path
+Cohesion: 0.16
+Nodes (16): MemoryStore, Single-process store (tests, local development). `clock` is injectable for…, fake_clock(), _login(), AsyncClient, fixture, Rate limiting: sliding windows, honest client IPs, per-user and per-account…, settings() (+8 more)
 
 ### Community 168 - "hooks.js"
 Cohesion: 0.50
@@ -597,77 +587,85 @@ Nodes (6): DeviceSettings(), useInstallPrompt(), useOnline(), usePendingDoseTick
 Cohesion: 0.28
 Nodes (3): newId(), Prompts(), Questions()
 
-### Community 170 - "install.js"
-Cohesion: 0.33
-Nodes (3): emit(), listeners, promptInstall()
+### Community 170 - "test_assistant.py"
+Cohesion: 0.42
+Nodes (12): ask(), new_thread(), AsyncClient, Consume the SSE stream and return {sources, answer, done, events}., test_answers_are_grounded_and_cited(), test_document_text_is_searchable(), test_lists_current_medications(), test_refuses_medical_advice() (+4 more)
 
 ### Community 172 - "main.jsx"
 Cohesion: 0.21
 Nodes (5): Providers(), router, ApiError, ADR-0025, queryClient
 
 ### Community 177 - "totp.py"
-Cohesion: 0.20
-Nodes (14): code_at(), current_step(), _key(), new_recovery_codes(), new_secret(), normalize_recovery_code(), Time-based one-time passwords (RFC 6238, the format authenticator apps use).…, 160 random bits as unpadded base32, what authenticator apps expect. (+6 more)
+Cohesion: 0.18
+Nodes (15): code_at(), current_step(), _key(), new_recovery_codes(), new_secret(), normalize_recovery_code(), provisioning_uri(), Time-based one-time passwords (RFC 6238, the format authenticator apps use).… (+7 more)
+
+### Community 178 - "env.py"
+Cohesion: 0.70
+Nodes (4): _do_run(), run_migrations_offline(), run_migrations_online(), _url()
 
 ### Community 183 - "labs.py"
 Cohesion: 0.15
 Nodes (18): analyte_key(), flag_against(), parse_range(), parse_value(), printed_flag(), Deterministic handling of lab results (ADR-020). Values and reference ranges…, H' / 'High' / 'L*' printed next to a value on the report., The printed range wins when it parses (it stays correct if the value is edited… (+10 more)
 
-### Community 192 - "test_security_hardening.py"
-Cohesion: 0.08
-Nodes (27): field_validator, Refuse to start in production with settings that would quietly be unsafe., Key for encrypting OAuth tokens at rest. Derived from JWT secret outside prod., Settings, test_production_requires_google_credentials_when_google_is_on(), png_header(), AsyncClient, parametrize (+19 more)
+### Community 191 - "test_sharing.py"
+Cohesion: 0.53
+Nodes (10): anon(), AsyncClient, setup_share(), test_cannot_share_someone_elses_records(), test_create_returns_token_once_and_stores_only_hash(), test_expired_links_are_gone(), test_public_view_returns_scoped_bundle_and_audits(), test_revoked_links_stop_working_immediately() (+2 more)
 
-### Community 199 - "test_assistant.py"
-Cohesion: 0.42
-Nodes (12): ask(), new_thread(), AsyncClient, Consume the SSE stream and return {sources, answer, done, events}., test_answers_are_grounded_and_cited(), test_document_text_is_searchable(), test_lists_current_medications(), test_refuses_medical_advice() (+4 more)
+### Community 192 - "test_security_hardening.py"
+Cohesion: 0.05
+Nodes (45): field_validator, Refuse to start in production with settings that would quietly be unsafe., Key for encrypting OAuth tokens at rest. Derived from JWT secret outside prod., Settings, image_size(), inspect(), Inspection, _matrix() (+37 more)
+
+### Community 197 - "test_timeline_dashboard.py"
+Cohesion: 0.56
+Nodes (8): demo(), AsyncClient, test_dashboard_shows_today(), test_deleting_account_removes_files(), test_demo_account_is_seeded_with_history(), test_export_contains_records_but_no_secrets(), test_timeline_orders_and_filters(), test_timeline_pagination_never_splits_a_day()
 
 ### Community 200 - "test_doses.py"
 Cohesion: 0.41
 Nodes (12): log(), _medicine(), AsyncClient, Response, Dose tracking: taken/skipped logs per scheduled dose, history that never…, Confirm a prescription with one twice-daily medicine that started `days_ago`…, test_dose_logs_are_private(), test_history_counts_without_assuming_misses() (+4 more)
 
 ### Community 202 - "extraction/service.py"
-Cohesion: 0.12
-Nodes (30): ExtractionStatus, StrEnum, _nullable(), Any, Prompts and the strict JSON schema for document extraction., repair_prompt(), text_user_prompt(), vision_user_prompt() (+22 more)
+Cohesion: 0.07
+Nodes (50): DocumentKind, DocumentStatus, StrEnum, set_status(), process_document(), Extraction, One AI reading of a document. Versioned; only a confirmed version becomes…, _nullable() (+42 more)
 
-### Community 209 - "safe_path"
-Cohesion: 0.33
-Nodes (6): Request, Response, The request path with secret tokens replaced, for logs., safe_path(), test_token_paths_are_redacted(), RequestResponseEndpoint
+### Community 209 - ".dispatch"
+Cohesion: 0.60
+Nodes (3): Request, Response, RequestResponseEndpoint
 
 ### Community 230 - "assistant/service.py"
+Cohesion: 0.06
+Nodes (58): ChatMessage, ask(), AskIn, create_thread(), delete_thread(), get_thread(), list_threads(), MessageOut (+50 more)
+
+### Community 231 - "identity/service.py"
+Cohesion: 0.11
+Nodes (26): Time-ordered UUID (RFC 9562 v7) so primary keys index and sort well., uuid7(), create_access_token(), create_purpose_token(), decode_access_claims(), decode_access_token(), _fernet(), needs_rehash() (+18 more)
+
+### Community 232 - "test_email_change.py"
+Cohesion: 0.40
+Nodes (14): change(), change_token(), confirm(), AsyncClient, Response, Changing the account email (ADR-033): proof, confirmation by the new inbox,…, test_addresses_already_in_use_and_unchanged_ones_are_refused(), test_change_happens_only_when_the_new_inbox_confirms() (+6 more)
+
+### Community 235 - "notify/service.py"
 Cohesion: 0.07
-Nodes (53): ChatMessage, ask(), AskIn, create_thread(), delete_thread(), get_thread(), list_threads(), MessageOut (+45 more)
-
-### Community 231 - "get_settings"
-Cohesion: 0.16
-Nodes (19): get_settings(), create_access_token(), create_purpose_token(), decode_access_claims(), decode_access_token(), _fernet(), needs_rehash(), UUID (+11 more)
-
-### Community 232 - "FakeMailer"
-Cohesion: 0.23
-Nodes (24): FakeMailer, Keeps the last messages in memory (the dev outbox and tests read them)., confirm_email(), link_token(), The token from the first `<path>?token=...` link in an email body., Follow the verification link from the outbox, as the address owner would., change(), change_token() (+16 more)
-
-### Community 235 - "test_email_recovery.py"
-Cohesion: 0.09
-Nodes (25): outbox(), get, Dev-only outbox: read simulated emails (local testing and e2e). Never mounted…, BrevoMailer, get_mailer(), Mailer, Message, AsyncClient (+17 more)
+Nodes (37): outbox(), get, app_url(), _html(), Transactional email (ADR-030): what MedSpace says, and to whom. Delivery is the…, To the address being replaced: once when a change is asked for, once when it…, _send(), send_circle_invite() (+29 more)
 
 ## Knowledge Gaps
-- **286 isolated node(s):** `WorkerSettings`, `medspace-api`, `here`, `SAMPLE`, `here` (+281 more)
+- **287 isolated node(s):** `WorkerSettings`, `medspace-api`, `here`, `SAMPLE`, `here` (+282 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **45 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **43 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `get_settings()` connect `get_settings` to `record`, `reminders/router.py`, `S3Storage`, `User`, `reminders/service.py`, `integrations/router.py`, `google.py`, `test_google_live.py`, `documents/router.py`, `ratelimit.py`, `main.py`, `test_timeline_dashboard.py`, `notify/service.py`, `utcnow`, `llm.py`, `test_ratelimit.py`, `demo/service.py`, `db.py`, `build_pdf`, `sharing/service.py`, `identity/router.py`, `test_security_hardening.py`, `extraction/service.py`, `safe_path`, `assistant/service.py`, `test_email_recovery.py`, `worker.py`?**
+- **Why does `get_settings()` connect `get_settings` to `ratelimit.py`, `reminders/service.py`, `doses/service.py`, `integrations/router.py`, `sharing/service.py`, `google.py`, `test_google_live.py`, `documents/router.py`, `demo/service.py`, `test_ratelimit.py`, `errors.py`, `db.py`, `env.py`, `record`, `identity/router.py`, `test_security_hardening.py`, `test_timeline_dashboard.py`, `extraction/service.py`, `.dispatch`, `assistant/service.py`, `identity/service.py`, `notify/service.py`?**
   _High betweenness centrality (0.065) - this node is a cross-community bridge._
-- **Why does `User` connect `User` to `record`, `reminders/service.py`, `doses/service.py`, `integrations/router.py`, `integrations/service.py`, `circle/router.py`, `test_google_live.py`, `visits/service.py`, `utcnow`, `supply/service.py`, `records/service.py`, `signup`, `demo/service.py`, `db.py`, `test_google_signin.py`, `deps.py`, `sharing/service.py`, `extraction/service.py`, `assistant/service.py`, `FakeMailer`, `test_email_recovery.py`?**
-  _High betweenness centrality (0.054) - this node is a cross-community bridge._
-- **Why does `csrf()` connect `csrf` to `conftest.py`, `test_authorization_sweep.py`, `test_google_live.py`, `test_visits.py`, `test_timeline_dashboard.py`, `test_labs.py`, `AsyncClient`, `test_sharing.py`, `test_caregiver_reminders.py`, `test_evidence.py`, `test_ratelimit.py`, `supply/service.py`, `signup`, `test_auth.py`, `build_pdf`, `test_google_signin.py`, `test_security_hardening.py`, `test_assistant.py`, `test_doses.py`, `FakeMailer`, `test_email_recovery.py`, `test_integrations.py`?**
-  _High betweenness centrality (0.024) - this node is a cross-community bridge._
+- **Why does `User` connect `User` to `reminders/service.py`, `doses/service.py`, `export.py`, `integrations/service.py`, `sharing/service.py`, `circle/router.py`, `test_google_live.py`, `visits/service.py`, `test_email_recovery.py`, `demo/service.py`, `utcnow`, `supply/service.py`, `records/service.py`, `signup`, `db.py`, `test_google_signin.py`, `deps.py`, `record`, `extraction/service.py`, `assistant/service.py`, `identity/service.py`, `test_email_change.py`?**
+  _High betweenness centrality (0.045) - this node is a cross-community bridge._
+- **Why does `csrf()` connect `csrf` to `conftest.py`, `test_google_live.py`, `test_visits.py`, `test_labs.py`, `test_email_recovery.py`, `test_caregiver_reminders.py`, `test_ratelimit.py`, `supply/service.py`, `signup`, `test_assistant.py`, `test_auth.py`, `drain`, `test_google_signin.py`, `test_sharing.py`, `test_security_hardening.py`, `test_timeline_dashboard.py`, `test_doses.py`, `test_email_change.py`, `test_integrations.py`?**
+  _High betweenness centrality (0.027) - this node is a cross-community bridge._
 - **What connects `WorkerSettings`, `medspace-api`, `here` to the rest of the system?**
-  _286 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `test_eval.py` be split into smaller, more focused modules?**
-  _Cohesion score 0.1036036036036036 - nodes in this community are weakly interconnected._
-- **Should `record` be split into smaller, more focused modules?**
-  _Cohesion score 0.12612612612612611 - nodes in this community are weakly interconnected._
-- **Should `reminders/router.py` be split into smaller, more focused modules?**
-  _Cohesion score 0.07402597402597402 - nodes in this community are weakly interconnected._
+  _287 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `extract` be split into smaller, more focused modules?**
+  _Cohesion score 0.11764705882352941 - nodes in this community are weakly interconnected._
+- **Should `ratelimit.py` be split into smaller, more focused modules?**
+  _Cohesion score 0.11396011396011396 - nodes in this community are weakly interconnected._
+- **Should `reminders/service.py` be split into smaller, more focused modules?**
+  _Cohesion score 0.05640203154236835 - nodes in this community are weakly interconnected._

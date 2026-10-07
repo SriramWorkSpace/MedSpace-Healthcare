@@ -12,9 +12,9 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "backend/app/core/config.py": {
-    "mtime": 1791369641.8566713,
-    "seen": 1791369846.4922032,
-    "ast_hash": "1f0f0267b4747fe022b0cc120ab03bf6",
+    "mtime": 1791386291.3954241,
+    "seen": 1791386633.3482833,
+    "ast_hash": "bfc5f19c4a16078ad36c4231ef83796c",
     "semantic_hash": ""
   },
   "backend/app/core/db.py": {
@@ -60,10 +60,10 @@
     "semantic_hash": ""
   },
   "backend/app/jobs.py": {
-    "mtime": 1790879361.860924,
-    "seen": 1790880449.7581851,
-    "ast_hash": "c5ce9fba63b0d0d5b13010eace155c53",
-    "semantic_hash": "c5ce9fba63b0d0d5b13010eace155c53"
+    "mtime": 1791387641.163614,
+    "seen": 1791389300.9890623,
+    "ast_hash": "c864f47a17ffa2a4fb95cc7f02776901",
+    "semantic_hash": ""
   },
   "backend/app/main.py": {
     "mtime": 1791316755.1450331,
@@ -120,9 +120,9 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "backend/app/modules/demo/router.py": {
-    "mtime": 1791316745.5183318,
-    "seen": 1791318253.0918732,
-    "ast_hash": "1802c48a413c85b43c643aa805fd4d26",
+    "mtime": 1791387653.1823356,
+    "seen": 1791389300.9891932,
+    "ast_hash": "f5a42c9b60e82a193c65fe345b9f2c6c",
     "semantic_hash": ""
   },
   "backend/app/modules/demo/samples.py": {
@@ -132,9 +132,9 @@
     "semantic_hash": ""
   },
   "backend/app/modules/demo/service.py": {
-    "mtime": 1791316745.5889435,
-    "seen": 1791318253.091879,
-    "ast_hash": "ecbc5839855e82f2db485d612f968517",
+    "mtime": 1791387653.3421495,
+    "seen": 1791389300.9892094,
+    "ast_hash": "c308a92de800509299702c392ecbe595",
     "semantic_hash": ""
   },
   "backend/app/modules/documents/__init__.py": {
@@ -373,7 +373,7 @@
   },
   "backend/scripts/init-db.sql": {
     "mtime": 1790877337.95084,
-    "seen": 1791375331.0849898,
+    "seen": 1791386633.348851,
     "ast_hash": "",
     "semantic_hash": ""
   },
@@ -384,9 +384,9 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "backend/tests/conftest.py": {
-    "mtime": 1791136403.5627627,
-    "seen": 1791137282.0667543,
-    "ast_hash": "8d3029da2aec5e87d72b5b3c53482af0",
+    "mtime": 1791388123.6264267,
+    "seen": 1791389300.989627,
+    "ast_hash": "a6da347cd79902318a86b06bba1dbb0e",
     "semantic_hash": ""
   },
   "backend/tests/test_auth.py": {
@@ -906,9 +906,9 @@
     "semantic_hash": ""
   },
   "docs/plan.md": {
-    "mtime": 1791374970.5592172,
-    "seen": 1791375331.086112,
-    "ast_hash": "b36f2faac416f6e9cadfae6d16b1b8b5",
+    "mtime": 1791389287.9896293,
+    "seen": 1791389300.9904268,
+    "ast_hash": "c57fed632915baa89c23f04eb4a57e05",
     "semantic_hash": ""
   },
   "backend/app/modules/assistant/__init__.py": {
@@ -954,9 +954,9 @@
     "semantic_hash": ""
   },
   "backend/app/modules/integrations/router.py": {
-    "mtime": 1791355507.510888,
-    "seen": 1791356005.3691838,
-    "ast_hash": "44d5940ad139e75bce7ab02163d9e4fc",
+    "mtime": 1791387653.3421495,
+    "seen": 1791389300.9893374,
+    "ast_hash": "6ac4771e605a9252eb4caacc0bd85dc9",
     "semantic_hash": ""
   },
   "backend/app/modules/integrations/service.py": {
@@ -1020,10 +1020,10 @@
     "semantic_hash": "0f0e2156da16da25c4d45d25aab8c9d8"
   },
   "backend/tests/test_assistant.py": {
-    "mtime": 1790881292.2009535,
-    "seen": 1790918922.5478835,
-    "ast_hash": "c230d1acd59c9cc93132af34e3d5eccd",
-    "semantic_hash": "c230d1acd59c9cc93132af34e3d5eccd"
+    "mtime": 1791388123.6270247,
+    "seen": 1791389300.9896355,
+    "ast_hash": "83c56dff4a4b5896309f48200dcf2bb6",
+    "semantic_hash": ""
   },
   "backend/tests/test_integrations.py": {
     "mtime": 1790931861.3294928,
@@ -1128,9 +1128,9 @@
     "semantic_hash": "ccd9cbc53e002411c7218a813391e617"
   },
   "docs/deployment.md": {
-    "mtime": 1791374970.5581303,
-    "seen": 1791375331.0860987,
-    "ast_hash": "3cdc4f91c1edbcca4d44c66a889272c0",
+    "mtime": 1791389287.9901378,
+    "seen": 1791389300.990418,
+    "ast_hash": "18be16e72e6dfc13c0f8b2eb6cf34209",
     "semantic_hash": ""
   },
   "backend/app/modules/extraction/labs.py": {
@@ -1200,9 +1200,9 @@
     "semantic_hash": ""
   },
   "backend/tests/test_search.py": {
-    "mtime": 1790937931.5493276,
-    "seen": 1790942913.4845157,
-    "ast_hash": "43ae73f14010a94e8ac7ee0b88a1d489",
+    "mtime": 1791388123.6275377,
+    "seen": 1791389300.989738,
+    "ast_hash": "ad62b1d2ac6cecee6ebb31cb4fc42d5c",
     "semantic_hash": ""
   },
   "frontend/e2e/labs.spec.js": {
@@ -1663,7 +1663,7 @@
   },
   "backend/app/eval/thresholds.json": {
     "mtime": 1790965200.822874,
-    "seen": 1791375331.0844862,
+    "seen": 1791386633.348346,
     "ast_hash": "",
     "semantic_hash": ""
   },
@@ -2076,9 +2076,9 @@
     "semantic_hash": ""
   },
   "docs/launch-guide.md": {
-    "mtime": 1791374970.5408692,
-    "seen": 1791375331.086108,
-    "ast_hash": "9bd0a1fbfef4b18fde576c505f4d6bc2",
+    "mtime": 1791386343.9606657,
+    "seen": 1791386633.3497136,
+    "ast_hash": "a7423f072d11083c10c9b273a39ccf64",
     "semantic_hash": ""
   },
   "backend/tests/test_authorization_sweep.py": {
@@ -2088,9 +2088,9 @@
     "semantic_hash": ""
   },
   "backend/tests/test_security_hardening.py": {
-    "mtime": 1791365856.402637,
-    "seen": 1791365980.721548,
-    "ast_hash": "1d9353d1f1d499ccaaf08cc02eb8ed87",
+    "mtime": 1791388129.3756437,
+    "seen": 1791389300.9897418,
+    "ast_hash": "eaf3647ef18f4a97b1366bd3d6d90ed3",
     "semantic_hash": ""
   },
   "frontend/deploy/security-headers.js": {
@@ -2112,9 +2112,9 @@
     "semantic_hash": ""
   },
   "frontend/vercel.json": {
-    "mtime": 1791360004.5814512,
-    "seen": 1791360045.0168643,
-    "ast_hash": "42b42f9290c93458fce08528fdc0280a",
+    "mtime": 1791386263.1699343,
+    "seen": 1791386633.3496785,
+    "ast_hash": "48d9855a095cb19cea821a4d8e1372aa",
     "semantic_hash": ""
   },
   "backend/tests/test_google_live.py": {
@@ -2133,6 +2133,12 @@
     "mtime": 1791369657.5575926,
     "seen": 1791369846.4924932,
     "ast_hash": "ce910ea0ce31dc48e248b89235d44e65",
+    "semantic_hash": ""
+  },
+  "backend/app/modules/demo/jobs.py": {
+    "mtime": 1791387638.8584127,
+    "seen": 1791389300.9891412,
+    "ast_hash": "3e9cb576a44131c5d281ff9efd4b39d1",
     "semantic_hash": ""
   }
 }
