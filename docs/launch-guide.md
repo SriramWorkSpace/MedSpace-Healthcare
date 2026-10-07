@@ -8,8 +8,8 @@ Technical reference for every setting: [deployment.md](deployment.md).
 `your-project.vercel.app` address. The only card request you may see is Cloudflare asking for one
 to activate R2; usage stays inside the free allowance.
 
-**Region:** Render **Singapore** and Neon **AWS Asia Pacific (Singapore)**, side by side so the
-API and database talk quickly.
+**Region:** Render **Singapore** and Supabase **Southeast Asia (Singapore)**, side by side so
+the API and database talk quickly.
 
 **Never paste a password, key, client secret or connection string into a chat, an issue or a
 commit.** They go into a password manager and into Render's or Vercel's environment settings,
@@ -37,7 +37,7 @@ every account.
 |---|---|---|
 | [Vercel](https://vercel.com) | The web app | Hobby plan; let it access the MedSpace repo |
 | [Render](https://render.com) | The API container | Free web service, no card |
-| [Neon](https://neon.tech) | Postgres with pgvector | Create a project `medspace`, region **AWS Asia Pacific (Singapore)**, Postgres 17 |
+| [Supabase](https://supabase.com) | Postgres with pgvector | Free plan; the project itself is created in Part 3 |
 | [Cloudflare](https://dash.cloudflare.com) | R2 file storage | May ask for a card to activate R2; the free allowance covers this project |
 | A new Gmail account | Sending MedSpace's emails | e.g. `medspace.mail.yourname@gmail.com`; turn on 2-Step Verification (needed in Part 5) |
 | [Google Cloud](https://console.cloud.google.com) | Google Calendar and Tasks sign-in | Your own Google account; no billing account needed |
@@ -61,14 +61,31 @@ unreadable, changing the second breaks every device's reminder subscription.
 
 ---
 
-## Part 3. Database: Neon (10 minutes)
+## Part 3. Database: Supabase (15 minutes)
 
-1. In the `medspace` project (Singapore), open **Connect** and copy the connection string.
-2. Change its start from `postgresql://` to `postgresql+asyncpg://`, and replace everything
-   after `?` with `ssl=require` (the driver doesn't accept `sslmode` or `channel_binding`).
-   This is your `DATABASE_URL`.
-3. Nothing else: migrations run automatically when the API starts and create the `vector`
-   extension.
+Supabase's free Postgres stays on all month. (Neon's free plan counts active hours, and the
+every-minute reminder check would use them up mid-month; ADR-038.)
+
+1. **New project:** name `medspace`, region **Southeast Asia (Singapore)**.
+2. **Database password:** click **Generate a password**. If it contains anything other than
+   letters and digits, generate again (other characters would need escaping in the URL). Save
+   it in your password manager as `SUPABASE_DB_PASSWORD`.
+3. **Security options:** if asked which connections you'll use, choose **Only Connection
+   String**. MedSpace never uses Supabase's Data API, and leaving it on would expose the tables
+   over a REST endpoint. If you don't see the option, turn it off after creation:
+   **Project Settings**, **Data API**, untick **Enable Data API**.
+4. Create the project and wait until it's ready (a minute or two). Don't enable any extensions
+   in the dashboard; the API's migrations create `vector` themselves.
+5. **Connect** (top of the dashboard), **Connection String** tab, then pick **Session pooler**.
+   Not "Direct connection" (IPv6 only on the free plan, which Render can't reach) and not
+   "Transaction pooler" (it breaks the database driver). It looks like:
+   `postgresql://postgres.abcdefghijkl:[YOUR-PASSWORD]@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres`
+6. Turn it into your `DATABASE_URL`, in your password manager, not in a file:
+   - change the start to `postgresql+asyncpg://`
+   - replace `[YOUR-PASSWORD]` (brackets included) with the password from step 2
+   - add `?ssl=require` at the end
+
+   Result: `postgresql+asyncpg://postgres.abcdefghijkl:PASSWORD@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres?ssl=require`
 
 **Check:** the API's `/api/ready` returns `{"status": "ready"}` once it's deployed (Part 6).
 
@@ -112,13 +129,15 @@ email arrives. If it's in spam the first time, mark it "Not spam".
    ```bash
    sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT --no-proxy-headers --no-access-log"
    ```
-4. Health check path: `/api/ready`.
+4. Health check path: `/api/health` (not `/api/ready`: that one queries the database, and Render
+   calls the health check every few seconds).
 5. Environment variables (full list in [deployment.md](deployment.md)):
 
    | Variable | Value |
    |---|---|
    | `ENV` | `prod` |
    | `DATABASE_URL` | from Part 3 |
+   | `DB_POOL_SIZE`, `DB_MAX_OVERFLOW` | `5` and `5` (Supabase's free pooler allows about 15 connections) |
    | `JWT_SECRET`, `TOKEN_ENCRYPTION_KEY` | from Part 2 |
    | `COOKIE_SECURE` | `true` |
    | `FRONTEND_URL`, `PUBLIC_API_URL`, `CORS_ORIGINS` | your Vercel URL (Part 7), e.g. `https://medspace.vercel.app` |
@@ -262,9 +281,12 @@ most:
 
 ### Keep the data safe
 
-- **Backups:** Neon's free plan keeps only a short restore window. Every few weeks, export a
-  copy: `pg_dump "<your Neon URL, starting postgresql://>" -Fc -f medspace.dump`, and keep
-  it somewhere private.
+- **Backups:** Supabase's free plan has no backups you can restore. Every few weeks, export a
+  copy with Docker (match the image to your project's Postgres version, shown under **Project
+  Settings**, **Infrastructure**):
+  `docker run --rm -v "${PWD}:/out" postgres:17 pg_dump "<session pooler URL, starting postgresql://, with ?sslmode=require>" -Fc -f /out/medspace.dump`.
+  Run it outside the repo folder and keep the file somewhere private: it contains everyone's
+  data.
 - **Secrets:** if a secret ever leaks (pasted in a chat, committed by mistake), rotate it at
   the provider and on Render. A new `JWT_SECRET` signs everyone out; keep
   `TOKEN_ENCRYPTION_KEY` stable (see Part 2).

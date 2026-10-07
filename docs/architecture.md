@@ -371,4 +371,4 @@ Fakes (`LLM_PROVIDER=fake`, `EMBEDDING_PROVIDER=hash`, `GOOGLE_PROVIDER=fake`, l
 |---|---|
 | Local | `docker compose up` → `postgres (pgvector/pgvector:pg17)`, `redis`, `s3 (SeaweedFS)`, `api`, `worker`, `web` |
 | CI | GitHub Actions: ruff + pytest (Postgres service container), ESLint + Vitest + build, Docker image build |
-| Demo (suggested) | Web on Vercel/Netlify with an `/api` rewrite · API on Render/Fly (`QUEUE_MODE=inline` for a single free instance) · Postgres on Neon (pgvector) · Storage on Cloudflare R2. Step by step: [deployment.md](deployment.md) |
+| Demo (suggested) | Web on Vercel/Netlify with an `/api` rewrite · API on Render/Fly (`QUEUE_MODE=inline` for a single free instance) · Postgres on Supabase (pgvector, always on; ADR-038) · Storage on Cloudflare R2. Step by step: [deployment.md](deployment.md) |

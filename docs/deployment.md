@@ -8,16 +8,25 @@ first-party `SameSite=Lax` cookies.
 flowchart LR
   B[Browser] --> W["Static web host<br/>(Vercel / Netlify / nginx image)"]
   W -- "/api/* rewrite" --> A["API container<br/>(Render / Fly / Railway)"]
-  A --> P[("Neon Postgres<br/>+ pgvector")]
+  A --> P[("Supabase Postgres<br/>+ pgvector")]
   A --> S[("Cloudflare R2<br/>S3 API")]
   A -. optional .-> R[("Redis + worker<br/>QUEUE_MODE=arq")]
 ```
 
-## 1. Database: Neon (or any Postgres 15+ with pgvector)
+## 1. Database: Supabase (or any always-on Postgres 15+ with pgvector)
 
-1. Create a project and copy the connection string.
-2. Convert it for asyncpg: `postgresql+asyncpg://USER:PASSWORD@HOST/DB?ssl=require`.
-3. Migrations create the `vector` extension automatically (`alembic upgrade head`).
+The API queries the database every minute for due reminders (inline mode), so the database
+must not bill by active hours: Neon's free plan (100 CU-hours, about 400 hours a month at the
+smallest size) would run out mid-month (ADR-038). Supabase's free plan has no compute-hour
+limit and pauses only after 7 days without activity, which the reminder check prevents.
+
+1. Create a project; under connections choose **Only Connection String** (the Data API is
+   not used, and turning it off keeps the tables unreachable over Supabase's REST API).
+2. Copy the **Session pooler** connection string (IPv4; the direct connection is IPv6-only
+   on the free plan, and the transaction pooler breaks asyncpg's prepared statements).
+3. Convert it for asyncpg: `postgresql+asyncpg://postgres.REF:PASSWORD@aws-...pooler.supabase.com:5432/postgres?ssl=require`.
+4. Set `DB_POOL_SIZE=5` and `DB_MAX_OVERFLOW=5`: the free session pooler allows about 15 clients.
+5. Migrations create the `vector` extension automatically (`alembic upgrade head`).
 
 ## 2. Object storage: Cloudflare R2 (or AWS S3)
 
@@ -35,6 +44,8 @@ Build from `backend/Dockerfile`. Start command:
 sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT --no-proxy-headers --no-access-log"
 ```
 
+Health check path: `/api/health`, which doesn't touch the database. (`/api/ready` does, and a platform health check polling it every few seconds keeps the database busy for nothing.)
+
 `--no-access-log` matters: uvicorn's access log would write full URLs, including share-link and invitation tokens. MedSpace logs every request itself, with those tokens redacted.
 
 Environment (see `.env.example` for every option):
@@ -42,7 +53,8 @@ Environment (see `.env.example` for every option):
 | Variable | Value |
 |---|---|
 | `ENV` | `prod` (enables HSTS and turns off the dev email outbox) |
-| `DATABASE_URL` | Neon URL from step 1 |
+| `DATABASE_URL` | Supabase session pooler URL from step 1 |
+| `DB_POOL_SIZE` / `DB_MAX_OVERFLOW` | `5` / `5` (stay under the pooler's client limit) |
 | `JWT_SECRET` | `python -c "import secrets; print(secrets.token_urlsafe(48))"` |
 | `TOKEN_ENCRYPTION_KEY` | `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"` |
 | `COOKIE_SECURE` | `true` |

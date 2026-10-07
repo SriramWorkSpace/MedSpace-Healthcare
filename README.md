@@ -182,7 +182,7 @@ npx playwright install chromium && npm run e2e
 
 ### Deploy
 
-Step-by-step launch checklist (accounts, secrets, email, hosting): [docs/launch-guide.md](docs/launch-guide.md). See [docs/deployment.md](docs/deployment.md) for a free-tier setup (static web host with an `/api` rewrite, a single API instance, Neon Postgres with pgvector, Cloudflare R2).
+Step-by-step launch checklist (accounts, secrets, email, hosting): [docs/launch-guide.md](docs/launch-guide.md). See [docs/deployment.md](docs/deployment.md) for a free-tier setup (static web host with an `/api` rewrite, a single API instance, Supabase Postgres with pgvector, Cloudflare R2).
 
 ## Project structure
 

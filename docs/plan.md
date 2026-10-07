@@ -273,6 +273,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 
 ## Change log
 
+- **2026-10-07**: Hosted database moves from Neon to Supabase (ADR-038): the every-minute reminder check would use up Neon's free compute hours mid-month. Session pooler, Data API off, configurable connection pool (5 + 5 in production), and health checks on `/api/health` so they never touch the database.
+
 - **2026-10-07**: Least-privilege Google access (ADR-037): sign-in asks for identity only; connecting asks for `calendar.app.created` (a dedicated MedSpace calendar, nothing else) and `tasks`; token revocation moved out of the URL; a DEBUG-level test proves tokens, the client secret and authorization codes never reach logs or API responses.
 
 - **2026-10-07**: Google Calendar and Tasks run on real OAuth 2.0 in production (ADR-036): real accounts use live Google, demo accounts the simulation, each connection keeps its own client, production refuses Google without credentials, account deletion revokes the grant, and the UI notes when access is limited to test users. The production Google client gained HTTP-level tests. Launch guide rewritten for an all-free deployment in Singapore with Gmail for email.
