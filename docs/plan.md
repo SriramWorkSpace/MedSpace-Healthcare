@@ -273,6 +273,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 
 ## Change log
 
+- **2026-10-07**: Email through Brevo's HTTPS API (ADR-039): Render's free plan blocks SMTP ports, so Gmail SMTP can't work there. Storage creates its bucket only when it's missing, so least-privilege R2 tokens work.
+
 - **2026-10-07**: Hosted database moves from Neon to Supabase (ADR-038): the every-minute reminder check would use up Neon's free compute hours mid-month. Session pooler, Data API off, configurable connection pool (5 + 5 in production), and health checks on `/api/health` so they never touch the database.
 
 - **2026-10-07**: Least-privilege Google access (ADR-037): sign-in asks for identity only; connecting asks for `calendar.app.created` (a dedicated MedSpace calendar, nothing else) and `tasks`; token revocation moved out of the URL; a DEBUG-level test proves tokens, the client secret and authorization codes never reach logs or API responses.

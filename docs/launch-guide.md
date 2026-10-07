@@ -39,7 +39,8 @@ every account.
 | [Render](https://render.com) | The API container | Free web service, no card |
 | [Supabase](https://supabase.com) | Postgres with pgvector | Free plan; the project itself is created in Part 3 |
 | [Cloudflare](https://dash.cloudflare.com) | R2 file storage | May ask for a card to activate R2; the free allowance covers this project |
-| A new Gmail account | Sending MedSpace's emails | e.g. `medspace.mail.yourname@gmail.com`; turn on 2-Step Verification (needed in Part 5) |
+| A new Gmail account | The address MedSpace's emails come from | e.g. `medspace.mail.yourname@gmail.com`; turn on 2-Step Verification |
+| [Brevo](https://www.brevo.com) | Sending email over HTTPS | Free plan, 300 emails a day (Part 5) |
 | [Google Cloud](https://console.cloud.google.com) | Google Calendar and Tasks sign-in | Your own Google account; no billing account needed |
 | [Groq](https://console.groq.com) | AI extraction and Ask MedSpace | Free API key with rate limits |
 
@@ -116,21 +117,34 @@ Settings: `STORAGE_PROVIDER=s3`, `S3_ENDPOINT_URL`, `S3_ACCESS_KEY`, `S3_SECRET_
 
 ---
 
-## Part 5. Email through Gmail (10 minutes)
+## Part 5. Email through Brevo (15 minutes)
 
 Without email, nobody can confirm an address, reset a forgotten password or change their email.
-Gmail's SMTP server is free (about 500 emails a day) and reaches inboxes well.
+Render's free plan blocks outbound email ports (25, 465, 587), so MedSpace sends through Brevo's
+HTTPS API instead (port 443, free, 300 emails a day; ADR-039). The sender is your sending Gmail.
 
-1. Sign in to the new sending Gmail (Part 1). 2-Step Verification must be on.
-2. Open [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords), create an
-   app password named `MedSpace`, and copy the 16 characters (without spaces). It only allows
-   sending mail as this account, and you can revoke it there at any time.
-3. Settings: `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=587`, `SMTP_SECURITY=starttls`,
-   `SMTP_USERNAME=<the sending Gmail address>`, `SMTP_PASSWORD=<the app password>`,
-   `MAIL_FROM=MedSpace <the sending Gmail address>`.
+1. Sign up at [brevo.com](https://www.brevo.com) on the free plan and turn on two-factor
+   authentication. If Brevo asks for company details, a personal project is fine. New accounts
+   are sometimes reviewed before sending is enabled; that can take a day.
+2. **Sender:** **Settings**, **Senders, domains & dedicated IPs**, **Senders**, **Add a sender**:
+   name `MedSpace`, email = your sending Gmail. Confirm it with the code Brevo emails there.
+3. **API key:** **Settings**, **SMTP & API**, **API keys**, **Generate a new API key**, name
+   `medspace-render`. It starts with `xkeysib-` (not the `xsmtpsib-` SMTP key). It's shown once:
+   save it as `BREVO_API_KEY`.
+4. **Authorised IPs:** Brevo blocks API calls from addresses it hasn't seen. After Part 6, copy
+   your Render service's **Outbound IP addresses** (its **Connect** menu) into Brevo:
+   **Security**, **Authorised IPs**, **Add IP**. If emails still fail with "unrecognised IP",
+   Brevo also lets you deactivate the blocking there; then only the API key protects sending, so
+   keep it secret.
+
+Settings: `MAIL_PROVIDER=brevo`, `BREVO_API_KEY`, `MAIL_FROM=MedSpace <your sending Gmail>`.
+
+**Honest limit:** without a domain of your own, mail sent "from" a Gmail address through another
+service can't pass Gmail's sender checks. Expect some messages in spam, and Brevo may show its own
+address as the sender. Links in them work either way. A domain (about $10 a year) would fix it.
 
 **Check (after Part 7):** sign up on the live site with your personal email; the confirmation
-email arrives. If it's in spam the first time, mark it "Not spam".
+email arrives (check spam). Brevo's **Transactional**, **Logs** page shows every send.
 
 ---
 

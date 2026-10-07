@@ -70,6 +70,7 @@ Environment (see `.env.example` for every option):
 | `RATE_LIMIT_SCALE` | leave at `1` in production |
 | `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | for dose reminders by notification: generate once with `python -m app.shared.push` and keep them stable (changing them invalidates every device's subscription). Without them reminders are simulated. |
 | `VAPID_SUBJECT` | `mailto:` address push services can contact about your traffic |
+| `MAIL_PROVIDER` / `BREVO_API_KEY` | `brevo` sends through Brevo's HTTPS API (ADR-039): use it where outbound SMTP ports are blocked, as on Render's free plan. `auto` picks Brevo when a key is set, then SMTP, then the in-memory outbox. |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USERNAME` / `SMTP_PASSWORD` | outgoing mail for confirmation, password reset and security alerts (any provider: Postmark, SES, Resend, Mailgun). `SMTP_SECURITY` is `starttls` (587) or `ssl` (465). Without a host, mail is simulated and nobody can reset a forgotten password. |
 | `MAIL_FROM` | sender, e.g. `MedSpace <no-reply@yourdomain>`; set up SPF and DKIM for that domain with your provider |
 
