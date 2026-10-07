@@ -373,7 +373,7 @@
   },
   "backend/scripts/init-db.sql": {
     "mtime": 1790877337.95084,
-    "seen": 1791357152.0861926,
+    "seen": 1791360045.0165975,
     "ast_hash": "",
     "semantic_hash": ""
   },
@@ -1663,7 +1663,7 @@
   },
   "backend/app/eval/thresholds.json": {
     "mtime": 1790965200.822874,
-    "seen": 1791357152.085946,
+    "seen": 1791360045.0164337,
     "ast_hash": "",
     "semantic_hash": ""
   },
@@ -2100,9 +2100,9 @@
     "semantic_hash": ""
   },
   "frontend/deploy/security-headers.test.js": {
-    "mtime": 1791317530.9617996,
-    "seen": 1791318253.092134,
-    "ast_hash": "b2800c8c3213646f2d2c5aaed51c3036",
+    "mtime": 1791360004.5814512,
+    "seen": 1791360045.0166364,
+    "ast_hash": "f746d057949ff288d2dbf3c86eb26337",
     "semantic_hash": ""
   },
   "frontend/src/lib/zod.js": {
@@ -2112,9 +2112,9 @@
     "semantic_hash": ""
   },
   "frontend/vercel.json": {
-    "mtime": 1791317530.903101,
-    "seen": 1791318253.0925636,
-    "ast_hash": "c391cc2ff4ba490c7a4e53ba96b31bf9",
+    "mtime": 1791360004.5814512,
+    "seen": 1791360045.0168643,
+    "ast_hash": "42b42f9290c93458fce08528fdc0280a",
     "semantic_hash": ""
   },
   "backend/tests/test_google_live.py": {
