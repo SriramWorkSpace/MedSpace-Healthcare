@@ -23,6 +23,9 @@ flowchart LR
 | Files | Cloudflare R2, bucket `medspace-documents` |
 | Email | Brevo HTTPS API |
 
+Requests through the Vercel rewrite must answer well within Vercel's proxy timeout, so slow work
+(document processing, demo indexing) runs as background jobs after the response.
+
 The browser only talks to the web app's origin; `frontend/vercel.json` rewrites `/api/*` to the
 API. So `FRONTEND_URL`, `PUBLIC_API_URL` and `CORS_ORIGINS` are all the web app's URL.
 
