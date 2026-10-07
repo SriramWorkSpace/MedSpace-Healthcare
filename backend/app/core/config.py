@@ -66,8 +66,10 @@ class Settings(BaseSettings):
     reminder_loop_enabled: bool = True
 
     # --- Email (ADR-030) ------------------------------------------------------
-    # auto: SMTP when SMTP_HOST is set, otherwise an in-memory outbox (dev, demo, CI).
-    mail_provider: Literal["auto", "fake", "smtp"] = "auto"
+    # auto: Brevo with BREVO_API_KEY, SMTP with SMTP_HOST, else an in-memory outbox (dev, demo,
+    # CI). Brevo sends over HTTPS, for hosts that block outbound SMTP ports (Render's free plan).
+    mail_provider: Literal["auto", "fake", "smtp", "brevo"] = "auto"
+    brevo_api_key: SecretStr | None = None
     mail_from: str = "MedSpace <no-reply@medspace.example>"
     smtp_host: str | None = None
     smtp_port: int = 587

@@ -1,4 +1,5 @@
-"""Email port (ADR-030): SMTP in production, an in-memory outbox in dev, demo and tests.
+"""Email port (ADR-030): SMTP or Brevo's HTTPS API in production (ADR-039), an in-memory outbox
+in dev, demo and tests.
 
 Sending is best effort: a mail server outage is logged and never fails the request that
 triggered it (the user can ask for the email again).
@@ -13,8 +14,10 @@ import ssl
 from collections import deque
 from dataclasses import dataclass, field
 from email.message import EmailMessage
-from email.utils import make_msgid
+from email.utils import make_msgid, parseaddr
 from typing import Protocol
+
+import httpx
 
 from app.core.config import get_settings
 
@@ -104,6 +107,51 @@ class SmtpMailer:
             return False
 
 
+BREVO_URL = "https://api.brevo.com/v3/smtp/email"
+
+
+class BrevoMailer:
+    """Brevo's transactional email API over HTTPS (port 443), for hosts that block SMTP ports."""
+
+    name = "brevo"
+
+    def __init__(self, api_key: str, sender: str, http: httpx.AsyncClient | None = None) -> None:
+        self._key = api_key
+        name, email = parseaddr(sender)
+        if not email:
+            raise ValueError("MAIL_FROM needs an address, e.g. MedSpace <you@example.com>")
+        self._sender = {"name": name or "MedSpace", "email": email}
+        self._http = http or httpx.AsyncClient(timeout=15)
+
+    async def send(self, message: Message) -> bool:
+        body = {
+            "sender": self._sender,
+            "to": [{"email": message.to}],
+            "subject": message.subject,
+            "textContent": message.text,
+        }
+        if message.html:
+            body["htmlContent"] = message.html
+        try:
+            resp = await self._http.post(
+                BREVO_URL,
+                json=body,
+                headers={"api-key": self._key, "accept": "application/json"},
+            )
+        except httpx.HTTPError as exc:
+            logger.warning("mail to %s failed: %s", message.to, type(exc).__name__)
+            return False
+        if resp.status_code >= 300:
+            try:
+                code = resp.json().get("code", "")
+            except ValueError:
+                code = ""
+            # Status and Brevo's error code only: never the request (it carries the API key).
+            logger.warning("mail to %s failed: Brevo %s %s", message.to, resp.status_code, code)
+            return False
+        return True
+
+
 _mailer: Mailer | None = None
 
 
@@ -113,8 +161,12 @@ def get_mailer() -> Mailer:
         s = get_settings()
         provider = s.mail_provider
         if provider == "auto":
-            provider = "smtp" if s.smtp_host else "fake"
-        if provider == "smtp":
+            provider = "brevo" if s.brevo_api_key else "smtp" if s.smtp_host else "fake"
+        if provider == "brevo":
+            if not (s.brevo_api_key and s.brevo_api_key.get_secret_value()):
+                raise RuntimeError("MAIL_PROVIDER=brevo needs BREVO_API_KEY")
+            _mailer = BrevoMailer(s.brevo_api_key.get_secret_value(), s.mail_from)
+        elif provider == "smtp":
             if not s.smtp_host:
                 raise RuntimeError("MAIL_PROVIDER=smtp needs SMTP_HOST")
             _mailer = SmtpMailer(
