@@ -227,3 +227,16 @@ async def test_demo_is_capped_overall(client: httpx.AsyncClient, monkeypatch):
     busy = await client.post("/api/auth/demo")
     assert busy.status_code == 503
     assert "busy" in busy.json()["detail"]
+
+
+# ---- 7. Database pool fits a hosted pooler's limit ----------------------------------------------
+
+
+def test_database_pool_size_comes_from_settings():
+    from app.core.db import engine
+
+    s = get_settings()
+    assert engine.pool.size() == s.db_pool_size
+    assert engine.pool._max_overflow == s.db_max_overflow
+    small = Settings(_env_file=None, db_pool_size=5, db_max_overflow=5)
+    assert small.db_pool_size + small.db_max_overflow <= 15  # Supabase free session pooler

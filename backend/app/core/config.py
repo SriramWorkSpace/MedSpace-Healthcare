@@ -34,6 +34,10 @@ class Settings(BaseSettings):
 
     # --- Data ----------------------------------------------------------------
     database_url: str = "postgresql+asyncpg://medspace:medspace@localhost:5432/medspace"
+    # Connections per API process. Keep pool + overflow under the database's limit (Supabase's free
+    # session pooler allows about 15 clients): production uses 5 + 5.
+    db_pool_size: int = 10
+    db_max_overflow: int = 10
     redis_url: str = "redis://localhost:6379/0"
     queue_mode: Literal["inline", "arq"] = "inline"
 
