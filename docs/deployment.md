@@ -15,13 +15,18 @@ flowchart LR
 
 ## Current deployment
 
-| Piece | Where |
-|---|---|
-| Web app | `https://medspace-healthcare.vercel.app` (Vercel, root `frontend`) |
-| API | `https://medspace-api.onrender.com` (Render free, Singapore, Docker, root `backend`, health check `/api/health`) |
-| Database | Supabase Postgres, Singapore, session pooler |
-| Files | Cloudflare R2, bucket `medspace-documents` |
-| Email | Brevo HTTPS API |
+Status as of 2026-10-08:
+
+| Piece | Where | Status |
+|---|---|---|
+| Web app | `https://medspace-healthcare.vercel.app` (Vercel, root `frontend`) | Live; `/api` rewrite to Render working |
+| API | `https://medspace-api.onrender.com` (Render free, Singapore, Docker, root `backend`, health check `/api/health`) | Live; `/api/ready` ready |
+| Database | Supabase Postgres, Singapore, session pooler | Connected; migrations applied |
+| Files | Cloudflare R2, bucket `medspace-documents` | Configured (object-only token) |
+| Email | Brevo HTTPS API, Render's two outbound IP ranges authorised | Configured; first real delivery not yet confirmed |
+| AI | `LLM_PROVIDER=fake` | Groq pending (launch guide Part 8) |
+| Google | `GOOGLE_PROVIDER=fake` (simulation) | OAuth pending (Part 9) |
+| Uptime monitor | none yet | Pending (Part 10); the free instance sleeps after ~15 idle minutes |
 
 Requests through the Vercel rewrite must answer well within Vercel's proxy timeout, so slow work
 (document processing, demo indexing) runs as background jobs after the response.

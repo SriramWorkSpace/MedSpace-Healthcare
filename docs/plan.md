@@ -273,6 +273,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 
 ## Change log
 
+- **2026-10-08**: Launch guide Part 6 complete: Render API live in Singapore, Supabase connected, R2 and Brevo configured, Render's outbound IP ranges authorised in Brevo. Deployment status table added to `docs/deployment.md`. Next: Groq (Part 8), Google (Part 9), uptime monitor (Part 10).
+
 - **2026-10-07**: "Try the demo" returned 502 on the live site: demo setup took about 60 s on Render's free CPU, past Vercel's proxy timeout, and 90% of it was embedding the demo documents. The demo now signs in first and indexes for Ask MedSpace in a background job (`index_demo_documents`, queued after the seed commits): 248 s down to 26 s at a strict 0.1 CPU. Tests wait for background jobs before cleaning tables.
 
 - **2026-10-07**: Deployed: web on Vercel (`medspace-healthcare.vercel.app`), API on Render (`medspace-api.onrender.com`). The Vercel `/api` rewrite now points at Render. Production also refuses to start with a non-https `PUBLIC_API_URL`, a localhost `DATABASE_URL`, missing R2 keys or no email provider.
