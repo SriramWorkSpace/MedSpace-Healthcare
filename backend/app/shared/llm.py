@@ -55,15 +55,22 @@ def _parse_json(text: str) -> dict[str, Any]:
 class GroqProvider:
     name = "groq"
 
-    def __init__(self, api_key: str) -> None:
+    def __init__(self, api_key: str, http_client: Any = None) -> None:
         from groq import AsyncGroq
 
-        self.client = AsyncGroq(api_key=api_key, max_retries=2, timeout=90)
+        # http_client: tests pass an httpx client with a mocked transport.
+        self.client = AsyncGroq(api_key=api_key, max_retries=2, timeout=90, http_client=http_client)
 
     @staticmethod
     def _reasoning_kwargs(model: str) -> dict[str, Any]:
-        # gpt-oss models reason before answering; keep it short for structured extraction.
-        return {"reasoning_effort": "low"} if "gpt-oss" in model else {}
+        # gpt-oss models always reason before answering: keep it short. Qwen 3.x models think by
+        # default, which slows extraction and can leak reasoning into the JSON; "none" switches them
+        # to instruct mode.
+        if "gpt-oss" in model:
+            return {"reasoning_effort": "low"}
+        if "qwen" in model:
+            return {"reasoning_effort": "none"}
+        return {}
 
     async def complete_json(
         self,
@@ -92,7 +99,10 @@ class GroqProvider:
             # Strict schemas are model-dependent; degrade to JSON mode + Pydantic validation.
             logger.warning("strict schema rejected by %s, falling back to json_object", model)
             kwargs["response_format"] = {"type": "json_object"}
-            resp = await self.client.chat.completions.create(**kwargs)
+            try:
+                resp = await self.client.chat.completions.create(**kwargs)
+            except Exception as retry_exc:  # callers handle LLMError, never raw SDK errors
+                raise LLMError(f"LLM request failed: {retry_exc}") from retry_exc
         except Exception as exc:
             raise LLMError(f"LLM request failed: {exc}") from exc
         return _parse_json(resp.choices[0].message.content or "")
