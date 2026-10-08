@@ -273,6 +273,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 
 ## Change log
 
+- **2026-10-08**: Launch guide Parts 8 and 10 complete. Groq live in production (typed PDF via gpt-oss-120b, photo via qwen3.8-27b, Ask streaming with citations, all verified on the live site). cron-job.org pings `/api/health` every 10 minutes so the free Render instance stays awake; a cold start had pushed "Try the demo" past Vercel's proxy timeout. Next: Google OAuth (Part 9).
+
 - **2026-10-08**: Groq readiness (launch guide Part 8): Qwen vision models run with `reasoning_effort=none` (instruct mode, no thinking text before the JSON); a failing strict-schema fallback now raises `LLMError` instead of a raw SDK error; 16 tests drive `GroqProvider` and the real extraction and Ask paths against a mocked Groq API. Models checked against Groq on 2026-10-08: `openai/gpt-oss-120b` (production), `qwen/qwen3.8-27b` (preview, vision).
 
 - **2026-10-08**: Launch guide Part 6 complete: Render API live in Singapore, Supabase connected, R2 and Brevo configured, Render's outbound IP ranges authorised in Brevo. Deployment status table added to `docs/deployment.md`. Next: Groq (Part 8), Google (Part 9), uptime monitor (Part 10).

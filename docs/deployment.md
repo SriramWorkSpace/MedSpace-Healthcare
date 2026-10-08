@@ -15,7 +15,7 @@ flowchart LR
 
 ## Current deployment
 
-Status as of 2026-10-08:
+Status as of 2026-10-08 (launch guide Parts 1-8 and 10 done; Part 9 next):
 
 | Piece | Where | Status |
 |---|---|---|
@@ -24,9 +24,9 @@ Status as of 2026-10-08:
 | Database | Supabase Postgres, Singapore, session pooler | Connected; migrations applied |
 | Files | Cloudflare R2, bucket `medspace-documents` | Configured (object-only token) |
 | Email | Brevo HTTPS API, Render's two outbound IP ranges authorised | Configured; first real delivery not yet confirmed |
-| AI | `LLM_PROVIDER=fake` | Groq pending (launch guide Part 8) |
+| AI | Groq: `openai/gpt-oss-120b` (typed PDFs, Ask), `qwen/qwen3.8-27b` (photos and scans) | Live; verified end to end on 2026-10-08 |
 | Google | `GOOGLE_PROVIDER=fake` (simulation) | OAuth pending (Part 9) |
-| Uptime monitor | none yet | Pending (Part 10); the free instance sleeps after ~15 idle minutes |
+| Uptime monitor | cron-job.org, `GET https://medspace-api.onrender.com/api/health` every 10 minutes | Live; keeps the free instance awake (it sleeps after ~15 idle minutes, and a cold start plus demo setup exceeded Vercel's proxy timeout) |
 
 Requests through the Vercel rewrite must answer well within Vercel's proxy timeout, so slow work
 (document processing, demo indexing) runs as background jobs after the response.
