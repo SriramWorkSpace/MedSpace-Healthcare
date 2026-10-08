@@ -273,6 +273,8 @@ Goal: the core loop. A user reviews AI-extracted fields against the source and c
 
 ## Change log
 
+- **2026-10-08**: Groq readiness (launch guide Part 8): Qwen vision models run with `reasoning_effort=none` (instruct mode, no thinking text before the JSON); a failing strict-schema fallback now raises `LLMError` instead of a raw SDK error; 16 tests drive `GroqProvider` and the real extraction and Ask paths against a mocked Groq API. Models checked against Groq on 2026-10-08: `openai/gpt-oss-120b` (production), `qwen/qwen3.8-27b` (preview, vision).
+
 - **2026-10-08**: Launch guide Part 6 complete: Render API live in Singapore, Supabase connected, R2 and Brevo configured, Render's outbound IP ranges authorised in Brevo. Deployment status table added to `docs/deployment.md`. Next: Groq (Part 8), Google (Part 9), uptime monitor (Part 10).
 
 - **2026-10-07**: "Try the demo" returned 502 on the live site: demo setup took about 60 s on Render's free CPU, past Vercel's proxy timeout, and 90% of it was embedding the demo documents. The demo now signs in first and indexes for Ask MedSpace in a background job (`index_demo_documents`, queued after the seed commits): 248 s down to 26 s at a strict 0.1 CPU. Tests wait for background jobs before cleaning tables.
