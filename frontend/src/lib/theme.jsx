@@ -42,8 +42,11 @@ export function ThemeProvider({ children }) {
   }, []);
 
   /**
-   * Switch theme. Given an origin point (the toggle's centre), the new theme is revealed as a
-   * circle growing from it, via the View Transitions API. Falls back to an instant switch.
+   * Switch theme. Given an origin (the toggle's centre and radius), the new theme is revealed as
+   * a circle growing out of the toggle, via the View Transitions API. Falls back to an instant
+   * switch. A strong ease-out makes the first frames grow fast right at the toggle, so the reveal
+   * reads as coming from it; ease-in-out kept it hidden under the button and the visible sweep
+   * happened far away, in the screen's corners.
    */
   const toggle = useCallback(
     (origin) => {
@@ -61,7 +64,7 @@ export function ThemeProvider({ children }) {
       const root = document.documentElement;
       root.classList.add("theme-switching"); // no colour cross-fades inside the snapshot
       const transition = document.startViewTransition(apply);
-      const { x, y } = origin;
+      const { x, y, r = 0 } = origin;
       const radius = Math.hypot(
         Math.max(x, window.innerWidth - x),
         Math.max(y, window.innerHeight - y),
@@ -70,11 +73,11 @@ export function ThemeProvider({ children }) {
         .then(() =>
           root.animate(
             {
-              clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`],
+              clipPath: [`circle(${r}px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`],
             },
             {
-              duration: 560,
-              easing: "cubic-bezier(0.65, 0, 0.35, 1)",
+              duration: 500,
+              easing: "cubic-bezier(0.23, 1, 0.32, 1)",
               pseudoElement: "::view-transition-new(root)",
             },
           ),

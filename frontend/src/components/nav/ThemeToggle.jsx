@@ -20,7 +20,11 @@ export function ThemeToggle() {
       aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
       onClick={(e) => {
         const box = e.currentTarget.getBoundingClientRect();
-        toggle({ x: box.left + box.width / 2, y: box.top + box.height / 2 });
+        toggle({
+          x: box.left + box.width / 2,
+          y: box.top + box.height / 2,
+          r: Math.min(box.width, box.height) / 2, // starts as the button, not from nothing
+        });
         countClick();
       }}
     >
