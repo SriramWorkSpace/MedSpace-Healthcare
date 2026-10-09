@@ -230,3 +230,52 @@ def test_get_llm_selects_groq_only_with_a_key(monkeypatch, provider_name, key, e
 
 def test_offline_default_is_kept_in_tests():
     assert llm_module.get_settings().llm_provider == "fake"
+
+
+# ---- Answer formatting -------------------------------------------------------------------------
+
+LB, RB, DAGGER = "【", "】", "†"  # the model's citation brackets and dagger
+
+
+def test_model_citation_styles_become_square_brackets_across_chunks():
+    n = assistant.CitationNormalizer()
+    chunks = ["Low-salt diet ", LB, "1", RB + LB + "6" + DAGGER + "L3", "-L5" + RB, " and [2]."]
+    assert "".join(n.feed(c) for c in chunks) == "Low-salt diet [1][6] and [2]."
+
+
+def test_ordinary_brackets_are_left_alone():
+    n = assistant.CitationNormalizer()
+    text = "Dose [a]: take 1 [2] then see array[0] and [x" + DAGGER + "y]"
+    assert n.feed(text) == text
+
+
+def test_grouped_citations_count():
+    def src(i):
+        return assistant.Source(
+            n=i, kind="record", title=f"S{i}", page_no=1, snippet="", document_id=None,
+            confirmed=True, text="",
+        )  # fmt: skip
+
+    cited = assistant.used_citations("A [1, 3] and B [2]", [src(1), src(2), src(3), src(4)])
+    assert [c["n"] for c in cited] == [1, 2, 3]
+
+
+def test_the_prompt_asks_for_plain_text_and_square_bracket_citations():
+    assert "No Markdown" in assistant.SYSTEM_PROMPT
+    assert "[2] or [1][3]" in assistant.SYSTEM_PROMPT
+
+
+async def test_streamed_answer_reaches_the_visitor_normalized(monkeypatch):
+    fake = FakeGroq(
+        sse(
+            {"content": "Low-salt diet " + LB + "1"},
+            {"content": RB + LB + "2" + DAGGER + "L1-L2" + RB + "."},
+        )
+    )
+    monkeypatch.setattr(assistant, "get_llm", lambda: provider(fake))
+    source = assistant.Source(
+        n=1, kind="record", title="Diet", page_no=1, snippet="Low salt", document_id="d1",
+        confirmed=True, text="Low-salt diet.",
+    )  # fmt: skip
+    text = "".join([d async for d in assistant.answer_stream("Diet?", "general", [source], [])])
+    assert text == "Low-salt diet [1][2]."

@@ -113,7 +113,10 @@ e.g. [2]. Never cite a number that is not listed.
 give medical advice. For such questions, state what the documents say and suggest asking their \
 prescriber or pharmacist.
 - If a source is marked UNCONFIRMED, mention that the user hasn't reviewed it yet.
-- Be concise: at most about 120 words, plain language, bullet points for lists. No preamble."""
+- Be concise: at most about 120 words, plain language, bullet points for lists. No preamble.
+- Format: plain text only. No Markdown emphasis, headings or tables (no **, __, #). Start each \
+list item with "- ". Write citations with ASCII square brackets exactly like [2] or [1][3], \
+never full-width brackets or other citation styles."""
 
 
 # --------------------------------------------------------------------------- indexing
@@ -578,19 +581,56 @@ async def answer_stream(
     if not sources:
         yield NOT_FOUND_REPLY
         return
+    normalize = CitationNormalizer()
     try:
         async for delta in llm.stream_text(
             model=get_settings().groq_chat_model, messages=build_prompt(question, sources, history)
         ):
-            yield delta
+            if text := normalize.feed(delta):
+                yield text
     except LLMError:
         logger.exception("assistant stream failed; falling back to extractive answer")
         yield "\n\n" + compose_offline(question, intent, sources)
 
 
+_CITE_GROUP = re.compile(r"\[(\d{1,2}(?:\s*,\s*\d{1,2})*)\]")
+
+
 def used_citations(answer: str, sources: list[Source]) -> list[dict]:
-    cited = {int(n) for n in re.findall(r"\[(\d{1,2})\]", answer)}
+    cited = {int(n) for group in _CITE_GROUP.findall(answer) for n in re.split(r"\s*,\s*", group)}
     return [s.public() for s in sources if s.n in cited]
+
+
+class CitationNormalizer:
+    """Rewrites model citation styles to [n] as text streams in, chunk boundaries included.
+
+    gpt-oss often cites as 【2】 or 【2†L3-L5】; the app (citation buttons, used_citations) expects
+    [2]. Full-width brackets become ASCII, and a dagger suffix inside a citation is dropped.
+    """
+
+    def __init__(self) -> None:
+        self._in_cite = False  # inside [ ... ] after a digit
+        self._skipping = False  # inside a dagger suffix, until the closing bracket
+
+    def feed(self, text: str) -> str:
+        out = []
+        for ch in text.replace("【", "[").replace("】", "]"):  # 【 】
+            if self._skipping:
+                if ch == "]":
+                    self._skipping = self._in_cite = False
+                    out.append(ch)
+                continue
+            if ch == "[":
+                self._in_cite = True
+            elif ch == "]":
+                self._in_cite = False
+            elif self._in_cite and ch == "†":  # dagger
+                self._skipping = True
+                continue
+            elif self._in_cite and not (ch.isdigit() or ch in ", "):
+                self._in_cite = False
+            out.append(ch)
+        return "".join(out)
 
 
 # --------------------------------------------------------------------------- threads
